@@ -1,13 +1,16 @@
+import streamlit as st
 import dropbox
 import pandas as pd
-import streamlit as st
 from io import BytesIO
 
-dbx = dropbox.Dropbox(token)
+DROPBOX_TOKEN = st.secrets["dropbox"]["token"]
+DROPBOX_PATH = st.secrets["dropbox"]["path"]
+
+dbx = dropbox.Dropbox(DROPBOX_TOKEN)
 
 def load_from_dropbox():
     try:
-        _, res = dbx.files_download(path)
+        _, res = dbx.files_download(DROPBOX_PATH)
         return pd.read_excel(BytesIO(res.content))
     except dropbox.exceptions.ApiError:
         st.error("⚠ 서버에서 파일을 찾을 수 없습니다.")
