@@ -3,8 +3,8 @@ import dropbox
 import pandas as pd
 from io import BytesIO
 
-DROPBOX_TOKEN = st.secrets["DROPBOX"]["token"]
-DROPBOX_PATH = st.secrets["DROPBOX"]["path"]
+DROPBOX_TOKEN = st.secrets["dropbox"]["token"]
+DROPBOX_PATH = st.secrets["dropbox"]["path"]
 
 dbx = dropbox.Dropbox(DROPBOX_TOKEN)
 
