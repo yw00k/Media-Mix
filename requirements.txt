@@ -8,3 +8,4 @@ matplotlib
 patsy
 dropbox
 BytesIO
+openpyxl
