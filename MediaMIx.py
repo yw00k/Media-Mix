@@ -14,7 +14,7 @@ dbx = dropbox.Dropbox(oauth2_refresh_token=self.refreshtoken, app_key=self.appke
 
 def load_from_dropbox():
     try:
-        -, res = dbx.filesdownload(self.path)
+        _, res = dbx.filesdownload(self.path)
         return pd.read_excel(BytesIO(res.content))
     except dropbox.exceptions.ApiError:
         st.error("⚠ 서버에서 파일을 찾을 수 없습니다.")
