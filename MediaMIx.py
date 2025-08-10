@@ -10,8 +10,9 @@ class DropBoxManager:
         self.refreshtoekn = "kDmK6QzdX2EAAAAAAAAAL1RweOMFWDPUclNfOs0mufw"
         self.path = "/Media Mix/data.xlsx"
         
+dbx = dropbox.Dropbox(oauth2_refresh_token=self.refreshtoken, app_key=self.appkey, timeout=900)       
+
     def load_from_dropbox():
-    dbx = dropbox.Dropbox(oauth2_refresh_token=self.refreshtoken, app_key=self.appkey, timeout=900)
     try:
         -, res = dbx.filesdownload(self.path)
         return pd.read_excel(BytesIO(res.content))
