@@ -12,7 +12,7 @@ class DropBoxManager:
         
 dbx = dropbox.Dropbox(oauth2_refresh_token=self.refreshtoken, app_key=self.appkey, timeout=900)       
 
-    def load_from_dropbox():
+def load_from_dropbox():
     try:
         -, res = dbx.filesdownload(self.path)
         return pd.read_excel(BytesIO(res.content))
