@@ -3,13 +3,11 @@ import dropbox
 import pandas as pd
 from io import BytesIO
 
-# Streamlit secrets에서 정보 가져오기
-APP_KEY = st.secrets["dropbox"]["app_key"]
-APP_SECRET = st.secrets["dropbox"]["app_secret"]
-REFRESH_TOKEN = st.secrets["dropbox"]["refresh_token"]
-DROPBOX_PATH = st.secrets["dropbox"]["path"]
+APP_KEY        = st.secrets["dropbox"]["app_key"]
+APP_SECRET     = st.secrets["dropbox"]["app_secret"]
+REFRESH_TOKEN  = st.secrets["dropbox"]["refresh_token"]
+DROPBOX_PATH   = st.secrets["dropbox"]["path"]
 
-# Dropbox 객체 생성
 dbx = dropbox.Dropbox(
     oauth2_refresh_token=REFRESH_TOKEN,
     app_key=APP_KEY,
@@ -22,20 +20,15 @@ def load_from_dropbox():
         return pd.read_excel(BytesIO(res.content))
     except dropbox.exceptions.ApiError as e:
         st.error(f"⚠ API 오류: {e}")
-        return None    
+        return None
     except Exception as e:
-        st.error(f"⚠ 서버에서 파일을 찾을 수 없습니다: {e}")
+        st.error(f"⚠ API 오류: {e}")
         return None
 
 df_raw = load_from_dropbox()
 
-
-# 데이터 로드
-df_raw = load_from_dropbox()
-
 if df_raw is not None:
     st.success("✅ 서버에서 데이터 불러오기 성공")
-    st.dataframe(df_raw.head())
 
 import importlib
 import subprocess
