@@ -248,8 +248,8 @@ def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=99):
     optimal_idx = int(np.argmax(pred_i))
     out = pd.DataFrame({
         '예산(억 원)': [budget_won/100_000_000],
-        'A 비율': [f"{int(a[optimal_idx]*100)}%"],
-        'B 비율': [f"{int(b[optimal_idx]*100)}%"],
+        'TV 비율': [f"{int(a[optimal_idx]*100)}%"],
+        'Digital 비율': [f"{int(b[optimal_idx]*100)}%"],
         'Reach 1+(%)': [round(100.0 * pred_i[optimal_idx], 2)]
     })
     return a, pred_i, spline_i, out
@@ -270,7 +270,7 @@ if "single_opt_curve" not in st.session_state:
 with tab1:
     st.session_state.max_units_val = st.slider("예산 범위(억 원)", 1, 30, 15, key="max_units_tab1_val")
 
-    if st.button("예산 범위 최적화 실행", key="run_budget_range"):
+    if st.button("예산 범위 최적화", key="run_budget_range"):
         st.session_state.df_opt = optimize_mix_over_budget(
             cpm_a_input, cpm_b_input, max_budget_units=st.session_state.max_units_val
             )
@@ -289,7 +289,7 @@ with tab1:
 with tab2:
     st.session_state.single_budget_val = st.number_input("특정 예산(억 원)", value=7.0, step=0.1, key="single_budget_tab2_val")
     
-    if st.button("특정 예산 최적화 실행", key="run_single_budget"):
+    if st.button("특정 예산 최적화", key="run_single_budget"):
         a, pred_i, spline_i, out = optimize_single_budget(
             st.session_state.single_budget_val * 100_000_000, cpm_a_input, cpm_b_input
             )
@@ -303,9 +303,8 @@ with tab2:
         fig3, ax3 = plt.subplots()
         ax3.scatter(100*a, 100*pred_i, alpha=0.6, color='gold', s=30)
         ax3.plot(100*a, 100*spline_i, color='crimson')
-        ax3.set_xlabel("Media A ratio(%)")
+        ax3.set_xlabel("TV Proportion(%)")
         ax3.set_ylabel("Reach 1+ (%)")
         ax3.grid(True, linestyle='--')
         st.pyplot(fig3, use_container_width=False)
         st.dataframe(st.session_state.single_opt_result)
-
