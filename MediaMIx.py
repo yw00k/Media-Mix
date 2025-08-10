@@ -29,8 +29,13 @@ def load_from_dropbox():
 
 df_raw = load_from_dropbox()
 
+
+# 데이터 로드
+df_raw = load_from_dropbox()
+
 if df_raw is not None:
     st.success("✅ 서버에서 데이터 불러오기 성공")
+    st.dataframe(df_raw.head())
 
 import importlib
 import subprocess
@@ -45,7 +50,9 @@ required_packages = [
     "numpy",
     "pandas",
     "matplotlib",
-    "patsy"
+    "patsy",
+    "dropbox",
+    "openpyxl"
 ]
 
 # 패키지 설치
