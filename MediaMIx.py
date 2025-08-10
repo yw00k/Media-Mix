@@ -27,6 +27,11 @@ def load_from_dropbox():
         st.error(f"⚠ 서버에서 파일을 찾을 수 없습니다: {e}")
         return None
 
+df_raw = load_from_dropbox()
+
+if df_raw is not None:
+    st.success("✅ 서버에서 데이터 불러오기 성공")
+
 #DROPBOX_TOKEN = st.secrets["dropbox"]["appkey"]
 #DROPBOX_PATH = st.secrets["dropbox"]["path"]
 
@@ -39,11 +44,6 @@ def load_from_dropbox():
     #except dropbox.exceptions.ApiError:
         #st.error("⚠ 서버에서 파일을 찾을 수 없습니다.")
         #return None
-
-df_raw = load_from_dropbox()
-
-if df_raw is not None:
-    st.success("✅ 서버에서 데이터 불러오기 성공")
 
 import importlib
 import subprocess
