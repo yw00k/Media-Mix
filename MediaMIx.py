@@ -3,21 +3,28 @@ import dropbox
 import pandas as pd
 from io import BytesIO
 
-class DropBoxManager:
-    def __init__(self,token, filename,pathname):
-        
-        self.appkey = "yoohmiog60cwqhp"
-        self.refreshtoekn = "kDmK6QzdX2EAAAAAAAAAL1RweOMFWDPUclNfOs0mufw"
-        self.path = "/Media Mix/data.xlsx"
-        
-dbx = dropbox.Dropbox(oauth2_refresh_token=self.refreshtoken, app_key=self.appkey, timeout=900)       
+# Streamlit secrets에서 정보 가져오기
+APP_KEY = st.secrets["dropbox"]["app_key"]
+APP_SECRET = st.secrets["dropbox"]["app_secret"]
+REFRESH_TOKEN = st.secrets["dropbox"]["refresh_token"]
+DROPBOX_PATH = st.secrets["dropbox"]["path"]
+
+# Dropbox 객체 생성
+dbx = dropbox.Dropbox(
+    oauth2_refresh_token=REFRESH_TOKEN,
+    app_key=APP_KEY,
+    app_secret=APP_SECRET
+)
 
 def load_from_dropbox():
     try:
-        _, res = dbx.filesdownload(self.path)
+        _, res = dbx.files_download(DROPBOX_PATH)
         return pd.read_excel(BytesIO(res.content))
-    except dropbox.exceptions.ApiError:
-        st.error("⚠ 서버에서 파일을 찾을 수 없습니다.")
+    except dropbox.exceptions.ApiError as e:
+        st.error(f"⚠ API 오류: {e}")
+        return None    
+    except Exception as e:
+        st.error(f"⚠ 서버에서 파일을 찾을 수 없습니다: {e}")
         return None
 
 #DROPBOX_TOKEN = st.secrets["dropbox"]["appkey"]
