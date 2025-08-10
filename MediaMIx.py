@@ -3,18 +3,34 @@ import dropbox
 import pandas as pd
 from io import BytesIO
 
-DROPBOX_TOKEN = st.secrets["dropbox"]["token"]
-DROPBOX_PATH = st.secrets["dropbox"]["path"]
-
-dbx = dropbox.Dropbox(DROPBOX_TOKEN)
-
-def load_from_dropbox():
+class DropBoxManager:
+    def __init__(self,token, filename,pathname):
+        
+        self.appkey = "yoohmiog60cwqhp"
+        self.refreshtoekn = "kDmK6QzdX2EAAAAAAAAAL1RweOMFWDPUclNfOs0mufw"
+        self.path = "/Media Mix/data.xlsx"
+        
+    def load_from_dropbox():
+    dbx = dropbox.Dropbox(oauth2_refresh_token=self.refreshtoken, app_key=self.appkey, timeout=900)
     try:
-        _, res = dbx.files_download(DROPBOX_PATH)
+        -, res = dbx.filesdownload(self.path)
         return pd.read_excel(BytesIO(res.content))
     except dropbox.exceptions.ApiError:
         st.error("⚠ 서버에서 파일을 찾을 수 없습니다.")
         return None
+
+#DROPBOX_TOKEN = st.secrets["dropbox"]["appkey"]
+#DROPBOX_PATH = st.secrets["dropbox"]["path"]
+
+#dbx = dropbox.Dropbox(DROPBOX_TOKEN)
+
+#def load_from_dropbox():
+    #try:
+        #_, res = dbx.files_download(DROPBOX_PATH)
+        #return pd.read_excel(BytesIO(res.content))
+    #except dropbox.exceptions.ApiError:
+        #st.error("⚠ 서버에서 파일을 찾을 수 없습니다.")
+        #return None
 
 df_raw = load_from_dropbox()
 
