@@ -337,7 +337,7 @@ with tab2:
         pb_allB = hill(imps_b_allB, *popt_b)
 
         fig2, ax2 = plt.subplots(figsize=(8,5))
-        ax2.plot(st.session_state.sweep_df['예산(억 원)'], st.session_state.sweep_df['Total'], marker='o', label='Opt Mix', color='mediumseagreen')
+        ax2.plot(st.session_state.sweep_df['예산(억 원)'], st.session_state.sweep_df['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
         ax2.plot(np.arange(1, max_units+1), 100*pa_allA, linestyle='--', marker='s', label='Only TV', color='royalblue')
         ax2.plot(np.arange(1, max_units+1), 100*pb_allB, linestyle='--', marker='^', label='Only Digital', color='darkorange')
         ax2.set_xlabel("Budget Range"); ax2.set_ylabel("Reach 1+(%)")
