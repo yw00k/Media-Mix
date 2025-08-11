@@ -403,8 +403,8 @@ with tab1:
         width = 0.38
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        bars1 = ax.bar(x - width/2, user_vals, width, label='사용자안', color='darkseagreen')
-        bars2 = ax.bar(x + width/2, opt_vals,  width, label='최적화안', color='mediumseagreen')
+        bars1 = ax.bar(x - width/2, user_vals, width, label='User', color='yellow')
+        bars2 = ax.bar(x + width/2, opt_vals,  width, label='Opt', color='olivedrab')
 
         for bars in (bars1, bars2):
             for b in bars:
