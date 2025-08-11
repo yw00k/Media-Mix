@@ -152,15 +152,15 @@ model_total = sm.OLS(y_total, X_train).fit()
 pred_in = model_total.predict(X_train)
 
 # 시각화: 미디어별 Reach 1+(%)
-st.subheader("미디어별 Reach 1+(%)")
-fig, ax = plt.subplots(figsize=(10, 6))
-ax.scatter(imps, 100*pred_a_curve, alpha=0.6, s=10, label='TV', color='royalblue')
-ax.scatter(imps, 100*pred_b_curve, alpha=0.6, s=10, label='Digital', color='darkorange')
-ax.scatter(imps, 100*pred_t_curve, alpha=0.6, s=10, label='Total', color='mediumseagreen')
-ax.set_xlabel("Impressions")
-ax.set_ylabel("Reach 1+(%)")
-ax.legend()
-st.pyplot(fig)
+##st.subheader("미디어별 Reach 1+(%)")
+##fig, ax = plt.subplots(figsize=(10, 6))
+##ax.scatter(imps, 100*pred_a_curve, alpha=0.6, s=10, label='TV', color='royalblue')
+##ax.scatter(imps, 100*pred_b_curve, alpha=0.6, s=10, label='Digital', color='darkorange')
+##ax.scatter(imps, 100*pred_t_curve, alpha=0.6, s=10, label='Total', color='mediumseagreen')
+##ax.set_xlabel("Impressions")
+##ax.set_ylabel("Reach 1+(%)")
+##ax.legend()
+##st.pyplot(fig)
 
 # 공통 계산 함수들
 def analyze_custom_budget(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
@@ -286,26 +286,23 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
 
     results = []
     for won, eok in zip(budget_won, budget_eok):
-        # 각 비중별 예측 곡선
+
         a_imps = a * won / (cpm_a / 1000.0)
         b_imps = b * won / (cpm_b / 1000.0)
-        a_r1 = hill(a_imps, *popt_a)   # TV 단일 미디어 R1
-        b_r1 = hill(b_imps, *popt_b)   # Digital 단일 미디어 R1
+        a_r1 = hill(a_imps, *popt_a)
+        b_r1 = hill(b_imps, *popt_b)
         ab_r1 = a_r1 * b_r1
 
-        # 통합 모델=
         X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
         total_r1_curve = model_total.predict(X_mix).values
 
-        # 최적 지점
         idx = int(np.argmax(total_r1_curve))
         a_share = float(a[idx])
         b_share = float(b[idx])
 
-        # 통합 모델 값
         total_r1 = float(total_r1_curve[idx])
 
-        # 극단 비중 보정: 한쪽이 100%(eps 이내)면 해당 단일 미디어 값을 Total로 사용
+        # 극단 비중 보정: 한 측이 100%면 해당 단일 미디어 값을 Total로 사용
         if a_share <= eps:         # TV=0%, Digital=100%
             total_r1 = float(b_r1[idx])
         elif b_share <= eps:       # Digital=0%, TV=100%
