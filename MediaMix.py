@@ -259,7 +259,10 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
     results = []
     a = np.arange(0, 101, dtype=np.float64) / 100.0
     b = 1.0 - a
-    for budget_range in range(1, max_budget_units + 1):
+
+    budget_eok = np.arange(1, max_budget_units + 1)
+    budget_won = budet_eok * unit
+    for budget, budget_eok in zip(budget_won, budget_eok):
         budget = unit * budget_range
         imps_a = a * budget / (cpm_a / 1000.0)
         imps_b = b * budget / (cpm_b / 1000.0)
@@ -278,12 +281,12 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
 
     df_opt = pd.DataFrame(results).reset_index(drop=True)
 
-    imps_o_a = 100 * budget / (cpm_a / 1000.0)
-    imps_o_b = 100 * budget / (cpm_b / 1000.0)
+    imps_o_a = budget_won / (cpm_a / 1000.0)
+    imps_o_b = budget_won / (cpm_b / 1000.0)
     poa = hill(imps_o_a, *popt_a)
     pob = hill(imps_o_b, *popt_b)
     df_only = pd.DataFrame({
-        '예산(억 원)': budget_range,
+        '예산(억 원)': budget_eok,
         'Only TV': np.round(100 * poa, 2),
         'Only Digital': np.round(100 * pob, 2),
     }).reset_index(drop=True)
@@ -367,12 +370,13 @@ with tab3:
         st.session_state.sweep_opt = df_opt
         st.session_state.sweep_only = df_only
 
-    if st.session_state.sweep_opt is not None:
-
+    if (st.session_state.sweep_opt is not None) and (st.session_state.get("sweep_only") is not None):
+        df_opt  = st.session_state.sweep_opt
+        df_only = st.session_state.sweep_only
         fig3, ax3 = plt.subplots(figsize=(8,5))
-        ax3.plot(st.session_state.sweep_opt['예산(억 원)'], st.session_state.sweep_opt['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
-        ax3.plot(st.session_state.sweep_only['예산(억 원)'], st.session_states.sweep_only['Only TV'], linestyle='--', marker='s', label='Only TV', color='royalblue')
-        ax3.plot(st.session_state.sweep_only['예산(억 원)'], st.session_states.sweep_only['Only Digital'], linestyle='--', marker='^', label='Only Digital', color='darkorange')
+        ax3.plot(df_opt['예산(억 원)'], df_opt['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
+        ax3.plot(df_only['예산(억 원)'], df_only['Only TV'], linestyle='--', marker='s', label='Only TV', color='royalblue')
+        ax3.plot(df_only['예산(억 원)'], df_only['Only Digital'], linestyle='--', marker='^', label='Only Digital', color='darkorange')
         ax3.set_xlabel("Budget Range"); ax3.set_ylabel("Reach 1+(%)")
         ax3.grid(True, linestyle='--'); ax3.legend()
         st.pyplot(fig3)
