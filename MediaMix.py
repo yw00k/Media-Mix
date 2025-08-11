@@ -12,7 +12,16 @@ import dropbox
 from io import BytesIO
 
 st.set_page_config(page_title="Reach 1+ Optimization")
-st.title("📊 Reach 1+ Optimization")
+
+st.markdown(
+    """
+    <div style="display:flex; align-items:center;">
+        <img src="https://share.google/images/KuO3UabiKUO5WmNbE" style="height:50px;margin-right:10px;">
+        <h1 style="margin:0;"> Reach 1+ Optimization</h1>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 APP_KEY        = st.secrets["dropbox"]["app_key"]
 APP_SECRET     = st.secrets["dropbox"]["app_secret"]
@@ -319,7 +328,7 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
     return df_opt, df_only
 
 # UI
-st.subheader("💰 예산 최적화")
+st.subheader("💵 CPM 입력")
 
 col_cpm1, col_cpm2 = st.columns(2)
 with col_cpm1:
