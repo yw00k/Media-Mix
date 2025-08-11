@@ -383,24 +383,41 @@ with tab1:
     if st.session_state.get("user_vs_opt") is not None:
         summary_df, pred_user, pred_opt = st.session_state.user_vs_opt
 
-        # 막대 1개 차트: 사용자안 vs 최적화안 Total Reach 1+
-        fig, ax = plt.subplots(figsize=(6, 4))
-        bars = ax.bar(
-            ['사용자안', '최적화안'],
-            [100 * pred_user, 100 * pred_opt],
-            color=['#6AADE4', '#43AA8B']  # 보기 좋은 파레트
-        )
-        for b in bars:
-            h = b.get_height()
-            ax.text(b.get_x() + b.get_width()/2, h + 1, f"{h:.2f}%", ha='center', va='bottom', fontsize=10, fontweight='bold')
+        labels = ['TV', 'Digital', 'Total']
 
+        user_vals = [
+            summary_df.loc['TV Reach1+(%)', '사용자안'],
+            summary_df.loc['Digital Reach1+(%)', '사용자안'],
+            summary_df.loc['Total Reach1+(%)', '사용자안'],
+        ]
+        opt_vals = [
+            summary_df.loc['TV Reach1+(%)', '최적화안'],
+            summary_df.loc['Digital Reach1+(%)', '최적화안'],
+            summary_df.loc['Total Reach1+(%)', '최적화안'],
+        ]
+
+        x = np.arange(len(labels))
+        width = 0.38
+
+        fig, ax = plt.subplots(figsize=(7, 4))
+        bars1 = ax.bar(x - width/2, user_vals, width, label='사용자안', color='#6AADE4')
+        bars2 = ax.bar(x + width/2, opt_vals,  width, label='최적화안', color='#43AA8B')
+
+        for bars in (bars1, bars2):
+            for b in bars:
+                h = b.get_height()
+                ax.text(b.get_x() + b.get_width()/2, h + 1, f"{h:.2f}%", ha='center', va='bottom', fontsize=9)
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels)
         ax.set_ylim(0, 100)
-        ax.set_ylabel("Total Reach 1+ (%)")
-        ax.grid(True, axis='y', linestyle='--', alpha=0.5)
+        ax.set_ylabel("Reach 1+(%)")
         st.pyplot(fig)
 
         # 요약 테이블(1개)
-        st.dataframe(summary_df, use_container_width=True)
+        summary_wide = (summary_df.set_index('안').T
+        summary_wide = summary_wide[['사용자안', '최적화안']]
+        st.dataframe(summary_wide, use_container_width=True)
 
 with tab2:
     single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
