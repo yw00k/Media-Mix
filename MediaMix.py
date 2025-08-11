@@ -249,8 +249,8 @@ def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=100):
 
     optimal_idx = int(np.argmax(pred_i))
     out = pd.DataFrame({
-        'TV': [f"{int(a[optimal_idx]*100)}%"],
-        'Digital': [f"{int(b[optimal_idx]*100)}%"],
+        'TV 비중': [f"{int(a[optimal_idx]*100)}%"],
+        'Digital 비중': [f"{int(b[optimal_idx]*100)}%"],
         'Total Reach 1+(%)': [round(100.0 * pred_i[optimal_idx], 2)]
     }).reset_index(drop=True)
     return a, pred_i, spline_i, out
@@ -292,9 +292,9 @@ def analyze_vs_opt(budget_a_eok, budget_b_eok, cpm_a, cpm_b, unit=100_000_000):
             'Digital 예산(억)': round(won_b / unit, 2),
             'TV 비중': f"{int(round(100 * won_a / total_won))}%" if total_won > 0 else 0,
             'Digital 비중': f"{int(round(100 * won_b / total_won))}%" if total_won > 0 else 0,
-            'TV Reach1+(%)': round(100 * pa_user[0], 2),
-            'Digital Reach1+(%)': round(100 * pb_user[0], 2),
-            'Total Reach1+(%)': round(100 * pred_user, 2),
+            'TV Reach 1+(%)': round(100 * pa_user[0], 2),
+            'Digital Reach 1+(%)': round(100 * pb_user[0], 2),
+            'Total Reach 1+(%)': round(100 * pred_user, 2),
         },
         {
             '구분': '최적화안',
@@ -302,9 +302,9 @@ def analyze_vs_opt(budget_a_eok, budget_b_eok, cpm_a, cpm_b, unit=100_000_000):
             'Digital 예산(억)': round(total_eok * b_opt, 2),
             'TV 비중': f"{int(round(100 * a_opt))}%",
             'Digital 비중': f"{int(round(100 * b_opt))}%",
-            'TV Reach1+(%)': round(100 * pa_opt, 2),
-            'Digital Reach1+(%)': round(100 * pb_opt, 2),
-            'Total Reach1+(%)': round(100 * pred_opt, 2),
+            'TV Reach 1+(%)': round(100 * pa_opt, 2),
+            'Digital Reach 1+(%)': round(100 * pb_opt, 2),
+            'Total Reach 1+(%)': round(100 * pred_opt, 2),
         }
     ])
 
@@ -383,20 +383,20 @@ with tab1:
     if st.session_state.get("user_vs_opt") is not None:
         summary_df, pred_user, pred_opt = st.session_state.user_vs_opt
 
-        summary_wide = (summary_df.set_index('구분').T)
+        summary_wide = (summary_df.set_index('구분').T.rename_axis('항목'))
         summary_wide = summary_wide[['사용자안', '최적화안']]
         
         labels = ['TV', 'Digital', 'Total']
 
         user_vals = [
-            summary_wide.loc['TV Reach1+(%)', '사용자안'],
-            summary_wide.loc['Digital Reach1+(%)', '사용자안'],
-            summary_wide.loc['Total Reach1+(%)', '사용자안'],
+            summary_wide.loc['TV Reach 1+(%)', '사용자안'],
+            summary_wide.loc['Digital Reach 1+(%)', '사용자안'],
+            summary_wide.loc['Total Reach 1+(%)', '사용자안'],
         ]
         opt_vals = [
-            summary_wide.loc['TV Reach1+(%)', '최적화안'],
-            summary_wide.loc['Digital Reach1+(%)', '최적화안'],
-            summary_wide.loc['Total Reach1+(%)', '최적화안'],
+            summary_wide.loc['TV Reach 1+(%)', '최적화안'],
+            summary_wide.loc['Digital Reach 1+(%)', '최적화안'],
+            summary_wide.loc['Total Reach 1+(%)', '최적화안'],
         ]
 
         x = np.arange(len(labels))
