@@ -370,7 +370,7 @@ with tab3:
         st.session_state.sweep_opt = df_opt
         st.session_state.sweep_only = df_only
 
-    if (st.session_state.sweep_opt is not None) and (st.session_state.get("sweep_only") is not None):
+    if (st.session_state.get("sweep_opt") is not None) and (st.session_state.get("sweep_only") is not None):
         df_opt  = st.session_state.sweep_opt
         df_only = st.session_state.sweep_only
         fig3, ax3 = plt.subplots(figsize=(8,5))
