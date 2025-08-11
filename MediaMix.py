@@ -247,8 +247,7 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
             'Digital': f"{int(b[optimal_idx]*100)}%",
             'Total Reach 1+(%)': round(100.0 * pred_i[optimal_idx], 2)
         })
-    df_results = pd.DataFrame(results).reset_index(drop=True)
-    return df_results
+    return results
 
 def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=100):
     a = np.arange(0, unit_points + 1) / 100.0
@@ -293,13 +292,15 @@ for key in ["custom_parts", "sweep_df", "single_curve", "single_out"]:
         st.session_state[key] = None
 
 with tab1:
-    c_budget_a, c_budget_b = st.columns(2)
+    c_budget_a, c_budget_b, c= st.columns([1, 1, 0.5)
     with c_budget_a:
         budget_a_eok = st.number_input("TV", value=3.5, step=0.1)
     with c_budget_b:
         budget_b_eok = st.number_input("Digital", value=3.5, step=0.1)
+    with c:
+        button = st.button("실행", type="primary")
 
-    if st.button("미디어별 예산 분석 실행", type="primary"):
+    if button:
         st.session_state.custom_df, st.session_state.custom_parts = analyze_custom_budgets(
             budget_a_eok, budget_b_eok, cpm_a_global, cpm_b_global
         )
@@ -322,9 +323,13 @@ with tab1:
         st.pyplot(fig1)
 
 with tab2:
-    max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
+    c1, c2 = st.columns([2, 0.5])
+    with c1:
+        max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
+    with c2:
+        button = st.button("실행", type="primary")
 
-    if st.button("예산 범위 최적화 실행", type="primary"):
+    if button:
         st.session_state.sweep_df = optimize_mix_over_budget(cpm_a_global, cpm_b_global, max_budget_units=max_units)
 
     if st.session_state.sweep_df is not None:
@@ -345,9 +350,13 @@ with tab2:
         st.pyplot(fig2)
 
 with tab3:
-    single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
+    c1, c2 = st.columns([2, 0.5])
+    with c1:
+        single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
+    with c2:
+        button = st.button("실행", type="primary")
 
-    if st.button("특정 예산 최적화 실행", type="primary"):
+    if button:
         a, pred_i, spline_i, out = optimize_single_budget(single_budget*100_000_000, cpm_a_global, cpm_b_global)
         st.session_state.single_curve = (a, pred_i, spline_i)
         st.session_state.single_out = out
