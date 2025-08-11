@@ -308,8 +308,15 @@ with tab1:
         pb_val = float(st.session_state.custom_parts['pb'][0])
         total_val = float(st.session_state.custom_parts['pred_total'][0])
         fig1, ax1 = plt.subplots(figsize=(6,4))
-        ax1.bar(['TV','Digital','Total'], [100*pa_val, 100*pb_val, 100*total_val])
-        ax1.set_ylim(0, 100); ax1.set_ylabel("Reach 1+ (%)"); ax1.set_title("Reach 1+(%)")
+        bars = ax1.bar(['TV','Digital','Total'],
+               [100*pa_val, 100*pb_val, 100*total_val],
+               color=['#1f77b4', '#ff7f0e', '#2ca02c'])
+        for bar in bars:
+        height = bar.get_height()
+        ax1.text(bar.get_x() + bar.get_width()/2, height + 1,
+                 f"{height:.2f}%", ha='center', va='bottom', fontsize=10, fontweight='bold')
+        
+        ax1.set_ylim(0, 100); ax1.set_ylabel("Reach 1+(%)")
         ax1.grid(True, axis='y', linestyle='--', alpha=0.5)
         st.pyplot(fig1)
 
@@ -350,7 +357,7 @@ with tab3:
         ax3.scatter(100*a, 100*pred_i, alpha=0.6, s=30, label='Predicted', color='gold')
         ax3.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
         ax3.set_xlabel('TV ratio (%)'); ax3.set_ylabel('Reach 1+ (%)')
-        ax3.grid(True, linestyle='--', alpha=0.7); ax3.legend()
+        ax3.grid(True, linestyle='--', alpha=0.7)
         st.pyplot(fig3)
     if st.session_state.single_out is not None:
         st.dataframe(st.session_state.single_out, use_container_width=True)
