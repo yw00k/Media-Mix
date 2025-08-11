@@ -194,7 +194,7 @@ st.pyplot(fig)
 
 # 공통 함수
 def analyze_custom_budgets(budget_a_eok, budget_b_eok, cpm_a, cpm_b):
-    # 억 원 → 원
+    # 단위 환산
     budget_a = budget_a_eok * 100_000_000
     budget_b = budget_b_eok * 100_000_000
 
@@ -241,7 +241,7 @@ def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=100):
     X_mix = pd.DataFrame({'const': 0.0, 'r1_a': pa, 'r1_b': pb, 'r1_ab': pab})
     pred_i = model_total.predict(X_mix)
 
-    # 스플라인(부드러운 곡선)
+    # 스플라인 추정
     df_spline = pd.DataFrame({'a': a, 'pred': pred_i})
     spline_a = dmatrix("bs(a, df=12, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
     spline_fit = sm.OLS(df_spline['pred'], spline_a).fit()
@@ -256,16 +256,17 @@ def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=100):
     return a, pred_i, spline_i, out
 
 def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000):
-    results = []
     a = np.arange(0, 101, dtype=np.float64) / 100.0
     b = 1.0 - a
 
     budget_eok = np.arange(1, max_budget_units + 1)
     budget_won = budget_eok * unit
-    for budget, budget_eok in zip(budget_won, budget_eok):
-        budget = unit * budget_range
-        imps_a = a * budget / (cpm_a / 1000.0)
-        imps_b = b * budget / (cpm_b / 1000.0)
+
+    results = []
+
+    for budget_won, budget_eok in zip(budget_won, budget_eok):
+        imps_a = a * budget_won / (cpm_a / 1000.0)
+        imps_b = b * budget_won / (cpm_b / 1000.0)
         pa = hill(imps_a, *popt_a)
         pb = hill(imps_b, *popt_b)
         pab = pa * pb
@@ -273,7 +274,7 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
         pred_i = model_total.predict(X_mix)
         optimal_idx = int(np.argmax(pred_i))
         results.append({
-            '예산(억 원)': budget_range,
+            '예산(억 원)': budget_eok,
             'TV': f"{int(a[optimal_idx]*100)}%",
             'Digital': f"{int(b[optimal_idx]*100)}%",
             'Total Reach 1+(%)': round(100.0 * pred_i[optimal_idx], 2)
