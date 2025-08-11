@@ -274,8 +274,15 @@ def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=100):
     })
     return a, pred_i, spline_i, out
 
-# ============== UI: 탭 ==============
+# UI: 탭
 st.subheader("💰 예산 분석/최적화")
+
+col_cpm1, col_cpm2 = st.columns(2)
+with col_cpm1:
+    cpm_a_global = st.number_input("CPM TV", value=9000, step=100, key="cpm_tv_global")
+with col_cpm2:
+    cpm_b_global = st.number_input("CPM Digital", value=7000, step=100, key="cpm_dg_global")
+    
 tab1, tab2, tab3 = st.tabs(["미디어별 예산 분석", "예산 범위 최적화", "특정 예산 최적화"])
 
 # 세션 상태 (탭 이동해도 유지)
@@ -290,15 +297,9 @@ with tab1:
     with c_budget_b:
         budget_b_eok = st.number_input("Digital", value=3.5, step=0.1)
 
-    c_cpm_a, c_cpm_b = st.columns(2)
-    with c_cpm_a:
-        cpm_a = st.number_input("CPM TV", value=9000, step=100)
-    with c_cpm_b:
-        cpm_b = st.number_input("CPM Digital", value=7000, step=100)
-
     if st.button("미디어별 예산 분석 실행", type="primary"):
         st.session_state.custom_df, st.session_state.custom_parts = analyze_custom_budgets(
-            budget_a_eok, budget_b_eok, cpm_a, cpm_b
+            budget_a_eok, budget_b_eok, cpm_a_global, cpm_b_global
         )
 
     if st.session_state.custom_df is not None:
@@ -314,49 +315,39 @@ with tab1:
 
 with tab2:
     max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
-    c1, c2 = st.columns([1,1])
-    with c1:
-        cpm_a = st.number_input("CPM TV", value=9000, step=100, key="cpm_a_sweep")
-    with c2:
-        cpm_b = st.number_input("CPM Digital", value=7000, step=100, key="cpm_b_sweep")
 
     if st.button("예산 범위 최적화 실행", type="primary"):
-        st.session_state.sweep_df = optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=max_units)
+        st.session_state.sweep_df = optimize_mix_over_budget(cpm_a_global, cpm_b_global, max_budget_units=max_units)
 
     if st.session_state.sweep_df is not None:
         st.dataframe(st.session_state.sweep_df, use_container_width=True)
         # 전액 A/B 비교선
         budgets = np.arange(1, max_units + 1) * 100_000_000
-        imps_a_allA = budgets / (cpm_a / 1000.0)
-        imps_b_allB = budgets / (cpm_b / 1000.0)
+        imps_a_allA = budgets / (cpm_a_global / 1000.0)
+        imps_b_allB = budgets / (cpm_b_global / 1000.0)
         pa_allA = hill(imps_a_allA, *popt_a)
         pb_allB = hill(imps_b_allB, *popt_b)
 
         fig2, ax2 = plt.subplots(figsize=(8,5))
-        ax2.plot(st.session_state.sweep_df['예산(억 원)'], st.session_state.sweep_df['Total'], marker='o', label='최적 믹스 Total (%)')
-        ax2.plot(np.arange(1, max_units+1), 100*pa_allA, linestyle='--', marker='s', label='전액 TV (%)')
-        ax2.plot(np.arange(1, max_units+1), 100*pb_allB, linestyle='--', marker='^', label='전액 Digital (%)')
-        ax2.set_xlabel("Budget Range (억 원)"); ax2.set_ylabel("Reach 1+ (%)")
+        ax2.plot(st.session_state.sweep_df['예산(억 원)'], st.session_state.sweep_df['Total'], marker='o', label='Opt Total')
+        ax2.plot(np.arange(1, max_units+1), 100*pa_allA, linestyle='--', marker='s', label='Only TV')
+        ax2.plot(np.arange(1, max_units+1), 100*pb_allB, linestyle='--', marker='^', label='Only Digital')
+        ax2.set_xlabel("Budget Range"); ax2.set_ylabel("Reach 1+(%)")
         ax2.grid(True, linestyle='--'); ax2.legend()
         st.pyplot(fig2)
 
 with tab3:
     single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
-    c1, c2 = st.columns([1,1])
-    with c1:
-        cpm_a = st.number_input("CPM TV", value=10000, step=100, key="cpm_a_single")
-    with c2:
-        cpm_b = st.number_input("CPM Digital", value=7000, step=100, key="cpm_b_single")
 
     if st.button("특정 예산 최적화 실행", type="primary"):
-        a, pred_i, spline_i, out = optimize_single_budget(single_budget*100_000_000, cpm_a, cpm_b)
+        a, pred_i, spline_i, out = optimize_single_budget(single_budget*100_000_000, cpm_a_global, cpm_b_global)
         st.session_state.single_curve = (a, pred_i, spline_i)
         st.session_state.single_out = out
 
     if st.session_state.single_curve is not None:
         a, pred_i, spline_i = st.session_state.single_curve
         fig3, ax3 = plt.subplots(figsize=(8,5))
-        ax3.scatter(100*a, 100*pred_i, alpha=0.6, s=30, label='Predicted')
+        ax3.scatter(100*a, 100*pred_i, alpha=0.6, s=30, color=gold, label='Predicted')
         ax3.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
         ax3.set_xlabel('TV ratio (%)'); ax3.set_ylabel('Reach 1+ (%)')
         ax3.grid(True, linestyle='--', alpha=0.7); ax3.legend()
