@@ -383,7 +383,7 @@ with tab1:
     if st.session_state.get("user_vs_opt") is not None:
         summary_df, pred_user, pred_opt = st.session_state.user_vs_opt
 
-        summary_wide = (summary_df.set_index('안').T)
+        summary_wide = (summary_df.set_index('구분').T)
         summary_wide = summary_wide[['사용자안', '최적화안']]
         
         labels = ['TV', 'Digital', 'Total']
