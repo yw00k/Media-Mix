@@ -261,7 +261,7 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
     b = 1.0 - a
 
     budget_eok = np.arange(1, max_budget_units + 1)
-    budget_won = budet_eok * unit
+    budget_won = budget_eok * unit
     for budget, budget_eok in zip(budget_won, budget_eok):
         budget = unit * budget_range
         imps_a = a * budget / (cpm_a / 1000.0)
