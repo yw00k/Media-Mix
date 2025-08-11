@@ -298,7 +298,7 @@ with tab1:
     with c_budget_b:
         budget_b_eok = st.number_input("Digital", value=3.5, step=0.1)
     with c:
-        button1 = st.button("실행", type="primary")
+        button1 = st.button("실행", type="primary", key="button1")
 
     if button1:
         st.session_state.custom_df, st.session_state.custom_parts = analyze_custom_budgets(
@@ -327,7 +327,7 @@ with tab2:
     with c1:
         max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
     with c2:
-        button2 = st.button("실행", type="primary")
+        button2 = st.button("실행", type="primary", key="button2")
 
     if button2:
         st.session_state.sweep_df = optimize_mix_over_budget(cpm_a_global, cpm_b_global, max_budget_units=max_units)
@@ -354,7 +354,7 @@ with tab3:
     with c1:
         single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
     with c2:
-        button3 = st.button("실행", type="primary")
+        button3 = st.button("실행", type="primary", key="button3")
 
     if button3:
         a, pred_i, spline_i, out = optimize_single_budget(single_budget*100_000_000, cpm_a_global, cpm_b_global)
