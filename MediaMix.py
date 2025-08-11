@@ -380,7 +380,7 @@ with tab1:
         )
         st.session_state.user_vs_opt = (summary_df, pred_user, pred_opt)
 
-    if st.session_state.user_vs_opt is not None:
+    if st.session_state.get("user_vs_opt") is not None:
         summary_df, pred_user, pred_opt = st.session_state.user_vs_opt
 
         # 막대 1개 차트: 사용자안 vs 최적화안 Total Reach 1+
