@@ -292,9 +292,9 @@ def analyze_vs_opt(budget_a_eok, budget_b_eok, cpm_a, cpm_b, unit=100_000_000):
             'Digital 예산(억)': round(won_b / unit, 2),
             'TV 비중': f"{int(round(100 * won_a / total_won))}%" if total_won > 0 else 0,
             'Digital 비중': f"{int(round(100 * won_b / total_won))}%" if total_won > 0 else 0,
-            'TV Reach 1+(%)': round(100 * pa_user[0], 2),
-            'Digital Reach 1+(%)': round(100 * pb_user[0], 2),
-            'Total Reach1 +(%)': round(100 * pred_user, 2),
+            'TV Reach1+(%)': round(100 * pa_user[0], 2),
+            'Digital Reach1+(%)': round(100 * pb_user[0], 2),
+            'Total Reach1+(%)': round(100 * pred_user, 2),
         },
         {
             '구분': '최적화안',
@@ -302,9 +302,9 @@ def analyze_vs_opt(budget_a_eok, budget_b_eok, cpm_a, cpm_b, unit=100_000_000):
             'Digital 예산(억)': round(total_eok * b_opt, 2),
             'TV 비중': f"{int(round(100 * a_opt))}%",
             'Digital 비중': f"{int(round(100 * b_opt))}%",
-            'TV Reach 1+(%)': round(100 * pa_opt, 2),
-            'Digital Reach 1+(%)': round(100 * pb_opt, 2),
-            'Total Reach1 +(%)': round(100 * pred_opt, 2),
+            'TV Reach1+(%)': round(100 * pa_opt, 2),
+            'Digital Reach1+(%)': round(100 * pb_opt, 2),
+            'Total Reach1+(%)': round(100 * pred_opt, 2),
         }
     ])
 
@@ -389,14 +389,14 @@ with tab1:
         labels = ['TV', 'Digital', 'Total']
 
         user_vals = [
-            summary_wide.loc['TV Reach 1+(%)', '사용자안'],
-            summary_wide.loc['Digital Reach 1+(%)', '사용자안'],
-            summary_wide.loc['Total Reach 1+(%)', '사용자안'],
+            summary_wide.loc['TV Reach1+(%)', '사용자안'],
+            summary_wide.loc['Digital Reach1+(%)', '사용자안'],
+            summary_wide.loc['Total Reach1+(%)', '사용자안'],
         ]
         opt_vals = [
-            summary_wide.loc['TV Reach 1+(%)', '최적화안'],
-            summary_wide.loc['Digital Reach 1+(%)', '최적화안'],
-            summary_wide.loc['Total Reach 1+(%)', '최적화안'],
+            summary_wide.loc['TV Reach1+(%)', '최적화안'],
+            summary_wide.loc['Digital Reach1+(%)', '최적화안'],
+            summary_wide.loc['Total Reach1+(%)', '최적화안'],
         ]
 
         x = np.arange(len(labels))
