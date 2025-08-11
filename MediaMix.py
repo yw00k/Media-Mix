@@ -383,6 +383,9 @@ with tab1:
     if st.session_state.get("user_vs_opt") is not None:
         summary_df, pred_user, pred_opt = st.session_state.user_vs_opt
 
+        summary_wide = (summary_df.set_index('안').T)
+        summary_wide = summary_wide[['사용자안', '최적화안']]
+        
         labels = ['TV', 'Digital', 'Total']
 
         user_vals = [
@@ -414,9 +417,6 @@ with tab1:
         ax.set_ylabel("Reach 1+(%)")
         st.pyplot(fig)
 
-        # 요약 테이블(1개)
-        summary_wide = (summary_df.set_index('안').T)
-        summary_wide = summary_wide[['사용자안', '최적화안']]
         st.dataframe(summary_wide, use_container_width=True)
 
 with tab2:
