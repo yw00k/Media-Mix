@@ -39,7 +39,7 @@ def load_from_dropbox(path, usecols=None, parse_dates=None):
             st.error(f"⚠ CSV 파싱 실패: {e}")
             return None
 
-img_bytes = load_image_from_dropbox("/Media Mix/logo.png")
+img_bytes = load_from_dropbox("/Media Mix/logo.png")
 
 if img_bytes:
     col1, col2 = st.columns([1, 5])
