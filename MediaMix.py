@@ -312,9 +312,9 @@ with tab1:
                [100*pa_val, 100*pb_val, 100*total_val],
                color=['#1f77b4', '#ff7f0e', '#2ca02c'])
         for bar in bars:
-        height = bar.get_height()
-        ax1.text(bar.get_x() + bar.get_width()/2, height + 1,
-                 f"{height:.2f}%", ha='center', va='bottom', fontsize=10, fontweight='bold')
+            height = bar.get_height()
+            ax1.text(bar.get_x() + bar.get_width()/2, height + 1,
+                     f"{height:.2f}%", ha='center', va='bottom', fontsize=10, fontweight='bold')
         
         ax1.set_ylim(0, 100); ax1.set_ylabel("Reach 1+(%)")
         ax1.grid(True, axis='y', linestyle='--', alpha=0.5)
