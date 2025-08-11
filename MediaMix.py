@@ -244,8 +244,8 @@ def compare_user_vs_opt(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
     summary = pd.DataFrame([
         {
             '구분': '사용자안',
-            'TV 예산(억)': round(a_eok, 2),
-            'Digital 예산(억)': round(b_eok, 2),
+            'TV 예산(억 원)': round(a_eok, 2),
+            'Digital 예산(억 원)': round(b_eok, 2),
             'TV 비중': f"{int(round(100 * (a_eok / total_eok))) if total_eok>0 else 0}%",
             'Digital 비중': f"{int(round(100 * (b_eok / total_eok))) if total_eok>0 else 0}%",
             'TV Reach 1+(%)': round(100 * user_a_r1, 2),
@@ -254,8 +254,8 @@ def compare_user_vs_opt(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
         },
         {
             '구분': '최적화안',
-            'TV 예산(억)': a_eok_opt,
-            'Digital 예산(억)': b_eok_opt,
+            'TV 예산(억 원)': a_eok_opt,
+            'Digital 예산(억 원)': b_eok_opt,
             'TV 비중': f"{int(round(100 * opt['a_share']))}%",
             'Digital 비중': f"{int(round(100 * opt['b_share']))}%",
             'TV Reach 1+(%)': round(100 * opt['a_r1'], 2),
@@ -266,7 +266,7 @@ def compare_user_vs_opt(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
     return summary
 
 # 예산 범위 최적화
-def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000):
+def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000, eps=1e-6):
     a = np.arange(0, 101, dtype=np.float64) / 100.0
     b = 1.0 - a
 
@@ -286,19 +286,36 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
 
     results = []
     for won, eok in zip(budget_won, budget_eok):
+        # 각 비중별 예측 곡선
         a_imps = a * won / (cpm_a / 1000.0)
         b_imps = b * won / (cpm_b / 1000.0)
-        a_r1 = hill(a_imps, *popt_a)
-        b_r1 = hill(b_imps, *popt_b)
+        a_r1 = hill(a_imps, *popt_a)   # TV 단일 미디어 R1
+        b_r1 = hill(b_imps, *popt_b)   # Digital 단일 미디어 R1
         ab_r1 = a_r1 * b_r1
+
+        # 통합 모델=
         X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
-        total_r1_curve = model_total.predict(X_mix)
+        total_r1_curve = model_total.predict(X_mix).values
+
+        # 최적 지점
         idx = int(np.argmax(total_r1_curve))
+        a_share = float(a[idx])
+        b_share = float(b[idx])
+
+        # 통합 모델 값
+        total_r1 = float(total_r1_curve[idx])
+
+        # 극단 비중 보정: 한쪽이 100%(eps 이내)면 해당 단일 미디어 값을 Total로 사용
+        if a_share <= eps:         # TV=0%, Digital=100%
+            total_r1 = float(b_r1[idx])
+        elif b_share <= eps:       # Digital=0%, TV=100%
+            total_r1 = float(a_r1[idx])
+
         results.append({
             '예산(억 원)': eok,
-            'TV 비중': f"{int(a[idx]*100)}%",
-            'Digital 비중': f"{int(b[idx]*100)}%",
-            'Total Reach 1+(%)': round(100.0 * total_r1_curve[idx], 2)
+            'TV 비중': f"{int(a_share*100)}%",
+            'Digital 비중': f"{int(b_share*100)}%",
+            'Total Reach 1+(%)': round(100.0 * total_r1, 2),
         })
 
     df_opt = pd.DataFrame(results).reset_index(drop=True)
