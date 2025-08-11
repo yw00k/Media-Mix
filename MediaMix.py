@@ -39,14 +39,14 @@ def load_from_dropbox(path, usecols=None, parse_dates=None):
             st.error(f"⚠ CSV 파싱 실패: {e}")
             return None
 
-img_bytes = load_from_dropbox("/Media Mix/logo.png")
+logo_bytes = load_from_dropbox("/Media Mix/logo.png")
 
-if img_bytes:
-    col1, col2 = st.columns([1, 5])
-    with col1:
-        st.image(img_bytes, use_container_width=True)
-    with col2:
-        st.markdown("<h1> Reach 1+ Optimization</h1>", unsafe_allow_html=True)
+col1, col2 = st.columns([1, 5])
+with col1:
+    if logo_bytes is not None:  # <-- 핵심 수정
+        st.image(logo_bytes, use_container_width=True)
+with col2:
+    st.markdown("<h1> Reach 1+ Optimization</h1>", unsafe_allow_html=True)
 
 needed_cols = ['date', 'brand_id', 'target', 'media', 'impression', 'r1']
 
