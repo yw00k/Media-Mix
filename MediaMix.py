@@ -301,8 +301,8 @@ with tab1:
         button1 = st.button("실행", type="primary", key="button1")
 
     if button1:
-        st.session_state.custom_parts = analyze_custom_budgets(
-            budget_a_eok, budget_b_eok, cpm_a_global, cpm_b_global
+        st.session_state.custom_df, st.session_state.custom_parts = analyze_custom_budgets(
+        budget_a_eok, budget_b_eok, cpm_a_global, cpm_b_global
         )
 
     if st.session_state.custom_parts is not None:
@@ -334,7 +334,7 @@ with tab2:
 
     if st.session_state.sweep_df is not None:
         st.dataframe(st.session_state.sweep_df, use_container_width=True)
-        # 전액 A/B 비교선
+
         budgets = np.arange(1, max_units + 1) * 100_000_000
         imps_a_allA = budgets / (cpm_a_global / 1000.0)
         imps_b_allB = budgets / (cpm_b_global / 1000.0)
