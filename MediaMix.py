@@ -262,26 +262,6 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
     budget_eok = np.arange(1, max_budget_units + 1)
     budget_won = budget_eok * unit
 
-    results = []
-
-    for budget_won, budget_eok in zip(budget_won, budget_eok):
-        imps_a = a * budget_won / (cpm_a / 1000.0)
-        imps_b = b * budget_won / (cpm_b / 1000.0)
-        pa = hill(imps_a, *popt_a)
-        pb = hill(imps_b, *popt_b)
-        pab = pa * pb
-        X_mix = pd.DataFrame({'const': 0.0, 'r1_a': pa, 'r1_b': pb, 'r1_ab': pab})
-        pred_i = model_total.predict(X_mix)
-        optimal_idx = int(np.argmax(pred_i))
-        results.append({
-            '예산(억 원)': budget_eok,
-            'TV': f"{int(a[optimal_idx]*100)}%",
-            'Digital': f"{int(b[optimal_idx]*100)}%",
-            'Total Reach 1+(%)': round(100.0 * pred_i[optimal_idx], 2)
-        })
-
-    df_opt = pd.DataFrame(results).reset_index(drop=True)
-
     imps_o_a = budget_won / (cpm_a / 1000.0)
     imps_o_b = budget_won / (cpm_b / 1000.0)
     poa = hill(imps_o_a, *popt_a)
@@ -291,6 +271,26 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
         'Only TV': np.round(100 * poa, 2),
         'Only Digital': np.round(100 * pob, 2),
     }).reset_index(drop=True)
+
+    results = []
+
+    for won, eok in zip(budget_won, budget_eok):
+        imps_a = a * won / (cpm_a / 1000.0)
+        imps_b = b * won / (cpm_b / 1000.0)
+        pa = hill(imps_a, *popt_a)
+        pb = hill(imps_b, *popt_b)
+        pab = pa * pb
+        X_mix = pd.DataFrame({'const': 0.0, 'r1_a': pa, 'r1_b': pb, 'r1_ab': pab})
+        pred_i = model_total.predict(X_mix)
+        optimal_idx = int(np.argmax(pred_i))
+        results.append({
+            '예산(억 원)': eok,
+            'TV': f"{int(a[optimal_idx]*100)}%",
+            'Digital': f"{int(b[optimal_idx]*100)}%",
+            'Total Reach 1+(%)': round(100.0 * pred_i[optimal_idx], 2)
+        })
+
+    df_opt = pd.DataFrame(results).reset_index(drop=True)
 
     return df_opt, df_only
 
