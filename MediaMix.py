@@ -340,8 +340,6 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
     return df_opt, df_only
 
 # UI
-st.subheader("💵 CPM 입력")
-
 col_cpm1, col_cpm2 = st.columns(2)
 with col_cpm1:
     cpm_a_global = st.number_input("CPM TV", value=9000, step=100, key="cpm_tv_global")
