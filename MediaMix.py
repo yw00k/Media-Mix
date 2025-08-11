@@ -18,6 +18,28 @@ APP_SECRET     = st.secrets["dropbox"]["app_secret"]
 REFRESH_TOKEN  = st.secrets["dropbox"]["refresh_token"]
 DROPBOX_PATH   = st.secrets["dropbox"]["path"]
 
+def load_image_from_dropbox(path: str) -> BytesIO | None:
+    try:
+        dbx = dropbox.Dropbox(
+            oauth2_refresh_token=REFRESH_TOKEN,
+            app_key=APP_KEY,
+            app_secret=APP_SECRET,
+        )
+        _, res = dbx.files_download(path)
+        return BytesIO(res.content)
+    except Exception as e:
+        st.error(f"이미지 불러오기 실패: {e}")
+        return None
+
+logo_bytes = load_image_from_dropbox("/Media Mix/logo.png")
+
+col1, col2 = st.columns([1, 5])
+with col1:
+    if logo_bytes is not None:
+        st.image(logo_bytes, use_container_width=True)
+with col2:
+    st.markdown("<h1> Reach 1+ Optimization</h1>", unsafe_allow_html=True)
+
 def load_from_dropbox(path, usecols=None, parse_dates=None):
     try:
         dbx = dropbox.Dropbox(
@@ -38,15 +60,6 @@ def load_from_dropbox(path, usecols=None, parse_dates=None):
         except Exception as e:
             st.error(f"⚠ CSV 파싱 실패: {e}")
             return None
-
-logo_bytes = load_from_dropbox("/Media Mix/logo.png")
-
-col1, col2 = st.columns([1, 5])
-with col1:
-    if logo_bytes is not None:  # <-- 핵심 수정
-        st.image(logo_bytes, use_container_width=True)
-with col2:
-    st.markdown("<h1> Reach 1+ Optimization</h1>", unsafe_allow_html=True)
 
 needed_cols = ['date', 'brand_id', 'target', 'media', 'impression', 'r1']
 
