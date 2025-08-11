@@ -403,8 +403,8 @@ with tab1:
         width = 0.38
 
         fig, ax = plt.subplots(figsize=(7, 4))
-        bars1 = ax.bar(x - width/2, user_vals, width, label='사용자안', color='#6AADE4')
-        bars2 = ax.bar(x + width/2, opt_vals,  width, label='최적화안', color='#43AA8B')
+        bars1 = ax.bar(x - width/2, user_vals, width, label='사용자안', color='darkseagreen')
+        bars2 = ax.bar(x + width/2, opt_vals,  width, label='최적화안', color='mediumseagreen')
 
         for bars in (bars1, bars2):
             for b in bars:
@@ -415,6 +415,7 @@ with tab1:
         ax.set_xticklabels(labels)
         ax.set_ylim(0, 100)
         ax.set_ylabel("Reach 1+(%)")
+        ax.legend()
         st.pyplot(fig)
 
         st.dataframe(summary_wide, use_container_width=True)
