@@ -247,7 +247,8 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
             'Digital': f"{int(b[optimal_idx]*100)}%",
             'Total Reach 1+(%)': round(100.0 * pred_i[optimal_idx], 2)
         })
-    return pd.DataFrame(results).reset_index(drop=True)
+    df_results = pd.DataFrame(results).reset_index(drop=True)
+    return df_results
 
 def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=100):
     a = np.arange(0, unit_points + 1) / 100.0
