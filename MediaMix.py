@@ -287,7 +287,7 @@ with col_cpm2:
 tab1, tab2, tab3 = st.tabs(["미디어별 예산 분석", "예산 범위 최적화", "특정 예산 최적화"])
 
 # 세션 상태 (탭 이동해도 유지)
-for key in ["custom_parts", "sweep_df", "single_curve", "single_out"]:
+for key in ["custom", "sweep_df", "single_curve", "single_out"]:
     if key not in st.session_state:
         st.session_state[key] = None
 
