@@ -13,16 +13,6 @@ from io import BytesIO
 
 st.set_page_config(page_title="Reach 1+ Optimization")
 
-st.markdown(
-    """
-    <div style="display:flex; align-items:center;">
-        <img src="https://share.google/images/KuO3UabiKUO5WmNbE" style="height:50px;margin-right:10px;">
-        <h1 style="margin:0;"> Reach 1+ Optimization</h1>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
 APP_KEY        = st.secrets["dropbox"]["app_key"]
 APP_SECRET     = st.secrets["dropbox"]["app_secret"]
 REFRESH_TOKEN  = st.secrets["dropbox"]["refresh_token"]
@@ -48,6 +38,15 @@ def load_from_dropbox(path, usecols=None, parse_dates=None):
         except Exception as e:
             st.error(f"⚠ CSV 파싱 실패: {e}")
             return None
+
+logo = load_from_dropbox("/Media Mix/logo.png")
+
+if logo:
+    col1, col2 = st.columns([1, 5])
+    with col1:
+        st.image(logo, use_container_width=True)
+    with col2:
+        st.markdown("<h1> Reach 1+ Optimization</h1>", unsafe_allow_html=True)
 
 needed_cols = ['date', 'brand_id', 'target', 'media', 'impression', 'r1']
 
