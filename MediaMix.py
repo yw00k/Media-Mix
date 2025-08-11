@@ -270,7 +270,7 @@ def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=100):
     out = pd.DataFrame({
         'TV': [f"{int(a[optimal_idx]*100)}%"],
         'Digital': [f"{int(b[optimal_idx]*100)}%"],
-        'Total': [round(100.0 * pred_i[optimal_idx], 2)]
+        'Total Reach 1+(%)': [round(100.0 * pred_i[optimal_idx], 2)]
     })
     return a, pred_i, spline_i, out
 
@@ -309,7 +309,7 @@ with tab1:
         fig1, ax1 = plt.subplots(figsize=(6,4))
         bars = ax1.bar(['TV','Digital','Total'],
                [100*pa_val, 100*pb_val, 100*total_val],
-               color=['#1f77b4', '#ff7f0e', '#2ca02c'])
+               color=['royalblue', 'darkorange', 'mediumseagreen'])
         for bar in bars:
             height = bar.get_height()
             ax1.text(bar.get_x() + bar.get_width()/2, height + 1,
@@ -335,9 +335,9 @@ with tab2:
         pb_allB = hill(imps_b_allB, *popt_b)
 
         fig2, ax2 = plt.subplots(figsize=(8,5))
-        ax2.plot(st.session_state.sweep_df['예산(억 원)'], st.session_state.sweep_df['Total'], marker='o', label='Opt Total')
-        ax2.plot(np.arange(1, max_units+1), 100*pa_allA, linestyle='--', marker='s', label='Only TV')
-        ax2.plot(np.arange(1, max_units+1), 100*pb_allB, linestyle='--', marker='^', label='Only Digital')
+        ax2.plot(st.session_state.sweep_df['예산(억 원)'], st.session_state.sweep_df['Total'], marker='o', label='Opt Total', color='mediumseagreen')
+        ax2.plot(np.arange(1, max_units+1), 100*pa_allA, linestyle='--', marker='s', label='Only TV', color='royalblue')
+        ax2.plot(np.arange(1, max_units+1), 100*pb_allB, linestyle='--', marker='^', label='Only Digital', color='darkorange')
         ax2.set_xlabel("Budget Range"); ax2.set_ylabel("Reach 1+(%)")
         ax2.grid(True, linestyle='--'); ax2.legend()
         st.pyplot(fig2)
@@ -349,6 +349,9 @@ with tab3:
         a, pred_i, spline_i, out = optimize_single_budget(single_budget*100_000_000, cpm_a_global, cpm_b_global)
         st.session_state.single_curve = (a, pred_i, spline_i)
         st.session_state.single_out = out
+        
+    if st.session_state.single_out is not None:
+        st.dataframe(st.session_state.single_out, use_container_width=True)
 
     if st.session_state.single_curve is not None:
         a, pred_i, spline_i = st.session_state.single_curve
@@ -358,5 +361,3 @@ with tab3:
         ax3.set_xlabel('TV ratio (%)'); ax3.set_ylabel('Reach 1+ (%)')
         ax3.grid(True, linestyle='--', alpha=0.7)
         st.pyplot(fig3)
-    if st.session_state.single_out is not None:
-        st.dataframe(st.session_state.single_out, use_container_width=True)
