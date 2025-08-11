@@ -1,10 +1,10 @@
 streamlit
-scikit-learn
-scipy
-statsmodels
-numpy
 pandas
+numpy
 matplotlib
+scipy
+scikit-learn
+statsmodels
 patsy
 dropbox
-openpyxl
+pyarrow
