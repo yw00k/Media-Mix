@@ -301,11 +301,11 @@ with tab1:
         button1 = st.button("실행", type="primary", key="button1")
 
     if button1:
-        st.session_state.custom_df, st.session_state.custom_parts = analyze_custom_budgets(
+        st.session_state.custom = analyze_custom_budgets(
             budget_a_eok, budget_b_eok, cpm_a_global, cpm_b_global
         )
 
-    if st.session_state.custom_df is not None:
+    if st.session_state.custom is not None:
         pa_val = float(st.session_state.custom_parts['pa'][0])
         pb_val = float(st.session_state.custom_parts['pb'][0])
         total_val = float(st.session_state.custom_parts['pred_total'][0])
