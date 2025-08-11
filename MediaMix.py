@@ -382,5 +382,4 @@ with tab3:
         ax3.grid(True, linestyle='--'); ax3.legend()
         st.pyplot(fig3)
 
-    if st.session_state.sweep_df is not None:
-        st.dataframe(st.session_state.sweep_opt, use_container_width=True)
+        st.dataframe(df_opt, use_container_width=True)
