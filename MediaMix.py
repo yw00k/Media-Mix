@@ -123,7 +123,7 @@ r1_b  = df_t['r1_b'].values
 r1_ab = df_t['r1_ab'].values
 
 # 예측용 impressions (1부터 시작: 0분모 방지)
-imps  = np.arange(1, 600_000_000, 1_000_000, dtype=np.int64)
+imps  = np.arange(1, 200_000_000, 1_000_000, dtype=np.int64)
 
 # Hill 함수 & 피팅
 def hill(x, a, b, c):
@@ -188,8 +188,7 @@ ax.scatter(imps, 100*pred_b_r1, alpha=0.6, s=10, label='Digital', color='darkora
 ax.scatter(imps, 100*pred_t_r1, alpha=0.6, s=10, label='Total', color='mediumseagreen')
 
 ax.set_xlabel("Impressions")
-ax.set_ylabel("Reach 1+ (%)")
-ax.grid(True, linestyle="--")
+ax.set_ylabel("Reach 1+(%)")
 ax.legend()
 st.pyplot(fig)
 
@@ -213,7 +212,7 @@ def analyze_custom_budgets(budget_a_eok, budget_b_eok, cpm_a, cpm_b):
         'r1_b': pb,
         'r1_ab': pab
     })
-    pred_total = model_total.predict(X_custom)  # 0~1
+    pred_total = model_total.predict(X_custom)
 
     # 표
     df_custom = pd.DataFrame({
@@ -230,29 +229,6 @@ def analyze_custom_budgets(budget_a_eok, budget_b_eok, cpm_a, cpm_b):
 
     parts = {"pa": pa, "pb": pb, "pred_total": pred_total}
     return df_custom, parts
-
-def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000):
-    results = []
-    a = np.arange(0, 101, dtype=np.float64) / 100.0
-    b = 1.0 - a
-    for budget_range in range(1, max_budget_units + 1):
-        budget = unit * budget_range
-        imps_a = a * budget / (cpm_a / 1000.0)
-        imps_b = b * budget / (cpm_b / 1000.0)
-        pa = hill(imps_a, *popt_a)
-        pb = hill(imps_b, *popt_b)
-        pab = pa * pb
-        X_mix = pd.DataFrame({'const': 0.0, 'r1_a': pa, 'r1_b': pb, 'r1_ab': pab})
-        pred_i = model_total.predict(X_mix)
-        optimal_idx = int(np.argmax(pred_i))
-        results.append({
-            '예산(억 원)': budget_range,
-            'TV': f"{int(a[optimal_idx]*100)}%",
-            'Digital': f"{int(b[optimal_idx]*100)}%",
-            'Total Reach 1+(%)': round(100.0 * pred_i[optimal_idx], 2)
-        })
-    df_results = pd.DataFrame(results).reset_index(drop=True)
-    return df_results
 
 def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=100):
     a = np.arange(0, unit_points + 1) / 100.0
@@ -278,6 +254,36 @@ def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=100):
         'Total Reach 1+(%)': [round(100.0 * pred_i[optimal_idx], 2)]
     }).reset_index(drop=True)
     return a, pred_i, spline_i, out
+
+def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000):
+    results = []
+    a = np.arange(0, 101, dtype=np.float64) / 100.0
+    b = 1.0 - a
+    for budget_range in range(1, max_budget_units + 1):
+        budget = unit * budget_range
+        imps_a = a * budget / (cpm_a / 1000.0)
+        imps_b = b * budget / (cpm_b / 1000.0)
+        pa = hill(imps_a, *popt_a)
+        pb = hill(imps_b, *popt_b)
+        pab = pa * pb
+        X_mix = pd.DataFrame({'const': 0.0, 'r1_a': pa, 'r1_b': pb, 'r1_ab': pab})
+        pred_i = model_total.predict(X_mix)
+        optimal_idx = int(np.argmax(pred_i))
+        results.append({
+            '예산(억 원)': budget_range,
+            'TV': f"{int(a[optimal_idx]*100)}%",
+            'Digital': f"{int(b[optimal_idx]*100)}%",
+            'Total Reach 1+(%)': round(100.0 * pred_i[optimal_idx], 2)
+        })
+
+        budget_1 = unit * budget_range
+        imps_o_a = 100 * budget / (cpm_a / 1000.0)
+        imps_o_b = 100 * budget / (cpm_b / 1000.0)
+        poa = hill(imps_o_a, *popt_a)
+        pob = hill(imps_o_b, *popt_b)
+        df_only = pd.DataFrame({'r1_o_a': poa, 'r1_o_b': pob}).reset_index(drop=True)
+    df_results = pd.DataFrame(results).reset_index(drop=True)
+    return df_results, df_only
 
 # UI: 탭
 st.subheader("💰 예산 분석/최적화")
@@ -327,34 +333,10 @@ with tab1:
         st.pyplot(fig1)
 
 with tab2:
-    max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
+    single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
     button2 = st.button("실행", type="primary", key="button2")
 
     if button2:
-        st.session_state.sweep_df = optimize_mix_over_budget(cpm_a_global, cpm_b_global, max_budget_units=max_units)
-
-    if st.session_state.sweep_df is not None:
-        st.dataframe(st.session_state.sweep_df, use_container_width=True)
-
-        budgets = np.arange(1, max_units + 1) * 100_000_000
-        imps_a_allA = budgets / (cpm_a_global / 1000.0)
-        imps_b_allB = budgets / (cpm_b_global / 1000.0)
-        pa_allA = hill(imps_a_allA, *popt_a)
-        pb_allB = hill(imps_b_allB, *popt_b)
-
-        fig2, ax2 = plt.subplots(figsize=(8,5))
-        ax2.plot(st.session_state.sweep_df['예산(억 원)'], st.session_state.sweep_df['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
-        ax2.plot(np.arange(1, max_units+1), 100*pa_allA, linestyle='--', marker='s', label='Only TV', color='royalblue')
-        ax2.plot(np.arange(1, max_units+1), 100*pb_allB, linestyle='--', marker='^', label='Only Digital', color='darkorange')
-        ax2.set_xlabel("Budget Range"); ax2.set_ylabel("Reach 1+(%)")
-        ax2.grid(True, linestyle='--'); ax2.legend()
-        st.pyplot(fig2)
-
-with tab3:
-    single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
-    button3 = st.button("실행", type="primary", key="button3")
-
-    if button3:
         a, pred_i, spline_i, out = optimize_single_budget(single_budget*100_000_000, cpm_a_global, cpm_b_global)
         st.session_state.single_curve = (a, pred_i, spline_i)
         st.session_state.single_out = out
@@ -364,9 +346,35 @@ with tab3:
 
     if st.session_state.single_curve is not None:
         a, pred_i, spline_i = st.session_state.single_curve
+        fig2, ax2 = plt.subplots(figsize=(8,5))
+        ax2.scatter(100*a, 100*pred_i, alpha=0.6, s=30, label='Predicted', color='gold')
+        ax2.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
+        ax2.set_xlabel('TV ratio (%)'); ax2.set_ylabel('Reach 1+ (%)')
+        ax2.grid(True, linestyle='--', alpha=0.7)
+        st.pyplot(fig2)
+
+with tab3:
+    max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
+    button3 = st.button("실행", type="primary", key="button3")
+
+    if button3:
+        st.session_state.sweep_df = optimize_mix_over_budget(cpm_a_global, cpm_b_global, max_budget_units=max_units)
+        st.session_state.sweep_opt = df_results
+        st.session_state.sweep_only = df_only
+
+    if st.session_state.sweep_df is not None:
+        st.dataframe(st.session_state.sweep_opt, use_container_width=True)
+
+        #budgets = np.arange(1, max_units + 1) * 100_000_000
+        #imps_a_allA = budgets / (cpm_a_global / 1000.0)
+        #imps_b_allB = budgets / (cpm_b_global / 1000.0)
+        #pa_allA = hill(imps_a_allA, *popt_a)
+        #pb_allB = hill(imps_b_allB, *popt_b)
+
         fig3, ax3 = plt.subplots(figsize=(8,5))
-        ax3.scatter(100*a, 100*pred_i, alpha=0.6, s=30, label='Predicted', color='gold')
-        ax3.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
-        ax3.set_xlabel('TV ratio (%)'); ax3.set_ylabel('Reach 1+ (%)')
-        ax3.grid(True, linestyle='--', alpha=0.7)
+        ax3.plot(st.session_state.sweep_opt['예산(억 원)'], st.session_state.sweep_opt['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
+        ax3.plot(np.arange(1, max_units+1), st.session_states.sweep_only['poa'], linestyle='--', marker='s', label='Only TV', color='royalblue')
+        ax3.plot(np.arange(1, max_units+1), st.session_states.sweep_only['pob'], linestyle='--', marker='^', label='Only Digital', color='darkorange')
+        ax3.set_xlabel("Budget Range"); ax3.set_ylabel("Reach 1+(%)")
+        ax3.grid(True, linestyle='--'); ax3.legend()
         st.pyplot(fig3)
