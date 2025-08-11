@@ -193,7 +193,7 @@ ax.legend()
 st.pyplot(fig)
 
 # 공통 함수
-def analyze_custom_budgets(budget_a_eok, budget_b_eok, cpm_a, cpm_b):
+def analyze_custom_budget(budget_a_eok, budget_b_eok, cpm_a, cpm_b):
     # 단위 환산
     budget_a = budget_a_eok * 100_000_000
     budget_b = budget_b_eok * 100_000_000
@@ -255,6 +255,61 @@ def optimize_single_budget(budget_won, cpm_a, cpm_b, unit_points=100):
     }).reset_index(drop=True)
     return a, pred_i, spline_i, out
 
+def analyze_vs_opt(budget_a_eok, budget_b_eok, cpm_a, cpm_b, unit=100_000_000):
+    # 단위 환산
+    won_a = budget_a_eok * unit
+    won_b = budget_b_eok * unit
+    total_won = won_a + won_b
+    total_eok = (won_a + won_b) / unit
+    
+    imps_a_user = won_a / (cpm_a / 1000.0) if cpm_a > 0 else 0.0
+    imps_b_user = won_b / (cpm_b / 1000.0) if cpm_b > 0 else 0.0
+    pa_user = hill(np.array([imps_a_user]), *popt_a)
+    pb_user = hill(np.array([imps_b_user]), *popt_b)
+    pab_user = pa_user * pb_user
+    X_user = pd.DataFrame({'const': 0.0, 'r1_a': pa_user, 'r1_b': pb_user, 'r1_ab': pab_user})
+    pred_user = float(model_total.predict(X_user)[0])
+
+    a = np.arange(0, 101, dtype=np.float64) / 100.0
+    b = 1.0 - a
+    imps_a_opt = a * total_won / (cpm_a / 1000.0) if cpm_a > 0 else np.zeros_like(a)
+    imps_b_opt = b * total_won / (cpm_b / 1000.0) if cpm_b > 0 else np.zeros_like(a)
+    pa_opt_curve = hill(imps_a_opt, *popt_a)
+    pb_opt_curve = hill(imps_b_opt, *popt_b)
+    pab_opt_curve = pa_opt_curve * pb_opt_curve
+    X_opt = pd.DataFrame({'const': 0.0, 'r1_a': pa_opt_curve, 'r1_b': pb_opt_curve, 'r1_ab': pab_opt_curve})
+    pred_curve = model_total.predict(X_opt).values
+    idx = int(np.argmax(pred_curve))
+
+    a_opt, b_opt = float(a[idx]), float(b[idx])
+    pa_opt, pb_opt = float(pa_opt_curve[idx]), float(pb_opt_curve[idx])
+    pred_opt = float(pred_curve[idx])
+
+    summary = pd.DataFrame([
+        {
+            '구분': '사용자안',
+            'TV 예산(억)': round(won_a / unit, 2),
+            'Digital 예산(억)': round(won_b / unit, 2),
+            'TV 비중(%)': int(round(100 * won_a / total_won)) if total_won > 0 else 0,
+            'Digital 비중(%)': int(round(100 * won_b / total_won)) if total_won > 0 else 0,
+            'TV Reach1+(%)': round(100 * pa_user[0], 2),
+            'Digital Reach1+(%)': round(100 * pb_user[0], 2),
+            'Total Reach1+(%)': round(100 * pred_user, 2),
+        },
+        {
+            '구분': '최적화안',
+            'TV 예산(억)': round(total_eok * a_opt, 2),
+            'Digital 예산(억)': round(total_eok * b_opt, 2),
+            'TV 비중(%)': int(round(100 * a_opt)),
+            'Digital 비중(%)': int(round(100 * b_opt)),
+            'TV Reach1+(%)': round(100 * pa_opt, 2),
+            'Digital Reach1+(%)': round(100 * pb_opt, 2),
+            'Total Reach1+(%)': round(100 * pred_opt, 2),
+        }
+    ])
+
+    return summary, pred_user, pred_opt
+    
 def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000):
     a = np.arange(0, 101, dtype=np.float64) / 100.0
     b = 1.0 - a
@@ -320,26 +375,32 @@ with tab1:
     button1 = st.button("실행", type="primary", key="button1")
 
     if button1:
-        st.session_state.custom_df, st.session_state.custom_parts = analyze_custom_budgets(
-        budget_a_eok, budget_b_eok, cpm_a_global, cpm_b_global
+        summary_df, pred_user, pred_opt = analyze_vs_opt(
+            budget_a_eok, budget_b_eok, cpm_a_global, cpm_b_global
         )
+        st.session_state.user_vs_opt = (summary_df, pred_user, pred_opt)
 
-    if st.session_state.custom_parts is not None:
-        pa_val = float(st.session_state.custom_parts['pa'][0])
-        pb_val = float(st.session_state.custom_parts['pb'][0])
-        total_val = float(st.session_state.custom_parts['pred_total'][0])
-        fig1, ax1 = plt.subplots(figsize=(6,4))
-        bars = ax1.bar(['TV','Digital','Total'],
-               [100*pa_val, 100*pb_val, 100*total_val],
-               color=['royalblue', 'darkorange', 'mediumseagreen'])
-        for bar in bars:
-            height = bar.get_height()
-            ax1.text(bar.get_x() + bar.get_width()/2, height + 1,
-                     f"{height:.2f}%", ha='center', va='bottom', fontsize=10, fontweight='bold')
-        
-        ax1.set_ylim(0, 100); ax1.set_ylabel("Reach 1+(%)")
-        ax1.grid(True, axis='y', linestyle='--', alpha=0.5)
-        st.pyplot(fig1)
+    if st.session_state.user_vs_opt is not None:
+        summary_df, pred_user, pred_opt = st.session_state.user_vs_opt
+
+        # 막대 1개 차트: 사용자안 vs 최적화안 Total Reach 1+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        bars = ax.bar(
+            ['사용자안', '최적화안'],
+            [100 * pred_user, 100 * pred_opt],
+            color=['#6AADE4', '#43AA8B']  # 보기 좋은 파레트
+        )
+        for b in bars:
+            h = b.get_height()
+            ax.text(b.get_x() + b.get_width()/2, h + 1, f"{h:.2f}%", ha='center', va='bottom', fontsize=10, fontweight='bold')
+
+        ax.set_ylim(0, 100)
+        ax.set_ylabel("Total Reach 1+ (%)")
+        ax.grid(True, axis='y', linestyle='--', alpha=0.5)
+        st.pyplot(fig)
+
+        # 요약 테이블(1개)
+        st.dataframe(summary_df, use_container_width=True)
 
 with tab2:
     single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
