@@ -292,7 +292,7 @@ for key in ["custom_parts", "sweep_df", "single_curve", "single_out"]:
         st.session_state[key] = None
 
 with tab1:
-    c_budget_a, c_budget_b, c= st.columns([1, 1, 0.5)
+    c_budget_a, c_budget_b, c= st.columns([1, 1, 0.5])
     with c_budget_a:
         budget_a_eok = st.number_input("TV", value=3.5, step=0.1)
     with c_budget_b:
