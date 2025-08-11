@@ -162,34 +162,31 @@ coef_df_r1.index = ['Coefficient']
 pred_r1 = model_total.predict(X)
 
 # 출력/요약
-st.subheader("모델 요약")
-c1, c2, c3 = st.columns(3)
-with c1:
-    st.markdown("**미디어별 Reach 1+**")
-    st.dataframe(media_r1_result)
-with c2:
-    st.markdown("**통합 Reaach 1+**")
-    st.dataframe(coef_df_r1)
-with c3:
-    st.markdown("**모델 적합도**")
-    st.write(f"MSE: {mean_squared_error(r1, pred_r1) * 100:.3f}")
-    st.write(f"MAE: {mean_absolute_error(r1, pred_r1) * 100:.3f}")
-    st.write(f"R-squared: {r2_score(r1, pred_r1):.4f}")
+##st.subheader("모델 요약")
+##c1, c2, c3 = st.columns(3)
+##with c1:
+##    st.markdown("**미디어별 Reach 1+**")
+##    st.dataframe(media_r1_result)
+##with c2:
+##    st.markdown("**통합 Reaach 1+**")
+##    st.dataframe(coef_df_r1)
+##with c3:
+##    st.markdown("**모델 적합도**")
+##    st.write(f"MSE: {mean_squared_error(r1, pred_r1) * 100:.3f}")
+##    st.write(f"MAE: {mean_absolute_error(r1, pred_r1) * 100:.3f}")
+##    st.write(f"R-squared: {r2_score(r1, pred_r1):.4f}")
 
 # 시각화
-st.subheader("Reach 1+ 곡선")
-fig, axes = plt.subplots(1, 3, sharex=True, sharey=True, figsize=(16, 4))
-axes[0].scatter(imps, 100*pred_a_r1, alpha=0.6, s=1, label='Predicted')
-axes[0].set_title("TV")
-axes[0].set_xlabel("TV Impressions"); axes[0].set_ylabel("Reach 1+ (%)"); axes[0].grid(True, linestyle="--")
+st.subheader("미디어별 Reach 1+")
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.scatter(imps, 100*pred_a_r1, alpha=0.6, s=10, label='TV', color='royalblue')
+ax.scatter(imps, 100*pred_b_r1, alpha=0.6, s=10, label='Digital', color='darkorange')
+ax.scatter(imps, 100*pred_t_r1, alpha=0.6, s=10, label='Total', color='mediumseagreen')
 
-axes[1].scatter(imps, 100*pred_b_r1, alpha=0.6, s=1, label='Predicted')
-axes[1].set_title("Digital")
-axes[1].set_xlabel("Digital Impressions"); axes[1].grid(True, linestyle="--")
-
-axes[2].scatter(imps, 100*pred_t_r1, alpha=0.6, s=1, label='Predicted')
-axes[2].set_title("Total")
-axes[2].set_xlabel("Total Impressions"); axes[2].grid(True, linestyle="--")
+ax.set_xlabel("Impressions")
+ax.set_ylabel("Reach 1+ (%)")
+ax.grid(True, linestyle="--")
+ax.legend()
 st.pyplot(fig)
 
 # 공통 함수
@@ -287,14 +284,19 @@ for key in ["custom_df", "custom_parts", "sweep_df", "single_curve", "single_out
         st.session_state[key] = None
 
 with tab1:
-    c1, c2, c3 = st.columns([1,1,2])
-    with c1:
-        budget_a_eok = st.number_input("TV 예산(억 원)", value=3.5, step=0.1)
-    with c2:
-        budget_b_eok = st.number_input("Digital 예산(억 원)", value=3.5, step=0.1)
-    with c3:
-        cpm_a = st.number_input("CPM A (TV, 원)", value=10000, step=100)
-        cpm_b = st.number_input("CPM B (Digital, 원)", value=7000, step=100)
+    
+    c_budget_a, c_budget_b = st.columns(2)
+    with c_budget_a:
+        budget_a_eok = st.number_input("TV", value=3.5, step=0.1)
+    with c_budget_b:
+        budget_b_eok = st.number_input("Digital", value=3.5, step=0.1)
+
+    # CPM 입력 묶음
+    c_cpm_a, c_cpm_b = st.columns(2)
+    with c_cpm_a:
+        cpm_a = st.number_input("CPM TV", value=9000, step=100)
+    with c_cpm_b:
+        cpm_b = st.number_input("CPM Digital", value=7000, step=100)
 
     if st.button("미디어별 예산 분석 실행", type="primary"):
         st.session_state.custom_df, st.session_state.custom_parts = analyze_custom_budgets(
