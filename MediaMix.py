@@ -386,14 +386,14 @@ with tab1:
         labels = ['TV', 'Digital', 'Total']
 
         user_vals = [
-            summary_df.loc['TV Reach1+(%)', '사용자안'],
-            summary_df.loc['Digital Reach1+(%)', '사용자안'],
-            summary_df.loc['Total Reach1+(%)', '사용자안'],
+            summary_wide.loc['TV Reach1+(%)', '사용자안'],
+            summary_wide.loc['Digital Reach1+(%)', '사용자안'],
+            summary_wide.loc['Total Reach1+(%)', '사용자안'],
         ]
         opt_vals = [
-            summary_df.loc['TV Reach1+(%)', '최적화안'],
-            summary_df.loc['Digital Reach1+(%)', '최적화안'],
-            summary_df.loc['Total Reach1+(%)', '최적화안'],
+            summary_wide.loc['TV Reach1+(%)', '최적화안'],
+            summary_wide.loc['Digital Reach1+(%)', '최적화안'],
+            summary_wide.loc['Total Reach1+(%)', '최적화안'],
         ]
 
         x = np.arange(len(labels))
