@@ -165,21 +165,6 @@ coef_df_r1 = pd.DataFrame(model_total.params).T
 coef_df_r1.index = ['Coefficient']
 pred_r1 = model_total.predict(X)
 
-# 출력/요약
-##st.subheader("모델 요약")
-##c1, c2, c3 = st.columns(3)
-##with c1:
-##    st.markdown("**미디어별 Reach 1+**")
-##    st.dataframe(media_r1_result)
-##with c2:
-##    st.markdown("**통합 Reaach 1+**")
-##    st.dataframe(coef_df_r1)
-##with c3:
-##    st.markdown("**모델 적합도**")
-##    st.write(f"MSE: {mean_squared_error(r1, pred_r1) * 100:.3f}")
-##    st.write(f"MAE: {mean_absolute_error(r1, pred_r1) * 100:.3f}")
-##    st.write(f"R-squared: {r2_score(r1, pred_r1):.4f}")
-
 # 시각화
 st.subheader("미디어별 Reach 1+")
 fig, ax = plt.subplots(figsize=(10, 6))
@@ -292,9 +277,9 @@ def analyze_vs_opt(budget_a_eok, budget_b_eok, cpm_a, cpm_b, unit=100_000_000):
             'Digital 예산(억)': round(won_b / unit, 2),
             'TV 비중': f"{int(round(100 * won_a / total_won))}%" if total_won > 0 else 0,
             'Digital 비중': f"{int(round(100 * won_b / total_won))}%" if total_won > 0 else 0,
-            'TV Reach 1+(%)': round(100 * pa_user[0], 2),
-            'Digital Reach 1+(%)': round(100 * pb_user[0], 2),
-            'Total Reach 1+(%)': round(100 * pred_user, 2),
+            'TV Reach1+(%)': round(100 * pa_user[0], 2),
+            'Digital Reach1+(%)': round(100 * pb_user[0], 2),
+            'Total Reach1+(%)': round(100 * pred_user, 2),
         },
         {
             '구분': '최적화안',
@@ -302,9 +287,9 @@ def analyze_vs_opt(budget_a_eok, budget_b_eok, cpm_a, cpm_b, unit=100_000_000):
             'Digital 예산(억)': round(total_eok * b_opt, 2),
             'TV 비중': f"{int(round(100 * a_opt))}%",
             'Digital 비중': f"{int(round(100 * b_opt))}%",
-            'TV Reach 1+(%)': round(100 * pa_opt, 2),
-            'Digital Reach 1+(%)': round(100 * pb_opt, 2),
-            'Total Reach 1+(%)': round(100 * pred_opt, 2),
+            'TV Reach1+(%)': round(100 * pa_opt, 2),
+            'Digital Reach1+(%)': round(100 * pb_opt, 2),
+            'Total Reach1+(%)': round(100 * pred_opt, 2),
         }
     ])
 
@@ -389,14 +374,14 @@ with tab1:
         labels = ['TV', 'Digital', 'Total']
 
         user_vals = [
-            summary_wide.loc['TV Reach 1+(%)', '사용자안'],
-            summary_wide.loc['Digital Reach 1+(%)', '사용자안'],
-            summary_wide.loc['Total Reach 1+(%)', '사용자안'],
+            summary_wide.loc['TV Reach1+(%)', '사용자안'],
+            summary_wide.loc['Digital Reach1+(%)', '사용자안'],
+            summary_wide.loc['Total Reach1+(%)', '사용자안'],
         ]
         opt_vals = [
-            summary_wide.loc['TV Reach 1+(%)', '최적화안'],
-            summary_wide.loc['Digital Reach 1+(%)', '최적화안'],
-            summary_wide.loc['Total Reach 1+(%)', '최적화안'],
+            summary_wide.loc['TV Reach1+(%)', '최적화안'],
+            summary_wide.loc['Digital Reach1+(%)', '최적화안'],
+            summary_wide.loc['Total Reach1+(%)', '최적화안'],
         ]
 
         x = np.arange(len(labels))
