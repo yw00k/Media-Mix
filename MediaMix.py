@@ -1,5 +1,6 @@
 # streamlit_app.py
 import streamlit as st
+import time
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from scipy.optimize import curve_fit
 import statsmodels.api as sm
@@ -61,8 +62,11 @@ df_raw = load_from_dropbox(
 # 로드 실패 시 중단
 if df_raw is None:
     st.stop()
-
-st.success("✅ 데이터 불러오기 성공")
+    
+msg_placeholder = st.empty()
+msg_placeholder.success("✅ 데이터 불러오기 성공")
+time.sleep(2)
+msg_placeholder.empty()
 
 # 0 제거
 df = df_raw[df_raw['r1'] != 0].copy()
