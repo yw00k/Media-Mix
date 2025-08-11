@@ -347,7 +347,7 @@ with tab3:
     if st.session_state.single_curve is not None:
         a, pred_i, spline_i = st.session_state.single_curve
         fig3, ax3 = plt.subplots(figsize=(8,5))
-        ax3.scatter(100*a, 100*pred_i, alpha=0.6, s=30, color=gold, label='Predicted')
+        ax3.scatter(100*a, 100*pred_i, alpha=0.6, s=30, label='Predicted', color='gold')
         ax3.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
         ax3.set_xlabel('TV ratio (%)'); ax3.set_ylabel('Reach 1+ (%)')
         ax3.grid(True, linestyle='--', alpha=0.7); ax3.legend()
