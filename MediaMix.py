@@ -294,10 +294,10 @@ with col_cpm1:
 with col_cpm2:
     cpm_b_global = st.number_input("CPM Digital", value=7000, step=100, key="cpm_dg_global")
     
-tab1, tab2, tab3 = st.tabs(["미디어별 예산 분석", "예산 범위 최적화", "특정 예산 최적화"])
+tab1, tab2, tab3 = st.tabs(["입력 예산 분석", "입력 예산 최적화", "예산 범위 최적화"])
 
 # 세션 상태 (탭 이동해도 유지)
-for key in ["custom_parts", "sweep_df", "single_curve", "single_out"]:
+for key in ["custom_parts", "single_curve", "single_out", "sweep_df"]:
     if key not in st.session_state:
         st.session_state[key] = None
 
@@ -364,12 +364,6 @@ with tab3:
 
     if st.session_state.sweep_df is not None:
         st.dataframe(st.session_state.sweep_opt, use_container_width=True)
-
-        #budgets = np.arange(1, max_units + 1) * 100_000_000
-        #imps_a_allA = budgets / (cpm_a_global / 1000.0)
-        #imps_b_allB = budgets / (cpm_b_global / 1000.0)
-        #pa_allA = hill(imps_a_allA, *popt_a)
-        #pb_allB = hill(imps_b_allB, *popt_b)
 
         fig3, ax3 = plt.subplots(figsize=(8,5))
         ax3.plot(st.session_state.sweep_opt['예산(억 원)'], st.session_state.sweep_opt['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
