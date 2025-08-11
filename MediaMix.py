@@ -284,14 +284,12 @@ for key in ["custom_df", "custom_parts", "sweep_df", "single_curve", "single_out
         st.session_state[key] = None
 
 with tab1:
-    
     c_budget_a, c_budget_b = st.columns(2)
     with c_budget_a:
         budget_a_eok = st.number_input("TV", value=3.5, step=0.1)
     with c_budget_b:
         budget_b_eok = st.number_input("Digital", value=3.5, step=0.1)
 
-    # CPM 입력 묶음
     c_cpm_a, c_cpm_b = st.columns(2)
     with c_cpm_a:
         cpm_a = st.number_input("CPM TV", value=9000, step=100)
@@ -315,13 +313,12 @@ with tab1:
         st.pyplot(fig1)
 
 with tab2:
-    c1, c2, c3 = st.columns([1,1,2])
+    max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
+    c1, c2 = st.columns([1,1])
     with c1:
-        max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
+        cpm_a = st.number_input("CPM TV", value=9000, step=100, key="cpm_a_sweep")
     with c2:
-        cpm_a = st.number_input("CPM A (TV, 원)", value=10000, step=100, key="cpm_a_sweep")
-    with c3:
-        cpm_b = st.number_input("CPM B (Digital, 원)", value=7000, step=100, key="cpm_b_sweep")
+        cpm_b = st.number_input("CPM Digital", value=7000, step=100, key="cpm_b_sweep")
 
     if st.button("예산 범위 최적화 실행", type="primary"):
         st.session_state.sweep_df = optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=max_units)
@@ -344,13 +341,12 @@ with tab2:
         st.pyplot(fig2)
 
 with tab3:
-    c1, c2, c3 = st.columns([1,1,2])
+    single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
+    c1, c2 = st.columns([1,1])
     with c1:
-        single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
+        cpm_a = st.number_input("CPM TV", value=10000, step=100, key="cpm_a_single")
     with c2:
-        cpm_a = st.number_input("CPM A (TV, 원)", value=10000, step=100, key="cpm_a_single")
-    with c3:
-        cpm_b = st.number_input("CPM B (Digital, 원)", value=7000, step=100, key="cpm_b_single")
+        cpm_b = st.number_input("CPM Digital", value=7000, step=100, key="cpm_b_single")
 
     if st.button("특정 예산 최적화 실행", type="primary"):
         a, pred_i, spline_i, out = optimize_single_budget(single_budget*100_000_000, cpm_a, cpm_b)
