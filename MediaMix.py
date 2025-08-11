@@ -290,21 +290,21 @@ def analyze_vs_opt(budget_a_eok, budget_b_eok, cpm_a, cpm_b, unit=100_000_000):
             '구분': '사용자안',
             'TV 예산(억)': round(won_a / unit, 2),
             'Digital 예산(억)': round(won_b / unit, 2),
-            'TV 비중(%)': int(round(100 * won_a / total_won)) if total_won > 0 else 0,
-            'Digital 비중(%)': int(round(100 * won_b / total_won)) if total_won > 0 else 0,
-            'TV Reach1+(%)': round(100 * pa_user[0], 2),
-            'Digital Reach1+(%)': round(100 * pb_user[0], 2),
-            'Total Reach1+(%)': round(100 * pred_user, 2),
+            'TV 비중': f"{int(round(100 * won_a / total_won))}%" if total_won > 0 else 0,
+            'Digital 비중': f"{int(round(100 * won_b / total_won))}%" if total_won > 0 else 0,
+            'TV Reach 1+(%)': round(100 * pa_user[0], 2),
+            'Digital Reach 1+(%)': round(100 * pb_user[0], 2),
+            'Total Reach1 +(%)': round(100 * pred_user, 2),
         },
         {
             '구분': '최적화안',
             'TV 예산(억)': round(total_eok * a_opt, 2),
             'Digital 예산(억)': round(total_eok * b_opt, 2),
-            'TV 비중(%)': int(round(100 * a_opt)),
-            'Digital 비중(%)': int(round(100 * b_opt)),
-            'TV Reach1+(%)': round(100 * pa_opt, 2),
-            'Digital Reach1+(%)': round(100 * pb_opt, 2),
-            'Total Reach1+(%)': round(100 * pred_opt, 2),
+            'TV 비중': f"{int(round(100 * a_opt))}%",
+            'Digital 비중': f"{int(round(100 * b_opt))}%",
+            'TV Reach 1+(%)': round(100 * pa_opt, 2),
+            'Digital Reach 1+(%)': round(100 * pb_opt, 2),
+            'Total Reach1 +(%)': round(100 * pred_opt, 2),
         }
     ])
 
@@ -350,7 +350,7 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
     return df_opt, df_only
 
 # UI: 탭
-st.subheader("💰 예산 분석/최적화")
+st.subheader("💰 예산 최적화")
 
 col_cpm1, col_cpm2 = st.columns(2)
 with col_cpm1:
@@ -358,7 +358,7 @@ with col_cpm1:
 with col_cpm2:
     cpm_b_global = st.number_input("CPM Digital", value=7000, step=100, key="cpm_dg_global")
     
-tab1, tab2, tab3 = st.tabs(["입력 예산 분석", "입력 예산 최적화", "예산 범위 최적화"])
+tab1, tab2, tab3 = st.tabs(["개별 예산 최적화", "총 예산 최적화", "예산 범위 최적화"])
 
 # 세션 상태 (탭 이동해도 유지)
 for key in ["custom_parts", "single_curve", "single_out", "sweep_df"]:
@@ -368,9 +368,9 @@ for key in ["custom_parts", "single_curve", "single_out", "sweep_df"]:
 with tab1:
     c_budget_a, c_budget_b = st.columns([1, 1])
     with c_budget_a:
-        budget_a_eok = st.number_input("TV", value=3.5, step=0.1)
+        budget_a_eok = st.number_input("TV 예산(억 원)", value=3.5, step=0.1)
     with c_budget_b:
-        budget_b_eok = st.number_input("Digital", value=3.5, step=0.1)
+        budget_b_eok = st.number_input("Digital 예산(억 원)", value=3.5, step=0.1)
     
     button1 = st.button("실행", type="primary", key="button1")
 
@@ -389,14 +389,14 @@ with tab1:
         labels = ['TV', 'Digital', 'Total']
 
         user_vals = [
-            summary_wide.loc['TV Reach1+(%)', '사용자안'],
-            summary_wide.loc['Digital Reach1+(%)', '사용자안'],
-            summary_wide.loc['Total Reach1+(%)', '사용자안'],
+            summary_wide.loc['TV Reach 1+(%)', '사용자안'],
+            summary_wide.loc['Digital Reach 1+(%)', '사용자안'],
+            summary_wide.loc['Total Reach 1+(%)', '사용자안'],
         ]
         opt_vals = [
-            summary_wide.loc['TV Reach1+(%)', '최적화안'],
-            summary_wide.loc['Digital Reach1+(%)', '최적화안'],
-            summary_wide.loc['Total Reach1+(%)', '최적화안'],
+            summary_wide.loc['TV Reach 1+(%)', '최적화안'],
+            summary_wide.loc['Digital Reach 1+(%)', '최적화안'],
+            summary_wide.loc['Total Reach 1+(%)', '최적화안'],
         ]
 
         x = np.arange(len(labels))
@@ -421,7 +421,7 @@ with tab1:
         st.dataframe(summary_wide, use_container_width=True)
 
 with tab2:
-    single_budget = st.number_input("특정 예산(억 원)", value=7.0, step=0.1)
+    single_budget = st.number_input("총 예산(억 원)", value=7.0, step=0.1)
     button2 = st.button("실행", type="primary", key="button2")
 
     if button2:
