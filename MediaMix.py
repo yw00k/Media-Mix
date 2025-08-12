@@ -280,13 +280,6 @@ def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     X_user = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
     total_r1 = model_total.predict(X_user)
 
-    if a_won <= 0 and b_won > 0:
-        total_r1 = b_r1
-    elif b_won <= 0 and a_won > 0:
-        total_r1 = a_r1
-    else:
-        total_r1 = total_r1_model
-        
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)', 'Digital(억 원)', '총(억 원)', 'TV Reach 1+(%)', 'Digital Reach 1+(%)', 'Total Reach 1+(%)'],
         '값': [
@@ -320,21 +313,13 @@ def optimize_total_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     total_r1_curve = model_total.predict(X_opt).values
 
     idx = int(np.argmax(total_r1_curve))
-    a_s = float(a_share[idx]); b_s = float(b_share[idx])
-
-    if a_s >= 1.0:           # TV 100%, Digital 0%
-        total_best = float(a_r1_curve[idx])
-    elif b_s >= 1.0:         # Digital 100%, TV 0%
-        total_best = float(b_r1_curve[idx])
-    else:
-        total_best = float(total_r1_curve[idx])
 
     return {
-        'a_share': a_s,
-        'b_share': b_s,
+        'a_share': float(a_share[idx]),
+        'b_share': float(b_share[idx]),
         'a_r1': float(a_r1_curve[idx]),
         'b_r1': float(b_r1_curve[idx]),
-        'total_r1': total_best,
+        'total_r1': float(total_r1_curve[idx]),
     }
 
 def compare_user_vs_opt(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
@@ -384,7 +369,7 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
     b_imps_only = imps_from_digital_budget_by_cpm(budget_won, cpm_b)
     only_a = hill(a_imps_only, *popt_a)
     only_b = hill(b_imps_only, *popt_b)
-    df_only_full = pd.DataFrame({
+    df_only = pd.DataFrame({
         '예산(억 원)': budget_eok,
         'Only TV': np.round(100 * only_a, 2),
         'Only Digital': np.round(100 * only_b, 2),
@@ -406,27 +391,17 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
         total_r1_curve = model_total.predict(X_mix).values
 
         idx = int(np.argmax(total_r1_curve))
-        a_s = float(a_share[idx]); b_s = float(b_share[idx])
-        total_best = float(total_r1_curve[idx])
-
-        if a_s >= 1.0:
-            total_best = float(a_r1[idx])
-        elif b_s >= 1.0:
-            total_best = float(b_r1[idx])
-
         results.append({
             '예산(억 원)': eok,
-            'TV 비중': f"{int(a_s*100)}%",
-            'Digital 비중': f"{int(b_s*100)}%",
-            'Total Reach 1+(%)': round(100.0 * total_best, 2),
+            'TV 비중': f"{int(a_share[idx]*100)}%",
+            'Digital 비중': f"{int(b_share[idx]*100)}%",
+            'Total Reach 1+(%)': round(100.0 * float(total_r1_curve[idx]), 2),
         })
 
-    df_opt_full = pd.DataFrame(results).reset_index(drop=True)
-
-    df_only_table = df_only_full[df_only_full['예산(억 원)'] > 0].reset_index(drop=True)
-    df_opt_table  = df_opt_full[df_opt_full['예산(억 원)'] > 0].reset_index(drop=True)
-
-    return df_opt_full, df_only_full, df_opt_table, df_only_table
+    df_opt = pd.DataFrame(results).reset_index(drop=True)
+    df_only = df_only[df_only['예산(억 원)'] >= 1].reset_index(drop=True)
+    df_opt  = df_opt[df_opt['예산(억 원)'] >= 1].reset_index(drop=True)
+    return df_opt, df_only
 
 # ---------------------------
 # UI: Tabs
@@ -508,19 +483,10 @@ with tab2:
 
         st.session_state.single_curve = (a, pred, spline_i)
         best_idx = int(np.argmax(pred))
-        a_share = float(a[best_idx])
-        b_share = 1.0 - a_share
-        best_pred = float(pred[best_idx])
-
-        if a_share >= 1.0:
-            best_pred = float(a_r1[best_idx])
-        elif b_share >= 1.0:
-            best_pred = float(b_r1[best_idx])
-
         out = pd.DataFrame({
-            'TV 비중': [f"{int(a_share*100)}%"],
-            'Digital 비중': [f"{int(b_share*100)}%"],
-            'Total Reach 1+(%)': [round(100.0 * best_pred, 2)]
+            'TV 비중': [f"{int(a[best_idx]*100)}%"],
+            'Digital 비중': [f"{int(b[best_idx]*100)}%"],
+            'Total Reach 1+(%)': [round(100.0 * float(pred[best_idx]), 2)]
         })
         st.session_state.single_out = out
 
@@ -539,20 +505,19 @@ with tab2:
 with tab3:
     max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
     if st.button("실행", type="primary", key="sweep_run"):
-        df_opt_full, df_only_full, df_opt_table, df_only_table = optimize_mix_over_budget(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
-        st.session_state.sweep_opt_graph = df_opt_full
-        st.session_state.sweep_only_graph = df_only_full
+        df_opt, df_only = optimize_mix_over_budget(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
+        st.session_state.sweep_opt = df_opt
+        st.session_state.sweep_only = df_only
 
-        st.session_state.sweep_opt_table = df_opt_table
-        st.session_state.sweep_only_table = df_only_table
-
-    if (st.session_state.sweep_opt_graph is not None) and (st.session_state.sweep_only_graph is not None):
+    if (st.session_state.sweep_opt is not None) and (st.session_state.sweep_only is not None):
+        df_opt  = st.session_state.sweep_opt
+        df_only = st.session_state.sweep_only
         fig3, ax3 = plt.subplots(figsize=(8,5))
-        ax3.plot(st.session_state.sweep_opt_graph['예산(억 원)'], st.session_state.sweep_opt_graph['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
-        ax3.plot(st.session_state.sweep_only_graph['예산(억 원)'], st.session_state.sweep_only_graph['Only TV'], linestyle='--', marker='s', label='Only TV', color='royalblue')
-        ax3.plot(st.session_state.sweep_only_graph['예산(억 원)'], st.session_state.sweep_only_graph['Only Digital'], linestyle='--', marker='^', label='Only Digital', color='darkorange')
+        ax3.plot(df_opt['예산(억 원)'], df_opt['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
+        ax3.plot(df_only['예산(억 원)'], df_only['Only TV'], linestyle='--', marker='s', label='Only TV', color='royalblue')
+        ax3.plot(df_only['예산(억 원)'], df_only['Only Digital'], linestyle='--', marker='^', label='Only Digital', color='darkorange')
         ax3.set_xlabel("Budget Range"); ax3.set_ylabel("Reach 1+(%)")
         ax3.grid(True, linestyle='--'); ax3.legend()
         st.pyplot(fig3)
 
-        st.dataframe(st.session_state.sweep_opt_table, use_container_width=True)
+        st.dataframe(df_opt, use_container_width=True)
