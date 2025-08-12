@@ -579,7 +579,6 @@ with tab2:
             y=100*np.round(pred, 4),
             mode='lines+markers',
             name='Predicted',
-            #hoverinfo='skip',
             marker=dict(size=4, color='#003594')
         ))
 
@@ -588,6 +587,8 @@ with tab2:
             yaxis=dict(title='Reach 1+(%)'),
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
+            hovermode='x',
+            template="plotly_white",
             width=700,
             height=400,
             dragmode=False,
