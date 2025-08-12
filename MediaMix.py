@@ -188,11 +188,11 @@ def hill(x, a, b, c):
 
 initial_params = [1.0, 50_000_000.0, 0.6]
 bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
-bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.7])
+bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.6])
 
-popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=30000)
-popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=30000)
-popt_t, _ = curve_fit(hill, x_total, y_total, p0=initial_params, bounds=bounds_a, maxfev=30000)
+popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=20000)
+popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=20000)
+popt_t, _ = curve_fit(hill, x_total, y_total, p0=initial_params, bounds=bounds_a, maxfev=20000)
 
 pred_a_fit = hill(x_a, *popt_a)
 pred_b_fit = hill(x_b, *popt_b)
@@ -295,7 +295,7 @@ def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
     return imps
 
 # ---------------------------
-# 분석 함수들: TV는 CPRP+universe, Digital은 CPM
+# 분석 함수: TV는 CPRP, Digital은 CPM
 # ---------------------------
 UNIT = 100_000_000  # 억→원
 
