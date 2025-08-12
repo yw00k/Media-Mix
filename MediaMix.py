@@ -310,7 +310,7 @@ def plateau_after_exceed(arr, threshold=1.0):
     return a
 
 def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
-    a_won = a_eok * unit / 100
+    a_won = a_eok * unit
     b_won = b_eok * unit
 
     a_imps = imps_from_tv_budget_by_cprp(a_won, cprp_a, universe_val)
@@ -342,7 +342,7 @@ def optimize_total_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     a_share = np.arange(0, 101, dtype=np.float64) / 100.0
     b_share = 1.0 - a_share
 
-    a_budget = a_share * total_won / 100
+    a_budget = a_share * total_won
     b_budget = b_share * total_won
 
     a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
