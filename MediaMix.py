@@ -263,7 +263,7 @@ def optimize_total_budget(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
         'total_r1': float(total_r1_curve[idx])
     }
 
-    eps = 1e-6
+    eps = 0
     if out['a_share'] <= eps:
         out['total_r1'] = out['b_r1']
     elif out['b_share'] <= eps:
@@ -351,6 +351,7 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
         total_r1 = float(total_r1_curve[idx])
 
         # 극단 비중 보정: 한 측이 100%면 해당 단일 미디어 값을 Total로 사용
+        eps = 0
         if a_share <= eps:         # TV=0%, Digital=100%
             total_r1 = float(b_r1[idx])
         elif b_share <= eps:       # Digital=0%, TV=100%
@@ -462,7 +463,7 @@ with tab2:
         b_share = 1.0 - a_share
         best_pred = float(pred[best_idx])
         
-        eps = 1e-6
+        eps = 0
         if a_share <= eps:
             best_pred = float(b_r1[best_idx])
         elif b_share <= eps:
