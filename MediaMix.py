@@ -424,7 +424,7 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
     df_opt = pd.DataFrame(results).reset_index(drop=True)
     df_only = df_only[df_only['예산(억 원)'] > 0].reset_index(drop=True)
     df_opt  = df_opt[df_opt['예산(억 원)'] > 0].reset_index(drop=True)
-    return df_graph, df_opt, df_only
+    return df_opt, df_only
 
 # ---------------------------
 # UI: Tabs
