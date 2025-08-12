@@ -162,6 +162,20 @@ media_r1_result = pd.DataFrame({
 }, index=['TV','Digital'])
 
 # 통합 모델
+
+EPS = 1e-9
+
+def _clip01(arr, eps: float = EPS):
+    return np.clip(arr, eps, 1.0 - eps)
+
+def logit(p):
+    p = _clip01(np.asarray(p, dtype=float))
+    return np.log(p / (1.0 - p))
+
+def inv_logit(z):
+    z = np.asarray(z, dtype=float)
+    return 1.0 / (1.0 + np.exp(-z))
+
 y_logit = logit(_clip01(y_total))
 X_train_logit = pd.DataFrame({
     'const': 1.0,
@@ -185,20 +199,6 @@ pred_in = inv_logit(pred_in_logit)
 ##st.pyplot(fig)
 
 # 공통 계산 함수들
-
-EPS = 1e-9
-
-def _clip01(arr, eps: float = EPS):
-    return np.clip(arr, eps, 1.0 - eps)
-
-def logit(p):
-    p = _clip01(np.asarray(p, dtype=float))
-    return np.log(p / (1.0 - p))
-
-def inv_logit(z):
-    z = np.asarray(z, dtype=float)
-    return 1.0 / (1.0 + np.exp(-z))
-
 def analyze_custom_budget(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
     # 억→원
     a_won = a_eok * unit
