@@ -206,7 +206,7 @@ media_r1_result = pd.DataFrame({
     'MAE(%)':     [mean_absolute_error(y_a, pred_a_fit)*100, mean_absolute_error(y_b, pred_b_fit)*100]
 }, index=['TV','Digital'])
 
-# 통합 모델
+# Total Reach 1+ Model
 X_train = pd.DataFrame({
     'const': 0.0,
     'r1_a': df_t['r1_a'].values,
@@ -221,22 +221,19 @@ model_total = sm.OLS(y_total, X_train).fit()
 def money_input(label, key, default=0.0, help=None, decimals=0, min_value=0.0):
 
     fmt = f"{{:,.{decimals}f}}"
-    # 초기 값 세팅 (첫 렌더링 시)
+    # 초기 값 세팅
     if key not in st.session_state:
         st.session_state[key] = fmt.format(default)
 
     # 입력창
     s = st.text_input(label, value=st.session_state[key], key=f"{key}_text", help=help)
 
-    # 파싱: 콤마 제거 → float
     try:
         v = float(s.replace(",", ""))
         if v < min_value:
             raise ValueError
-        # 표기 통일(콤마 포함)로 다시 세션에 저장
         st.session_state[key] = fmt.format(v)
     except ValueError:
-        # 파싱 실패 시 기존값 유지 + 경고
         st.warning("숫자만 입력하세요. 예: 1,000,000")
         v = float(st.session_state[key].replace(",", ""))
 
@@ -248,7 +245,7 @@ with col_cprp:
         "TV CPRP(원)",
         key="cprp_input",
         default=cprp_default_for_target,
-        help="천 단위 콤마로 입력/표시됩니다.",
+        help="천 단위 콤마(,)로 입력/표시됩니다.",
         decimals=0,
         min_value=0.0
     )
@@ -257,13 +254,13 @@ with col_cpm:
         "Digital CPM(원)",
         key="cpm_input",
         default=7_000.0,
-        help="천 단위 콤마로 입력/표시됩니다.",
+        help="천 단위 콤마(,)로 입력/표시됩니다.",
         decimals=0,
         min_value=0.0
     )
 
 # ---------------------------
-# 공통: 예산→임프레션 변환 함수 (TV=CPRP, Digital=CPM)
+# Cost to Impression (TV=CPRP, Digital=CPM)
 # ---------------------------
 def imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val):
 
@@ -295,15 +292,15 @@ def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
     return imps
 
 # ---------------------------
-# 분석 함수: TV는 CPRP, Digital은 CPM
+# Functions
 # ---------------------------
-UNIT = 100_000_000  # 억→원
+UNIT = 100_000_000
 
 def plateau_after_exceed(arr, threshold=1.0):
     a = np.asarray(arr, dtype=float).copy()
     over = a > threshold
     if np.any(over):
-        i = int(np.argmax(over))  # 첫 초과 인덱스
+        i = int(np.argmax(over))
         if i > 0:
             a[i:] = a[i-1]
         else:
@@ -409,7 +406,6 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=20, u
     budget_eok = np.arange(0, max_budget_units + 1)
     budget_won = budget_eok * unit
 
-    # Only 라인
     a_imps_only = imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val)
     b_imps_only = imps_from_digital_budget_by_cpm(budget_won, cpm_b)
     only_a = hill(a_imps_only, *popt_a)
@@ -434,7 +430,7 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=20, u
         ab_r1 = a_r1 * b_r1
 
         X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
-        total_r1_curve = model_total.predict(X_mix).values  # 0~1 범위 가정(넘을 수 있음)
+        total_r1_curve = model_total.predict(X_mix).values
 
         idx = int(np.argmax(total_r1_curve))
         totals_raw.append(float(total_r1_curve[idx]))
@@ -462,7 +458,7 @@ for key in ["compare_result", "single_curve", "single_out", "sweep_opt_full", "s
     if key not in st.session_state:
         st.session_state[key] = None
 
-# 탭1
+# Tab 1
 with tab1:
     c_a, c_b = st.columns([1, 1])
     with c_a:
@@ -539,7 +535,7 @@ with tab1:
 
         st.dataframe(summary_wide, use_container_width=True)
 
-# 탭2
+# Tab 2
 with tab2:
     total_eok_input = st.number_input("총 예산(억 원)", value=7.0, step=0.1, min_value=0.0)
     if st.button("실행", type="primary", key="single_run"):
@@ -592,7 +588,7 @@ with tab2:
             yaxis=dict(title='Reach 1+(%)'),
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            width=800,
+            width=700,
             height=400,
             dragmode=False,
             legend=dict(yanchor="top", y=1, xanchor="left", x=0),
@@ -604,7 +600,7 @@ with tab2:
     if st.session_state.single_out is not None:
         st.dataframe(st.session_state.single_out, use_container_width=True)
 
-# 탭3
+# Tab 3
 with tab3:
     max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10)
     if st.button("실행", type="primary", key="sweep_run"):
@@ -660,7 +656,7 @@ with tab3:
             xaxis_title="Budget Range (억 원)",
             yaxis_title="Reach 1+(%)",
             hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
-            hovermode="x unified",
+            hovermode="x",
             template="plotly_white",
             width=700,
             height=400,
