@@ -491,7 +491,7 @@ with tab1:
             summary_wide.loc['Total Reach 1+(%)', '최적화안'],
         ]
 
-        fig1 = go.Figure(hoverinfo='none')
+        fig1 = go.Figure()
 
         # User bar
         fig1.add_trace(go.Bar(
@@ -501,7 +501,8 @@ with tab1:
             marker_color='gold',
             opacity=0.7,
             text=[f"{v:.2f}%" for v in user_vals],
-            textposition='outside'
+            textposition='outside',
+            hoverinfo='skip'
         ))
 
         # Opt bar
@@ -511,7 +512,8 @@ with tab1:
             name='Opt',
             marker_color='#003594',
             text=[f"{v:.2f}%" for v in opt_vals],
-            textposition='outside'
+            textposition='outside',
+            hoverinfo='skip'
         ))
 
         fig1.update_layout(
@@ -570,13 +572,14 @@ with tab2:
 
     if st.session_state.single_curve is not None:
         a, pred, spline_i = st.session_state.single_curve
-        fig2 = go.Figure(hoverinfo='none')
+        fig2 = go.Figure()
 
         fig2.add_trace(go.Scatter(
             x=100*a, 
             y=100*pred,
             mode='lines+markers',
             name='Predicted',
+            hoverinfo='skip',
             marker=dict(size=4, color='#003594')
         ))
 
