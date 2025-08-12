@@ -398,9 +398,8 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
             'Total Reach 1+(%)': round(100.0 * float(total_r1_curve[idx]), 2),
         })
     df_opt_full = pd.DataFrame(results).reset_index(drop=True)
-    df_opt = pd.DataFrame(results).reset_index(drop=True)
-    df_only = df_only[df_only['예산(억 원)'] > 0].reset_index(drop=True)
-    df_opt  = df_opt[df_opt['예산(억 원)'] > 0].reset_index(drop=True)
+    df_only = df_only_full[df_only_full['예산(억 원)'] > 0].reset_index(drop=True)
+    df_opt  = df_opt_full[df_opt_full['예산(억 원)'] > 0].reset_index(drop=True)
     return df_opt_full, df_only_full, df_opt, df_only
 
 # ---------------------------
