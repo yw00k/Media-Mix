@@ -542,8 +542,8 @@ with tab2:
     if st.session_state.single_curve is not None:
         a, pred_i, spline_i = st.session_state.single_curve
         fig2, ax2 = plt.subplots(figsize=(8,5))
-        ax2.scatter(100*a, 100*pred_i, alpha=0.6, s=30, label='Predicted', color='gold')
-        ax2.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
+        ax2.plot(100*a, 100*pred_i, marker='o', label='Predicted', color='olivedrab')
+        #ax2.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
         ax2.set_xlabel('TV ratio (%)'); ax2.set_ylabel('Reach 1+(%)')
         ax2.grid(True, linestyle='--', alpha=0.7)
         st.pyplot(fig2)
