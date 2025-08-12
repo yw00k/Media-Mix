@@ -449,7 +449,7 @@ with tab2:
         spline_fit = sm.OLS(df_spline['pred'], spline_a).fit()
         spline_i = spline_fit.predict(spline_a)
 
-        st.session_state.single_curve = (a, pred.values, spline_i)
+        st.session_state.single_curve = (a, pred, spline_i)
         best_idx = int(np.argmax(pred))
         out = pd.DataFrame({
             'TV 비중': [f"{int(a[best_idx]*100)}%"],
