@@ -163,10 +163,10 @@ media_r1_result = pd.DataFrame({
 
 # 통합 모델
 
-EPS = 1e-9
+EPS1 = 1e-9
 
-def _clip01(arr, eps: float = EPS):
-    return np.clip(arr, eps, 1.0 - eps)
+def _clip01(arr, eps1: float = EPS1):
+    return np.clip(arr, eps1, 1.0 - eps1)
 
 def logit(p):
     p = _clip01(np.asarray(p, dtype=float))
