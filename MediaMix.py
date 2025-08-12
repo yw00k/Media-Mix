@@ -163,10 +163,10 @@ media_r1_result = pd.DataFrame({
 
 # 통합 모델
 
-EPS1 = 1e-9
+EPS = 1e-9
 
-def _clip01(arr, eps1: float = EPS1):
-    return np.clip(arr, eps1, 1.0 - eps1)
+def _clip01(arr, eps: float = EPS):
+    return np.clip(arr, eps1, 1.0 - eps)
 
 def logit(p):
     p = _clip01(np.asarray(p, dtype=float))
@@ -262,6 +262,13 @@ def optimize_total_budget(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
         'b_r1': float(b_r1_curve[idx]),
         'total_r1': float(total_r1_curve[idx])
     }
+
+    eps = 1e-6
+    if out['a_share'] <= eps:
+        out['total_r1'] = out['b_r1']
+    elif out['b_share'] <= eps:
+        out['total_r1'] = out['a_r1']
+    
     return out
 
 def compare_user_vs_opt(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
@@ -442,26 +449,37 @@ with tab2:
             'r1_ab': logit(_clip01(ab_r1)),
         })
         pred_logit = model_total.predict(X_mix_logit)
-        pred_i = inv_logit(pred_logit)
+        pred = inv_logit(pred_logit)
 
-        df_spline = pd.DataFrame({'a': a, 'pred': pred_i})
+        df_spline = pd.DataFrame({'a': a, 'pred': pred})
         spline_a = dmatrix("bs(a, df=12, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
         spline_fit = sm.OLS(df_spline['pred'], spline_a).fit()
         spline_i = spline_fit.predict(spline_a)
 
-        st.session_state.single_curve = (a, pred_i, spline_i)
+        st.session_state.single_curve = (a, pred, spline_i)
         best_idx = int(np.argmax(pred_i))
+        a_share = float(a[best_idx])
+        b_share = 1.0 - a_share
+        best_pred = float(pred[best_idx])
+        
+        eps = 1e-6
+        if a_share <= eps:
+            best_pred = float(b_r1[best_idx])
+        elif b_share <= eps:
+            best_pred = float(a_r1[best_idx])
+
         out = pd.DataFrame({
-            'TV 비중': [f"{int(a[best_idx]*100)}%"],
-            'Digital 비중': [f"{int(b[best_idx]*100)}%"],
-            'Total Reach 1+(%)': [round(100.0 * float(pred[best_idx]), 2)]
+            'TV 비중': [f"{int(a_share*100)}%"],
+            'Digital 비중': [f"{int(b_share*100)}%"],
+            'Total Reach 1+(%)': [round(100.0 * best_pred, 2)]
         })
+        
         st.session_state.single_out = out
 
     if st.session_state.single_curve is not None:
-        a, pred_i, spline_i = st.session_state.single_curve
+        a, pred, spline_i = st.session_state.single_curve
         fig2, ax2 = plt.subplots(figsize=(8,5))
-        ax2.scatter(100*a, 100*pred_i, alpha=0.6, s=30, label='Predicted', color='gold')
+        ax2.scatter(100*a, 100*pred, alpha=0.6, s=30, label='Predicted', color='gold')
         ax2.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
         ax2.set_xlabel('TV ratio (%)')
         ax2.set_ylabel('Reach 1+(%)')
