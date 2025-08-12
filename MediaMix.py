@@ -505,7 +505,7 @@ with tab1:
             textfont_size=12,
             textfont_color="black",
             dragmode=False,
-            hovertemplate=''
+            hoverinfo='none'
         ))
 
         # Opt bar
@@ -519,7 +519,7 @@ with tab1:
             textfont_size=12,
             textfont_color="black",
             dragmode=False,
-            hovertemplate=''
+            hoverinfo='none'
         ))
 
         fig1.update_layout(
