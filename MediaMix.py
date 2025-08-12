@@ -491,7 +491,7 @@ with tab1:
             summary_wide.loc['Total Reach 1+(%)', '최적화안'],
         ]
 
-        fig1 = go.Figure()
+        fig1 = go.Figure(hoverinfo='none')
 
         # User bar
         fig1.add_trace(go.Bar(
@@ -526,7 +526,6 @@ with tab1:
                 xanchor="center",
                 x=0.5
             ),
-            margin=dict(l=50, r=50, t=50, b=80),
             height=400,
         )
 
@@ -571,7 +570,7 @@ with tab2:
 
     if st.session_state.single_curve is not None:
         a, pred, spline_i = st.session_state.single_curve
-        fig2 = go.Figure()
+        fig2 = go.Figure(hoverinfo='none')
 
         fig2.add_trace(go.Scatter(
             x=100*a, 
