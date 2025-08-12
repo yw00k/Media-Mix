@@ -476,7 +476,7 @@ with tab1:
 
     if st.session_state.compare_result is not None:
         summary_df = st.session_state.compare_result
-        summary_wide = summary_df.set_index('구분').T.rename_axis('항목')
+        summary_wide = summary_df.set_index('구분').T.rename_axis('구분')
         summary_wide = summary_wide[['사용자안', '최적화안']]
 
         labels = ['TV', 'Digital', 'Total']
