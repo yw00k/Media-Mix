@@ -662,13 +662,13 @@ with tab3:
             hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
             hovermode="x unified",
             template="plotly_white",
-            width=800,
+            width=700,
             height=500,
-            dragmode=False,  # 줌/드래그 비활성화
+            dragmode=False,
             legend=dict(
-                orientation="h",   # 가로로 표시
+                orientation="h",
                 yanchor="top",
-                y=-0.2,            # 그래프 하단에 배치
+                y=-0.2,
                 xanchor="center",
                 x=0.5
             )
