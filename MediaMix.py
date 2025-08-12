@@ -187,8 +187,8 @@ def hill(x, a, b, c):
     return c / (1.0 + (b / x)**a)
 
 initial_params = [1.0, 50_000_000.0, 0.6]
-bounds_a = ([0, 0, 0], [np.inf, np.inf, 0.9])
-bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.6])
+bounds_a = ([0, 0, 0], [np.inf, np.inf, 0.91])
+bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.8])
 
 popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=20000)
 popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=20000)
