@@ -631,7 +631,7 @@ with tab3:
             name='Opt Mix',
             customdata=customdata,
             marker=dict(color='#003594'),
-            hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Opt R1+: %{y:.2f}%<extra></extra>'
+            hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Opt R1+: %{y:.2f}%'
         ))
 
         fig3.add_trace(go.Scatter(
@@ -640,7 +640,7 @@ with tab3:
             mode='lines+markers',
             name='Only TV',
             marker=dict(color='#ff7473'),
-            hovertemplate='Only TV R1+: %{y:.2f}%'
+            hovertemplate='Reach 1+: %{y:.2f}%'
         ))
 
         fig3.add_trace(go.Scatter(
@@ -649,7 +649,7 @@ with tab3:
             mode='lines+markers',
             name='Only Digital',
             marker=dict(color='gold'),
-            hovertemplate='Only DIG R1+: %{y:.2f}%<extra></extra>'
+            hovertemplate='Reach 1+: %{y:.2f}%'
         ))
 
         fig3.update_layout(
