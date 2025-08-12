@@ -609,11 +609,11 @@ with tab3:
         fig3.update_layout(
             xaxis_title="Budget Range (억 원)",
             yaxis_title="Reach 1+(%)",
-            hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
+            hoverlabel=dict(bgcolor='rgba(0,0,0,0.2)', font_color='white'),
             hovermode="x unified",
             template="plotly_white",
             width=800,
-            height=400,
+            height=500,
             dragmode=False,  # 줌/드래그 비활성화
             legend=dict(
                 orientation="h",   # 가로로 표시
