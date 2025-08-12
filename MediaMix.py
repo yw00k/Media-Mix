@@ -1,4 +1,3 @@
-# streamlit_app.py
 import streamlit as st
 import time
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
@@ -28,7 +27,7 @@ def load_image_from_dropbox(path: str) -> BytesIO | None:
         _, res = dbx.files_download(path)
         return BytesIO(res.content)
     except Exception as e:
-        st.error(f"이미지 불러오기 실패: {e}")
+        st.error(f"⚠ 이미지 불러오기 실패: {e}")
         return None
 
 logo_bytes = load_image_from_dropbox("/Media Mix/logo.png")
@@ -115,7 +114,7 @@ df0['r1_ab'] = df0['r1_a'] * df0['r1_b']
 # 타겟 선택
 target_list = sorted(df0['target'].unique())
 if not target_list:
-    st.error("⚠️ 선택 가능한 타겟이 없습니다.")
+    st.error("⚠ 선택 가능한 타겟이 없습니다.")
     st.stop()
 
 selected_target = st.selectbox("Target", target_list, index=0)
@@ -342,7 +341,7 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
 # UI
 col_cpm1, col_cpm2 = st.columns(2)
 with col_cpm1:
-    cpm_a_global = st.number_input("CPM TV", value=9000, step=100, key="cpm_tv_global")
+    cpm_a_global = st.number_input("CPM TV", value=4000, step=100, key="cpm_tv_global")
 with col_cpm2:
     cpm_b_global = st.number_input("CPM Digital", value=7000, step=100, key="cpm_dg_global")
 
