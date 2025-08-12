@@ -185,10 +185,7 @@ model_total = sm.OLS(y_total, X_train).fit()
 # CPM/CPRP UI
 # ---------------------------
 def money_input(label, key, default=0.0, help=None, decimals=0, min_value=0.0):
-    """
-    천 단위 콤마를 보여주는 입력. 텍스트로 받고 float으로 반환.
-    - decimals: 소수 자릿수 (0이면 정수로 표기)
-    """
+
     fmt = f"{{:,.{decimals}f}}"
     # 초기 값 세팅 (첫 렌더링 시)
     if key not in st.session_state:
@@ -402,6 +399,8 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
         })
 
     df_opt = pd.DataFrame(results).reset_index(drop=True)
+    df_only = df_only[df_only['예산(억 원)'] > 0].reset_index(drop=True)
+    df_opt  = df_opt[df_opt['예산(억 원)'] > 0].reset_index(drop=True)
     return df_opt, df_only
 
 # ---------------------------
