@@ -663,7 +663,7 @@ with tab3:
             hovermode="x unified",
             template="plotly_white",
             width=700,
-            height=500,
+            height=350,
             dragmode=False,
             legend=dict(
                 orientation="h",
