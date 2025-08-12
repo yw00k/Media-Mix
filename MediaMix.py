@@ -491,19 +491,46 @@ with tab1:
             summary_wide.loc['Total Reach 1+(%)', '최적화안'],
         ]
 
-        x = np.arange(len(labels)); width = 0.38
-        fig1, ax1 = plt.subplots(figsize=(7, 4))
-        bars1 = ax1.bar(x - width/2, user_vals, width, label='User', color='gold', alpha=0.7)
-        bars2 = ax1.bar(x + width/2, opt_vals,  width, label='Opt', color='#003594')
-        for bars in (bars1, bars2):
-            for b in bars:
-                h = b.get_height()
-                ax1.text(b.get_x() + b.get_width()/2, h + 1, f"{h:.2f}%", ha='center', va='bottom', fontsize=9)
-        ax1.set_xticks(x); ax1.set_xticklabels(labels)
-        ax1.set_ylim(0, 100)
-        ax1.set_ylabel("Reach 1+(%)")
-        ax1.legend()
-        st.pyplot(fig1)
+        fig1 = go.Figure()
+
+        # User bar
+        fig1.add_trace(go.Bar(
+            x=labels,
+            y=user_vals,
+            name='User',
+            marker_color='gold',
+            opacity=0.7,
+            text=[f"{v:.2f}%" for v in user_vals],
+            textposition='outside'
+        ))
+
+        # Opt bar
+        fig1.add_trace(go.Bar(
+            x=labels,
+            y=opt_vals,
+            name='Opt',
+            marker_color='#003594',
+            text=[f"{v:.2f}%" for v in opt_vals],
+            textposition='outside'
+        ))
+
+        fig1.update_layout(
+            barmode='group',
+            yaxis=dict(range=[0, 100], title="Reach 1+(%)"),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            legend=dict(
+                orientation="h",
+                yanchor="top",
+                y=-0.25,   # x축 아래
+                xanchor="center",
+                x=0.5
+            ),
+            margin=dict(l=50, r=50, t=50, b=80),
+            height=400,
+        )
+
+        st.plotly_chart(fig1, use_container_width=True)
 
         st.dataframe(summary_wide, use_container_width=True)
 
