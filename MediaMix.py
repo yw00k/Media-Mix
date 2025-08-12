@@ -576,7 +576,7 @@ with tab2:
 
         fig2.add_trace(go.Scatter(
             x=100*a, 
-            y=100*np.round(pred, 2),
+            y=100*np.round(pred, 4),
             mode='lines+markers',
             name='Predicted',
             #hoverinfo='skip',
