@@ -187,7 +187,7 @@ def hill(x, a, b, c):
     return c / (1.0 + (b / x)**a)
 
 initial_params = [1.0, 50_000_000.0, 0.6]
-bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
+bounds_a = ([0, 0, 0], [np.inf, np.inf, 0.9])
 bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.6])
 
 popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=20000)
@@ -248,7 +248,7 @@ with col_cprp:
         key="cprp_input",
         default=cprp_default_for_target,
         help="천 단위 콤마로 입력/표시됩니다.",
-        decimals=0,     # 필요하면 1~2로 늘려도 OK
+        decimals=0,
         min_value=0.0
     )
 with col_cpm:
@@ -275,7 +275,6 @@ def imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val):
                         (budget / cprp) / 100 * uni,
                         0.0)
 
-    # 입력 타입 유지: 스칼라 입력이면 스칼라로 반환
     if np.isscalar(budget_won):
         return float(imps)
     return imps
@@ -297,7 +296,7 @@ def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
 # ---------------------------
 # 분석 함수: TV는 CPRP, Digital은 CPM
 # ---------------------------
-UNIT = 100_000_000  # 억→원s
+UNIT = 100_000_000  # 억→원
 
 def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     a_won = a_eok * unit
