@@ -130,12 +130,45 @@ if uni_df is None or 'target' not in uni_df.columns or 'universe' not in uni_df.
 
 row_uni = uni_df.loc[uni_df['target'] == selected_target, 'universe']
 if row_uni.empty:
-    st.warning("선택한 타겟의 universe 값을 찾지 못했습니다. 첫 행의 universe를 사용합니다.")
+    st.warning("⚠ 선택한 타겟의 데이터를 찾지 못했습니다. 기본값을 사용합니다.")
     universe = float(uni_df['universe'].iloc[0])
 else:
     universe = float(row_uni.iloc[0])
 
 st.caption(f"👥 Universe: **{int(universe):,}**")
+
+# ---------------------------
+# Load CPRP default for target
+# ---------------------------
+CPRP_PATH = "/Media Mix/cprp.csv"
+
+cprp_df = load_csv_from_dropbox(CPRP_PATH)
+default_cprp_value = 1_000_000
+
+
+if cprp_df is None or 'target' not in cprp_df.columns or 'cprp' not in cprp_df.columns:
+    st.warning("⚠ 데이터를 찾지 못했습니다. 기본값을 사용합니다.")
+    cprp_default_for_target = default_cprp_value
+else:
+
+    row_cprp = cprp_df.loc[cprp_df['target'] == selected_target, 'cprp']
+    if row_cprp.empty:
+        st.warning("⚠ 선택한 타겟의 CPRP 값을 찾지 못했습니다. 기본값을 사용합니다.")
+        cprp_default_for_target = default_cprp_value
+    else:
+        try:
+            cprp_default_for_target = float(row_cprp.iloc[0])
+        except Exception:
+            st.warning("⚠ 데이터를 찾지 못했습니다. 기본값을 사용합니다.")
+            cprp_default_for_target = default_cprp_value
+
+if 'last_target_for_cprp' not in st.session_state:
+    st.session_state.last_target_for_cprp = None
+
+if st.session_state.last_target_for_cprp != selected_target:
+
+    st.session_state['cprp_input'] = f"{cprp_default_for_target:,.0f}"
+    st.session_state.last_target_for_cprp = selected_target
 
 # ---------------------------
 # Prepare arrays
@@ -155,11 +188,11 @@ def hill(x, a, b, c):
 
 initial_params = [1.0, 50_000_000.0, 0.6]
 bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
-bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.7])
+bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.6])
 
-popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=30000)
-popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=30000)
-popt_t, _ = curve_fit(hill, x_total, y_total, p0=initial_params, bounds=bounds_a, maxfev=30000)
+popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=20000)
+popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=20000)
+popt_t, _ = curve_fit(hill, x_total, y_total, p0=initial_params, bounds=bounds_a, maxfev=20000)
 
 pred_a_fit = hill(x_a, *popt_a)
 pred_b_fit = hill(x_b, *popt_b)
@@ -213,7 +246,7 @@ with col_cprp:
     cprp_a_global = money_input(
         "TV CPRP(원)",
         key="cprp_input",
-        default=1_000_000.0,
+        default=cprp_default_for_target,
         help="천 단위 콤마로 입력/표시됩니다.",
         decimals=0,     # 필요하면 1~2로 늘려도 OK
         min_value=0.0
@@ -262,9 +295,9 @@ def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
     return imps
 
 # ---------------------------
-# 분석 함수들: TV는 CPRP+universe, Digital은 CPM
+# 분석 함수: TV는 CPRP, Digital은 CPM
 # ---------------------------
-UNIT = 100_000_000  # 억→원
+UNIT = 100_000_000  # 억→원s
 
 def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     a_won = a_eok * unit
