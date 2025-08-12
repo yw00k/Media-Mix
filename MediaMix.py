@@ -504,8 +504,7 @@ with tab1:
             textposition='outside',
             textfont_size=12,
             textfont_color="black",
-            dragmode=False,
-            hoverinfo='none'
+            dragmode=False
         ))
 
         # Opt bar
@@ -518,8 +517,7 @@ with tab1:
             textposition='outside',
             textfont_size=12,
             textfont_color="black",
-            dragmode=False,
-            hoverinfo='none'
+            dragmode=False
         ))
 
         fig1.update_layout(
