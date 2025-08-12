@@ -570,15 +570,16 @@ with tab3:
         df_opt  = st.session_state.sweep_opt
         df_only = st.session_state.sweep_only
 
-        fig3 = go.Figure()
+        fig3 = go.Figure(layout=go.Layout(paper_bgcolor='rgba(0,0,0,0)',
+                                          plot_bgcolor='rgba(0,0,0,0)'))
 
         fig3.add_trace(go.Scatter(
-            x=df_opt_full['예산(억 원)'],
+            x=df_opt_full['TV 비중', 'Digital 비중'],
             y=df_opt_full['Total Reach 1+(%)'],
             mode='lines+markers',
             name='Opt Mix',
             marker=dict(color='#003594'),
-            hovertemplate='예산: %{x}억<br>Reach: %{y:.2f}%'
+            hovertemplate='%{x}억<br>Reach: %{y:.2f}%'
         ))
 
         fig3.add_trace(go.Scatter(
@@ -587,7 +588,7 @@ with tab3:
             mode='lines+markers',
             name='Only TV',
             marker=dict(color='#ff7473'),
-            hovertemplate='예산: %{x}억<br>Reach: %{y:.2f}%'
+            hovertemplate='Reach: %{y:.2f}%'
         ))
 
         fig3.add_trace(go.Scatter(
@@ -596,7 +597,7 @@ with tab3:
             mode='lines+markers',
             name='Only Digital',
             marker=dict(color='gold'),
-            hovertemplate='예산: %{x}억<br>Reach: %{y:.2f}%'
+            hovertemplate='Reach: %{y:.2f}%'
         ))
 
         fig3.update_layout(
