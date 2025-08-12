@@ -589,7 +589,7 @@ with tab3:
             mode='lines+markers',
             name='Opt Mix',
             marker=dict(color='#003594'),
-            hovertemplate='%{x_mix}<br>Reach: %{y:.2f}%<extra></extra>'
+            hovertemplate='%{x_mix}%<br>Reach: %{y:.2f}%<extra></extra>'
         ))
 
         fig3.add_trace(go.Scatter(
@@ -613,7 +613,7 @@ with tab3:
         fig3.update_layout(
             xaxis_title="Budget Range (억 원)",
             yaxis_title="Reach 1+(%)",
-            hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)'),
+            hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
             hovermode="x unified",
             template="plotly_white",
             width=800,
