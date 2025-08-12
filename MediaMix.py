@@ -442,9 +442,9 @@ with tab2:
             'r1_ab': logit(_clip01(ab_r1)),
         })
         pred_logit = model_total.predict(X_mix_logit)
-        pred = inv_logit(pred_logit)
+        pred_i = inv_logit(pred_logit)
 
-        df_spline = pd.DataFrame({'a': a, 'pred': pred})
+        df_spline = pd.DataFrame({'a': a, 'pred': pred_i})
         spline_a = dmatrix("bs(a, df=12, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
         spline_fit = sm.OLS(df_spline['pred'], spline_a).fit()
         spline_i = spline_fit.predict(spline_a)
@@ -461,7 +461,7 @@ with tab2:
     if st.session_state.single_curve is not None:
         a, pred, spline_i = st.session_state.single_curve
         fig2, ax2 = plt.subplots(figsize=(8,5))
-        ax2.scatter(100*a, 100*pred, alpha=0.6, s=30, label='Predicted', color='gold')
+        ax2.scatter(100*a, 100*pred_i, alpha=0.6, s=30, label='Predicted', color='gold')
         ax2.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
         ax2.set_xlabel('TV ratio (%)')
         ax2.set_ylabel('Reach 1+(%)')
