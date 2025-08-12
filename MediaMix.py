@@ -524,7 +524,8 @@ with tab2:
         ab_r1 = a_r1 * b_r1
 
         X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
-        pred = model_total.predict(X_mix).values
+        pred_raw = model_total.predict(X_mix).values
+        pred = plateau_after_exceed(pred_raw, threshold=1.0)
 
         df_spline = pd.DataFrame({'a': a, 'pred': pred})
         spline_a = dmatrix("bs(a, df=12, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
