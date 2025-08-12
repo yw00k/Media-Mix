@@ -187,10 +187,10 @@ model_total = sm.OLS(y_total, X_train).fit()
 col_cprp, col_cpm = st.columns(2)
 with col_cprp:
     # TV는 CPRP를 받음 (원/RatingPoint)
-    cprp_a_global = st.number_input("TV CPRP (원/RP)", value=120000.0, step=1000.0, min_value=0.0)
+    cprp_a_global = st.number_input("TV CPRP", value=1000000.0, step=100000.0, min_value=0.0)
 with col_cpm:
     # Digital은 기존처럼 CPM
-    cpm_b_global = st.number_input("Digital CPM (원/1000imps)", value=7000.0, step=100.0, min_value=0.0)
+    cpm_b_global = st.number_input("Digital CPM", value=7000.0, step=100.0, min_value=0.0)
 
 # ---------------------------
 # 공통: 예산→임프레션 변환 함수 (TV=CPRP, Digital=CPM)
