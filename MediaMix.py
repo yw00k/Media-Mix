@@ -492,7 +492,7 @@ with tab1:
 
         x = np.arange(len(labels)); width = 0.38
         fig1, ax1 = plt.subplots(figsize=(7, 4))
-        bars1 = ax1.bar(x - width/2, user_vals, width, label='User', color='lightsteelblue')
+        bars1 = ax1.bar(x - width/2, user_vals, width, label='User', color='gold')
         bars2 = ax1.bar(x + width/2, opt_vals,  width, label='Opt', color='#003594')
         for bars in (bars1, bars2):
             for b in bars:
