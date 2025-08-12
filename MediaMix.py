@@ -319,8 +319,9 @@ def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     ab_r1 = a_r1 * b_r1
 
     X_user = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1), 'r1_b': logit(b_r1), 'r1_ab': logit(ab_r1)})
-    total_r1 = original(model_total.predict(X_user))
-
+    total_r1 = model_total.predict(X_user)
+    total_r1 = original(total_r1)
+    
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)', 'Digital(억 원)', '총(억 원)', 'TV Reach 1+(%)', 'Digital Reach 1+(%)', 'Total Reach 1+(%)'],
         '값': [
@@ -351,7 +352,8 @@ def optimize_total_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     ab_r1_curve = a_r1_curve * b_r1_curve
 
     X_opt = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1_curve), 'r1_b': logit(b_r1_curve), 'r1_ab': logit(ab_r1_curve)})
-    total_r1_curve = original(model_total.predict(X_opt).values)
+    total_r1_curve = model_total.predict(X_opt).values
+    total_r1_curve = original(total_r1_curve)
 
     idx = int(np.argmax(total_r1_curve))
 
@@ -429,7 +431,8 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
         ab_r1 = a_r1 * b_r1
 
         X_mix = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1), 'r1_b': logit(b_r1), 'r1_ab': logit(ab_r1)})
-        total_r1_curve = original(model_total.predict(X_mix).values)
+        total_r1_curve = model_total.predict(X_mix).values
+        total_r1_curve = original(total_r1_curve)
 
         idx = int(np.argmax(total_r1_curve))
         results.append({
@@ -514,7 +517,8 @@ with tab2:
         ab_r1 = a_r1 * b_r1
 
         X_mix = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1), 'r1_b': logit(b_r1), 'r1_ab': logit(ab_r1)})
-        pred = original(model_total.predict(X_mix).values)
+        pred = model_total.predict(X_mix).values
+        pred = original(pred)
 
         df_spline = pd.DataFrame({'a': a, 'pred': pred})
         spline_a = dmatrix("bs(a, df=12, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
