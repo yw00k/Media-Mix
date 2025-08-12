@@ -585,6 +585,7 @@ with tab2:
         fig2.update_layout(
             xaxis=dict(title='TV ratio (%)', range=[0, 100]),
             yaxis=dict(title='Reach 1+(%)'),
+            hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
             hovermode='x',
