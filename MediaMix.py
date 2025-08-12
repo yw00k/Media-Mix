@@ -583,7 +583,7 @@ with tab3:
             mode='lines+markers',
             name='Opt Mix',
             tv=tv,
-            digital=digital
+            digital=digital,
             marker=dict(color='#003594'),
             hovertemplate='TV: %{tv}<br>Digital: %{digital}<br>Optmized: %{y:.2f}%<extra></extra>'
         ))
