@@ -584,16 +584,16 @@ with tab3:
 
 
         fig3.add_trace(go.Scatter(
-            x=x_mix,
+            x=df_opt_full['예산(억 원)'],
             y=df_opt_full['Total Reach 1+(%)'],
             mode='lines+markers',
             name='Opt Mix',
             marker=dict(color='#003594'),
-            hovertemplate='%{x}억<br>Reach: %{y:.2f}%<extra></extra>'
+            hovertemplate='x_mix<br>Reach: %{y:.2f}%<extra></extra>'
         ))
 
         fig3.add_trace(go.Scatter(
-            x=["100%"],
+            x=df_only_full['예산(억 원)'],
             y=df_only_full['Only TV'],
             mode='lines+markers',
             name='Only TV',
@@ -602,7 +602,7 @@ with tab3:
         ))
 
         fig3.add_trace(go.Scatter(
-            x=["100%"],
+            x=df_only_full['예산(억 원)'],
             y=df_only_full['Only Digital'],
             mode='lines+markers',
             name='Only Digital',
