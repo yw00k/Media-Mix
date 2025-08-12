@@ -576,10 +576,10 @@ with tab2:
 
         fig2.add_trace(go.Scatter(
             x=100*a, 
-            y=100*pred,
+            y=100*np.round(pred, 2),
             mode='lines+markers',
             name='Predicted',
-            hoverinfo='skip',
+            #hoverinfo='skip',
             marker=dict(size=4, color='#003594')
         ))
 
@@ -631,7 +631,7 @@ with tab3:
             name='Opt Mix',
             customdata=customdata,
             marker=dict(color='#003594'),
-            hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Opt R1+: %{y:.2f}%'
+            hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Reach 1+: %{y:.2f}%'
         ))
 
         fig3.add_trace(go.Scatter(
