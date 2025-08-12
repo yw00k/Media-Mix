@@ -195,17 +195,35 @@ with col_cpm:
 # ---------------------------
 # 공통: 예산→임프레션 변환 함수 (TV=CPRP, Digital=CPM)
 # ---------------------------
-def imps_from_tv_budget_by_cprp(budget_won: float, cprp_a: float, universe_val: float) -> float:
-    # imps = (budget / CPRP) * universe
-    if cprp_a <= 0 or universe_val <= 0 or budget_won <= 0:
-        return 0.0
-    return (budget_won / cprp_a) * universe_val
+def imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val):
 
-def imps_from_digital_budget_by_cpm(budget_won: float, cpm_b: float) -> float:
-    # imps = budget / (CPM/1000)
-    if cpm_b <= 0 or budget_won <= 0:
-        return 0.0
-    return budget_won / (cpm_b / 1000.0)
+    budget = np.asarray(budget_won, dtype=float)
+    cprp = float(cprp_a)
+    uni  = float(universe_val)
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        imps = np.where((cprp > 0) & (uni > 0) & (budget > 0),
+                        (budget / cprp) * uni,
+                        0.0)
+
+    # 입력 타입 유지: 스칼라 입력이면 스칼라로 반환
+    if np.isscalar(budget_won):
+        return float(imps)
+    return imps
+
+def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
+
+    budget = np.asarray(budget_won, dtype=float)
+    cpm = float(cpm_b)
+
+    with np.errstate(divide='ignore', invalid='ignore'):
+        imps = np.where((cpm > 0) & (budget > 0),
+                        budget / (cpm / 1000.0),
+                        0.0)
+
+    if np.isscalar(budget_won):
+        return float(imps)
+    return imps
 
 # ---------------------------
 # 분석 함수들: TV는 CPRP+universe, Digital은 CPM
