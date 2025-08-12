@@ -161,31 +161,15 @@ media_r1_result = pd.DataFrame({
     'MAE(%)':     [mean_absolute_error(y_a, pred_a_fit)*100, mean_absolute_error(y_b, pred_b_fit)*100]
 }, index=['TV','Digital'])
 
-# 통합 모델
-
-EPS = 1e-9
-
-def _clip01(arr, eps: float = EPS):
-    return np.clip(arr, eps, 1.0 - eps)
-
-def logit(p):
-    p = _clip01(np.asarray(p, dtype=float))
-    return np.log(p / (1.0 - p))
-
-def inv_logit(z):
-    z = np.asarray(z, dtype=float)
-    return 1.0 / (1.0 + np.exp(-z))
-
-y_logit = logit(_clip01(y_total))
-X_train_logit = pd.DataFrame({
-    'const': 1.0,
-    'r1_a':  logit(_clip01(df_t['r1_a'].values)),
-    'r1_b':  logit(_clip01(df_t['r1_b'].values)),
-    'r1_ab': logit(_clip01(df_t['r1_ab'].values)),
+# 통합 모델 학습
+X_train = pd.DataFrame({
+    'const': 0.0,
+    'r1_a': df_t['r1_a'].values,
+    'r1_b': df_t['r1_b'].values,
+    'r1_ab': df_t['r1_ab'].values
 })
-model_total = sm.OLS(y_logit, X_train_logit).fit()
-pred_in_logit = model_total.predict(X_train_logit)
-pred_in = inv_logit(pred_in_logit)
+model_total = sm.OLS(y_total, X_train).fit()
+pred_in = model_total.predict(X_train)
 
 # 시각화: 미디어별 Reach 1+(%)
 ##st.subheader("미디어별 Reach 1+(%)")
@@ -212,13 +196,13 @@ def analyze_custom_budget(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
     b_r1 = hill(np.array([b_imps]), *popt_b) if b_imps > 0 else np.array([0.0])
     ab_r1 = a_r1 * b_r1
 
-    X_user_logit = pd.DataFrame({
-        'const': 1.0,
-        'r1_a':  logit(_clip01(a_r1)),
-        'r1_b':  logit(_clip01(b_r1)),
-        'r1_ab': logit(_clip01(ab_r1)),
+    X_user = pd.DataFrame({
+        'const': 0.0,
+        'r1_a': a_r1,
+        'r1_b': b_r1,
+        'r1_ab': ab_r1
     })
-    total_r1 = inv_logit(model_total.predict(X_user_logit))
+    total_r1 = model_total.predict(X_user)
 
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)', 'Digital(억 원)', '총(억 원)', 'TV Reach 1+(%)', 'Digital Reach 1+(%)', 'Total Reach 1+(%)'],
@@ -246,13 +230,13 @@ def optimize_total_budget(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
     b_r1_curve = hill(b_imps, *popt_b)
     ab_r1_curve = a_r1_curve * b_r1_curve
 
-    X_opt_logit = pd.DataFrame({
-        'const': 1.0,
-        'r1_a':  logit(_clip01(a_r1_curve)),
-        'r1_b':  logit(_clip01(b_r1_curve)),
-        'r1_ab': logit(_clip01(ab_r1_curve)),
+    X_opt = pd.DataFrame({
+        'const': 0.0,
+        'r1_a': a_r1_curve,
+        'r1_b': b_r1_curve,
+        'r1_ab': ab_r1_curve
     })
-    total_r1_curve = inv_logit(model_total.predict(X_opt_logit).values)
+    total_r1_curve = model_total.predict(X_opt).values
     idx = int(np.argmax(total_r1_curve))
 
     out = {
@@ -262,13 +246,6 @@ def optimize_total_budget(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
         'b_r1': float(b_r1_curve[idx]),
         'total_r1': float(total_r1_curve[idx])
     }
-
-    eps = 0
-    if out['a_share'] <= eps:
-        out['total_r1'] = out['b_r1']
-    elif out['b_share'] <= eps:
-        out['total_r1'] = out['a_r1']
-    
     return out
 
 def compare_user_vs_opt(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
@@ -336,13 +313,8 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
         b_r1 = hill(b_imps, *popt_b)
         ab_r1 = a_r1 * b_r1
 
-        X_mix_logit = pd.DataFrame({
-            'const': 1.0,
-            'r1_a':  logit(_clip01(a_r1)),
-            'r1_b':  logit(_clip01(b_r1)),
-            'r1_ab': logit(_clip01(ab_r1)),
-        })
-        total_r1_curve = inv_logit(model_total.predict(X_mix_logit).values)
+        X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
+        total_r1_curve = model_total.predict(X_mix).values
 
         idx = int(np.argmax(total_r1_curve))
         a_share = float(a[idx])
@@ -351,7 +323,6 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
         total_r1 = float(total_r1_curve[idx])
 
         # 극단 비중 보정: 한 측이 100%면 해당 단일 미디어 값을 Total로 사용
-        eps = 0
         if a_share <= eps:         # TV=0%, Digital=100%
             total_r1 = float(b_r1[idx])
         elif b_share <= eps:       # Digital=0%, TV=100%
@@ -443,44 +414,27 @@ with tab2:
         a_r1 = hill(a_imps, *popt_a)
         b_r1 = hill(b_imps, *popt_b)
         ab_r1 = a_r1 * b_r1
-        X_mix_logit = pd.DataFrame({
-            'const': 1.0,
-            'r1_a':  logit(_clip01(a_r1)),
-            'r1_b':  logit(_clip01(b_r1)),
-            'r1_ab': logit(_clip01(ab_r1)),
-        })
-        pred_logit = model_total.predict(X_mix_logit)
-        pred = inv_logit(pred_logit)
+        X_mix = pd.DataFrame({'const': 1.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
+        pred = model_total.predict(X_mix)
 
         df_spline = pd.DataFrame({'a': a, 'pred': pred})
         spline_a = dmatrix("bs(a, df=12, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
         spline_fit = sm.OLS(df_spline['pred'], spline_a).fit()
         spline_i = spline_fit.predict(spline_a)
 
-        st.session_state.single_curve = (a, pred, spline_i)
+        st.session_state.single_curve = (a, pred.values, spline_i)
         best_idx = int(np.argmax(pred))
-        a_share = float(a[best_idx])
-        b_share = 1.0 - a_share
-        best_pred = float(pred[best_idx])
-        
-        eps = 0
-        if a_share <= eps:
-            best_pred = float(b_r1[best_idx])
-        elif b_share <= eps:
-            best_pred = float(a_r1[best_idx])
-
         out = pd.DataFrame({
-            'TV 비중': [f"{int(a_share*100)}%"],
-            'Digital 비중': [f"{int(b_share*100)}%"],
-            'Total Reach 1+(%)': [round(100.0 * best_pred, 2)]
+            'TV 비중': [f"{int(a[best_idx]*100)}%"],
+            'Digital 비중': [f"{int(b[best_idx]*100)}%"],
+            'Total Reach 1+(%)': [round(100.0 * float(pred[best_idx]), 2)]
         })
-        
         st.session_state.single_out = out
 
     if st.session_state.single_curve is not None:
-        a, pred, spline_i = st.session_state.single_curve
+        a, pred_i, spline_i = st.session_state.single_curve
         fig2, ax2 = plt.subplots(figsize=(8,5))
-        ax2.scatter(100*a, 100*pred, alpha=0.6, s=30, label='Predicted', color='gold')
+        ax2.scatter(100*a, 100*pred_i, alpha=0.6, s=30, label='Predicted', color='gold')
         ax2.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
         ax2.set_xlabel('TV ratio (%)')
         ax2.set_ylabel('Reach 1+(%)')
