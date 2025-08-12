@@ -586,7 +586,7 @@ with tab3:
             marker=dict(color='#003594'),
             tv=df_opt_full['TV 비중'].astype(str),
             digital=df_opt_full['Digital 비중'].astype(str),
-            hovertemplate='TV: %{tv}<br>''Digital: %{digital}<br>''Optmized: %{y:.2f}%<extra></extra>'
+            hovertemplate='TV: %{tv}<br>Digital: %{digital}<br>Optmized: %{y:.2f}%<extra></extra>'
         ))
 
         fig3.add_trace(go.Scatter(
