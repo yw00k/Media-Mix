@@ -445,7 +445,7 @@ with tab2:
         pred = inv_logit(pred_logit)
 
         df_spline = pd.DataFrame({'a': a, 'pred': pred})
-        spline_a = dmatrix("bs(a, df=12, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
+        spline_a = dmatrix("bs(a, df=8, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
         spline_fit = sm.OLS(df_spline['pred'], spline_a).fit()
         spline_i = spline_fit.predict(spline_a)
 
