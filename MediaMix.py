@@ -500,8 +500,11 @@ with tab1:
             name='User',
             marker_color='gold',
             opacity=0.7,
-            text=[f"{v:.2f}%" for v in user_vals],
+            text=[f"<b>{v:.2f}%<b>" for v in user_vals],
             textposition='outside',
+            textfont_size=12,
+            textfont_color="black",
+            dragmode=False,
             hoverinfo='skip'
         ))
 
@@ -511,8 +514,11 @@ with tab1:
             y=opt_vals,
             name='Opt',
             marker_color='#003594',
-            text=[f"{v:.2f}%" for v in opt_vals],
+            text=[f"<b>{v:.2f}%<b>" for v in opt_vals],
             textposition='outside',
+            textfont_size=12,
+            textfont_color="black",
+            dragmode=False,
             hoverinfo='skip'
         ))
 
@@ -580,6 +586,7 @@ with tab2:
             mode='lines+markers',
             name='Predicted',
             hoverinfo='skip',
+            dragmode=False,
             marker=dict(size=4, color='#003594')
         ))
 
