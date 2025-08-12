@@ -539,7 +539,7 @@ with tab2:
 with tab3:
     max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
     if st.button("실행", type="primary", key="sweep_run"):
-        df_opt_full, df_only_full, df_opt, df_only = optimize_mix_over_budget(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
+        df_opt_full, df_only_full, df_opt_table, df_only_table = optimize_mix_over_budget(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
         st.session_state.sweep_opt_graph = df_opt_full
         st.session_state.sweep_only_graph = df_only_full
 
@@ -547,8 +547,6 @@ with tab3:
         st.session_state.sweep_only_table = df_only_table
 
     if (st.session_state.sweep_opt_graph is not None) and (st.session_state.sweep_only_graph is not None):
-        df_opt  = st.session_state.sweep_opt_graph
-        df_only = st.session_state.sweep_only_graph
         fig3, ax3 = plt.subplots(figsize=(8,5))
         ax3.plot(st.session_state.sweep_opt_graph['예산(억 원)'], st.session_state.sweep_opt_graph['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
         ax3.plot(st.session_state.sweep_only_graph['예산(억 원)'], st.session_state.sweep_only_graph['Only TV'], linestyle='--', marker='s', label='Only TV', color='royalblue')
