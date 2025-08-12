@@ -207,7 +207,7 @@ media_r1_result = pd.DataFrame({
 
 # 통합 모델
 def logit(p):
-    return np.p / (0.91 - p)
+    return np.log(p / (0.91 - p))
 
 def original(p):
     return 0.91 / (1 + np.exp(-p))
