@@ -572,32 +572,42 @@ with tab3:
 
         fig3 = go.Figure(layout=go.Layout(paper_bgcolor='rgba(0,0,0,0)',
                                           plot_bgcolor='rgba(0,0,0,0)'))
+        x_mix = (
+            df_opt_full['TV 비중'].astype(str)
+              .str.replace('%','', regex=False).str.zfill(2).add('%')  # 선택: 정렬용
+              .str.cat(
+                  df_opt_full['Digital 비중'].astype(str)
+                    .str.replace('%','', regex=False).str.zfill(2).add('%'),
+                  sep=' : '
+              )
+        )
+
 
         fig3.add_trace(go.Scatter(
-            x=df_opt_full['TV 비중'] + ":" + df_opt_full['Digital 비중'],
+            x=x_mix,
             y=df_opt_full['Total Reach 1+(%)'],
             mode='lines+markers',
             name='Opt Mix',
             marker=dict(color='#003594'),
-            hovertemplate='%{x}억<br>Reach: %{y:.2f}%'
+            hovertemplate='%{x}억<br>Reach: %{y:.2f}%<extra></extra>'
         ))
 
         fig3.add_trace(go.Scatter(
-            x="100%",
+            x=["100%"],
             y=df_only_full['Only TV'],
             mode='lines+markers',
             name='Only TV',
             marker=dict(color='#ff7473'),
-            hovertemplate='Reach: %{y:.2f}%'
+            hovertemplate='Reach: %{y:.2f}%<extra></extra>'
         ))
 
         fig3.add_trace(go.Scatter(
-            x="100%",
+            x=["100%"],
             y=df_only_full['Only Digital'],
             mode='lines+markers',
             name='Only Digital',
             marker=dict(color='gold'),
-            hovertemplate='Reach: %{y:.2f}%'
+            hovertemplate='Reach: %{y:.2f}%<extra></extra>'
         ))
 
         fig3.update_layout(
