@@ -139,7 +139,7 @@ def hill(x, a, b, c):
 
 initial_params = [1.0, 50_000_000.0, 0.6]
 bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
-bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.8])
+bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.7])
 
 popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=30000)
 popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=30000)
@@ -290,10 +290,10 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
     a = np.arange(0, 101, dtype=np.float64) / 100.0
     b = 1.0 - a
 
-    budget_eok = np.arange(1, max_budget_units + 1)
+    budget_eok = np.arange(0, max_budget_units + 1)
     budget_won = budget_eok * unit
 
-    # Only TV/Digital 라인 (참고/플롯용)
+    # Only TV/Digital 라인
     a_imps_only = budget_won / (cpm_a / 1000.0)
     b_imps_only = budget_won / (cpm_b / 1000.0)
     only_a = hill(a_imps_only, *popt_a)
