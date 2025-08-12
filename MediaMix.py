@@ -584,8 +584,9 @@ with tab3:
             mode='lines+markers',
             name='Opt Mix',
             marker=dict(color='#003594'),
-            customdata=x_mix,
-            hovertemplate='%{customdata}<br>Reach: %{y:.2f}%<extra></extra>'
+            tv=df_opt_full['TV 비중'].astype(str),
+            digital=df_opt_full['Digital 비중'].astype(str),
+            hovertemplate='TV: %{tv}<br>''Digital: %{digital}<br>''Optmized: %{y:.2f}%<extra></extra>'
         ))
 
         fig3.add_trace(go.Scatter(
@@ -612,8 +613,8 @@ with tab3:
             hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
             hovermode="x unified",
             template="plotly_white",
-            width=1200,
-            height=900,
+            width=800,
+            height=400,
             dragmode=False,  # 줌/드래그 비활성화
             legend=dict(
                 orientation="h",   # 가로로 표시
