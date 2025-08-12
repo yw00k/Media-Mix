@@ -493,7 +493,7 @@ with tab1:
         x = np.arange(len(labels)); width = 0.38
         fig1, ax1 = plt.subplots(figsize=(7, 4))
         bars1 = ax1.bar(x - width/2, user_vals, width, label='User', color='yellow')
-        bars2 = ax1.bar(x + width/2, opt_vals,  width, label='Opt', color='olivedrab')
+        bars2 = ax1.bar(x + width/2, opt_vals,  width, label='Opt', color='royalblue')
         for bars in (bars1, bars2):
             for b in bars:
                 h = b.get_height()
@@ -543,7 +543,7 @@ with tab2:
     if st.session_state.single_curve is not None:
         a, pred_i, spline_i = st.session_state.single_curve
         fig2, ax2 = plt.subplots(figsize=(10,4))
-        ax2.plot(100*a, 100*pred_i, marker='o', markersize=2, label='Predicted', color='olivedrab')
+        ax2.plot(100*a, 100*pred_i, marker='o', markersize=6, label='Predicted', color='royalblue')
         #ax2.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
         ax2.set_xlim(0, 100)
         ax2.set_xlabel('TV ratio (%)'); ax2.set_ylabel('Reach 1+(%)')
@@ -568,8 +568,8 @@ with tab3:
         df_opt  = st.session_state.sweep_opt
         df_only = st.session_state.sweep_only
         fig3, ax3 = plt.subplots(figsize=(8,5))
-        ax3.plot(df_opt_full['예산(억 원)'], df_opt_full['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='olivedrab')
-        ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only TV'], linestyle='--', marker='s', label='Only TV', color='royalblue')
+        ax3.plot(df_opt_full['예산(억 원)'], df_opt_full['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='royalblue')
+        ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only TV'], linestyle='--', marker='s', label='Only TV', color='olivedrab')
         ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only Digital'], linestyle='--', marker='^', label='Only Digital', color='gold')
         ax3.set_xlabel("Budget Range"); ax3.set_ylabel("Reach 1+(%)")
         ax3.grid(axis='y', linestyle='--', alpha=0.7); ax3.legend()
