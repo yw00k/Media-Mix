@@ -503,8 +503,7 @@ with tab1:
             text=[f"<b>{v:.2f}%<b>" for v in user_vals],
             textposition='outside',
             textfont_size=12,
-            textfont_color="black",
-            dragmode=False
+            textfont_color="black"
         ))
 
         # Opt bar
@@ -516,8 +515,7 @@ with tab1:
             text=[f"<b>{v:.2f}%<b>" for v in opt_vals],
             textposition='outside',
             textfont_size=12,
-            textfont_color="black",
-            dragmode=False
+            textfont_color="black"
         ))
 
         fig1.update_layout(
@@ -525,10 +523,11 @@ with tab1:
             yaxis=dict(range=[0, 100], title="Reach 1+(%)"),
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
+            dragmode=False,
             legend=dict(
                 orientation="h",
                 yanchor="top",
-                y=-0.25,   # x축 아래
+                y=-0.25,
                 xanchor="center",
                 x=0.5
             ),
