@@ -544,13 +544,29 @@ with tab2:
 
     if st.session_state.single_curve is not None:
         a, pred, spline_i = st.session_state.single_curve
-        fig2, ax2 = plt.subplots(figsize=(10,4))
-        ax2.plot(100*a, 100*pred, marker='o', markersize=4, label='Predicted', color='#003594')
-        #ax2.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
-        ax2.set_xlim(0, 100)
-        ax2.set_xlabel('TV ratio (%)'); ax2.set_ylabel('Reach 1+(%)')
-        ax2.grid(axis='y', linestyle='--', alpha=0.7)
-        st.pyplot(fig2)
+        fig2 = go.Figure()
+
+        fig2.add_trace(go.Scatter(
+            x=100*a, 
+            y=100*pred,
+            mode='lines+markers',
+            name='Predicted',
+            marker=dict(size=4, color='#003594')
+        ))
+
+        fig2.update_layout(
+            xaxis=dict(title='TV ratio (%)', range=[0, 100]),
+            yaxis=dict(title='Reach 1+(%)'),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            width=800,
+            height=400,
+            legend=dict(yanchor="top", y=1, xanchor="left", x=0),
+        )
+
+        fig2.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(0,0,0,0.2)')
+        
+        st.plotly_chart(fig2, use_container_width=True)
     if st.session_state.single_out is not None:
         st.dataframe(st.session_state.single_out, use_container_width=True)
 
@@ -609,7 +625,7 @@ with tab3:
         fig3.update_layout(
             xaxis_title="Budget Range (억 원)",
             yaxis_title="Reach 1+(%)",
-            hoverlabel=dict(bgcolor='rgba(0,0,0,0.2)', font_color='white'),
+            hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
             hovermode="x unified",
             template="plotly_white",
             width=800,
