@@ -297,7 +297,7 @@ def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
 # ---------------------------
 # 분석 함수: TV는 CPRP, Digital은 CPM
 # ---------------------------
-UNIT = 100_000_000  # 억→원
+UNIT = 100_000_000  # 억→원s
 
 def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     a_won = a_eok * unit
