@@ -511,7 +511,7 @@ with tab3:
         st.session_state.sweep_opt = df_opt
         st.session_state.sweep_only = df_only
 
-    if (st.session_state.sweep_opt is not None) and (st.session_state.sweep_only is not None):
+    if (st.session_state.sweep_opt_full is not None) and (st.session_state.sweep_only_full is not None):
         df_opt_full = st.session_state.sweep_opt_full
         df_only_full = st.session_state.sweep_only_full
         df_opt  = st.session_state.sweep_opt
