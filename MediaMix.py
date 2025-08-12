@@ -503,7 +503,8 @@ with tab1:
             text=[f"<b>{v:.2f}%<b>" for v in user_vals],
             textposition='outside',
             textfont_size=12,
-            textfont_color="black"
+            textfont_color="black",
+            hoverinfo='skip'
         ))
 
         # Opt bar
@@ -515,7 +516,8 @@ with tab1:
             text=[f"<b>{v:.2f}%<b>" for v in opt_vals],
             textposition='outside',
             textfont_size=12,
-            textfont_color="black"
+            textfont_color="black",
+            hoverinfo='skip'
         ))
 
         fig1.update_layout(
