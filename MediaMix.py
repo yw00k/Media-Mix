@@ -493,7 +493,7 @@ with tab1:
         x = np.arange(len(labels)); width = 0.38
         fig1, ax1 = plt.subplots(figsize=(7, 4))
         bars1 = ax1.bar(x - width/2, user_vals, width, label='User', color='lavender')
-        bars2 = ax1.bar(x + width/2, opt_vals,  width, label='Opt', color='royalblue')
+        bars2 = ax1.bar(x + width/2, opt_vals,  width, label='Opt', color='#003594')
         for bars in (bars1, bars2):
             for b in bars:
                 h = b.get_height()
@@ -568,7 +568,7 @@ with tab3:
         df_opt  = st.session_state.sweep_opt
         df_only = st.session_state.sweep_only
         fig3, ax3 = plt.subplots(figsize=(8,5))
-        ax3.plot(df_opt_full['예산(억 원)'], df_opt_full['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='royalblue')
+        ax3.plot(df_opt_full['예산(억 원)'], df_opt_full['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='#003594')
         ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only TV'], marker='s', label='Only TV', color='#ff7473')
         ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only Digital'], marker='^', label='Only Digital', color='gold')
         ax3.set_xlabel("Budget Range"); ax3.set_ylabel("Reach 1+(%)")
