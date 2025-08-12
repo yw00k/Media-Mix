@@ -656,7 +656,7 @@ with tab3:
             xaxis_title="Budget Range (억 원)",
             yaxis_title="Reach 1+(%)",
             hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
-            hovermode="x",
+            hovermode='x',
             template="plotly_white",
             width=700,
             height=400,
