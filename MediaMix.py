@@ -210,7 +210,7 @@ def logit(p):
     return np.p / (0.91 - p)
 
 def original(p):
-    return 0.91 / (1 + np.exp(-p)
+    return 0.91 / (1 + np.exp(-p))
 
 y_logit = logit(y_total)
 
