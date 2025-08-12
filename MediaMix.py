@@ -408,7 +408,7 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
 # ---------------------------
 tab1, tab2, tab3 = st.tabs(["개별 예산 최적화", "총 예산 최적화", "예산 범위 최적화"])
 
-for key in ["compare_result", "single_curve", "single_out", "sweep_opt", "sweep_only"]:
+for key in ["compare_result", "single_curve", "single_out", "sweep_opt_full", "sweep_only_full", "sweep_opt", "sweep_only"]:
     if key not in st.session_state:
         st.session_state[key] = None
 
