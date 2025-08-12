@@ -582,6 +582,8 @@ with tab3:
             y=df_opt_full['Total Reach 1+(%)'],
             mode='lines+markers',
             name='Opt Mix',
+            tv=tv,
+            digital=digital
             marker=dict(color='#003594'),
             hovertemplate='TV: %{tv}<br>Digital: %{digital}<br>Optmized: %{y:.2f}%<extra></extra>'
         ))
