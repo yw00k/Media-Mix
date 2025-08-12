@@ -583,7 +583,6 @@ with tab2:
             mode='lines+markers',
             name='Predicted',
             hoverinfo='skip',
-            dragmode=False,
             marker=dict(size=4, color='#003594')
         ))
 
@@ -594,6 +593,7 @@ with tab2:
             paper_bgcolor='rgba(0,0,0,0)',
             width=800,
             height=400,
+            dragmode=False,
             legend=dict(yanchor="top", y=1, xanchor="left", x=0),
         )
 
