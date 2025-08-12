@@ -550,11 +550,11 @@ with tab3:
         df_opt  = st.session_state.sweep_opt_graph
         df_only = st.session_state.sweep_only_graph
         fig3, ax3 = plt.subplots(figsize=(8,5))
-        ax3.plot(df_opt['예산(억 원)'], df_opt['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
-        ax3.plot(df_only['예산(억 원)'], df_only['Only TV'], linestyle='--', marker='s', label='Only TV', color='royalblue')
-        ax3.plot(df_only['예산(억 원)'], df_only['Only Digital'], linestyle='--', marker='^', label='Only Digital', color='darkorange')
+        ax3.plot(st.session_state.sweep_opt_graph['예산(억 원)'], st.session_state.sweep_opt_graph['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='mediumseagreen')
+        ax3.plot(st.session_state.sweep_only_graph['예산(억 원)'], st.session_state.sweep_only_graph['Only TV'], linestyle='--', marker='s', label='Only TV', color='royalblue')
+        ax3.plot(st.session_state.sweep_only_graph['예산(억 원)'], st.session_state.sweep_only_graph['Only Digital'], linestyle='--', marker='^', label='Only Digital', color='darkorange')
         ax3.set_xlabel("Budget Range"); ax3.set_ylabel("Reach 1+(%)")
         ax3.grid(True, linestyle='--'); ax3.legend()
         st.pyplot(fig3)
 
-        st.dataframe(df_opt_table, use_container_width=True)
+        st.dataframe(st.session_state.sweep_opt_table, use_container_width=True)
