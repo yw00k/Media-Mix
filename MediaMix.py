@@ -130,45 +130,12 @@ if uni_df is None or 'target' not in uni_df.columns or 'universe' not in uni_df.
 
 row_uni = uni_df.loc[uni_df['target'] == selected_target, 'universe']
 if row_uni.empty:
-    st.warning("⚠ 선택한 타겟의 데이터를 찾지 못했습니다. 기본값을 사용합니다.")
+    st.warning("선택한 타겟의 universe 값을 찾지 못했습니다. 첫 행의 universe를 사용합니다.")
     universe = float(uni_df['universe'].iloc[0])
 else:
     universe = float(row_uni.iloc[0])
 
 st.caption(f"👥 Universe: **{int(universe):,}**")
-
-# ---------------------------
-# Load CPRP default for target
-# ---------------------------
-CPRP_PATH = "/Media Mix/cprp.csv"
-
-cprp_df = load_csv_from_dropbox(CPRP_PATH)
-default_cprp_value = 1_000_000
-
-
-if cprp_df is None or 'target' not in cprp_df.columns or 'cprp' not in cprp_df.columns:
-    st.warning("⚠ 데이터를 찾지 못했습니다. 기본값을 사용합니다.")
-    cprp_default_for_target = default_cprp_value
-else:
-
-    row_cprp = cprp_df.loc[cprp_df['target'] == selected_target, 'cprp']
-    if row_cprp.empty:
-        st.warning("⚠ 선택한 타겟의 CPRP 값을 찾지 못했습니다. 기본값을 사용합니다.")
-        cprp_default_for_target = default_cprp_value
-    else:
-        try:
-            cprp_default_for_target = float(row_cprp.iloc[0])
-        except Exception:
-            st.warning("⚠ 데이터를 찾지 못했습니다. 기본값을 사용합니다.")
-            cprp_default_for_target = default_cprp_value
-
-if 'last_target_for_cprp' not in st.session_state:
-    st.session_state.last_target_for_cprp = None
-
-if st.session_state.last_target_for_cprp != selected_target:
-
-    st.session_state['cprp_input'] = f"{cprp_default_for_target:,.0f}"
-    st.session_state.last_target_for_cprp = selected_target
 
 # ---------------------------
 # Prepare arrays
@@ -184,15 +151,15 @@ y_ab    = df_t['r1_ab'].values
 imps  = np.arange(1, 200_000_000, 1_000_000, dtype=np.int64)
 
 def hill(x, a, b, c):
-    return np.log(c / (1.0 + (b / x)**a))
+    return c / (1.0 + (b / x)**a)
 
 initial_params = [1.0, 50_000_000.0, 0.6]
 bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
-bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.6])
+bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.7])
 
-popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=20000)
-popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=20000)
-popt_t, _ = curve_fit(hill, x_total, y_total, p0=initial_params, bounds=bounds_a, maxfev=20000)
+popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=30000)
+popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=30000)
+popt_t, _ = curve_fit(hill, x_total, y_total, p0=initial_params, bounds=bounds_a, maxfev=30000)
 
 pred_a_fit = hill(x_a, *popt_a)
 pred_b_fit = hill(x_b, *popt_b)
@@ -206,21 +173,13 @@ media_r1_result = pd.DataFrame({
 }, index=['TV','Digital'])
 
 # 통합 모델
-def logit(p):
-    return np.log(p / (0.91 - p))
-
-def original(p):
-    return 0.91 / (1 + np.exp(-p))
-
-y_logit = logit(y_total)
-
 X_train = pd.DataFrame({
-    'const': 1.0,
-    'r1_a': logit(y_a),
-    'r1_b': logit(y_b),
-    'r1_ab': logit(y_ab)
+    'const': 0.0,
+    'r1_a': df_t['r1_a'].values,
+    'r1_b': df_t['r1_b'].values,
+    'r1_ab': df_t['r1_ab'].values
 })
-model_total = sm.OLS(y_logit, X_train).fit()
+model_total = sm.OLS(y_total, X_train).fit()
 
 # ---------------------------
 # CPM/CPRP UI
@@ -254,7 +213,7 @@ with col_cprp:
     cprp_a_global = money_input(
         "TV CPRP(원)",
         key="cprp_input",
-        default=cprp_default_for_target,
+        default=1_000_000.0,
         help="천 단위 콤마로 입력/표시됩니다.",
         decimals=0,     # 필요하면 1~2로 늘려도 OK
         min_value=0.0
@@ -303,9 +262,9 @@ def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
     return imps
 
 # ---------------------------
-# 분석 함수: TV는 CPRP, Digital은 CPM
+# 분석 함수들: TV는 CPRP+universe, Digital은 CPM
 # ---------------------------
-UNIT = 100_000_000  # 억→원s
+UNIT = 100_000_000  # 억→원
 
 def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     a_won = a_eok * unit
@@ -318,10 +277,9 @@ def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     b_r1 = hill(np.array([b_imps]), *popt_b) if b_imps > 0 else np.array([0.0])
     ab_r1 = a_r1 * b_r1
 
-    X_user = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1), 'r1_b': logit(b_r1), 'r1_ab': logit(ab_r1)})
+    X_user = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
     total_r1 = model_total.predict(X_user)
-    total_r1 = original(total_r1)
-    
+
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)', 'Digital(억 원)', '총(억 원)', 'TV Reach 1+(%)', 'Digital Reach 1+(%)', 'Total Reach 1+(%)'],
         '값': [
@@ -351,9 +309,8 @@ def optimize_total_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     b_r1_curve = hill(b_imps, *popt_b)
     ab_r1_curve = a_r1_curve * b_r1_curve
 
-    X_opt = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1_curve), 'r1_b': logit(b_r1_curve), 'r1_ab': logit(ab_r1_curve)})
+    X_opt = pd.DataFrame({'const': 0.0, 'r1_a': a_r1_curve, 'r1_b': b_r1_curve, 'r1_ab': ab_r1_curve})
     total_r1_curve = model_total.predict(X_opt).values
-    total_r1_curve = original(total_r1_curve)
 
     idx = int(np.argmax(total_r1_curve))
 
@@ -430,9 +387,8 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
         b_r1 = hill(b_imps, *popt_b)
         ab_r1 = a_r1 * b_r1
 
-        X_mix = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1), 'r1_b': logit(b_r1), 'r1_ab': logit(ab_r1)})
+        X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
         total_r1_curve = model_total.predict(X_mix).values
-        total_r1_curve = original(total_r1_curve)
 
         idx = int(np.argmax(total_r1_curve))
         results.append({
@@ -516,9 +472,8 @@ with tab2:
         b_r1 = hill(b_imps, *popt_b)
         ab_r1 = a_r1 * b_r1
 
-        X_mix = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1), 'r1_b': logit(b_r1), 'r1_ab': logit(ab_r1)})
+        X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
         pred = model_total.predict(X_mix).values
-        pred = original(pred)
 
         df_spline = pd.DataFrame({'a': a, 'pred': pred})
         spline_a = dmatrix("bs(a, df=12, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
