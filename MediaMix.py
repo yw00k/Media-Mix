@@ -572,10 +572,9 @@ with tab3:
 
         fig3 = go.Figure(layout=go.Layout(paper_bgcolor='rgba(0,0,0,0)',
                                           plot_bgcolor='rgba(0,0,0,0)'))
-        x_mix = (
-            df_opt_full['TV 비중'].astype(str)
-            .str.cat(df_opt_full['Digital 비중'].astype(str), sep=' : ')
-        )
+        
+        tv=df_opt_full['TV 비중'].astype(str)
+        digital=df_opt_full['Digital 비중'].astype(str)
 
 
         fig3.add_trace(go.Scatter(
@@ -584,8 +583,6 @@ with tab3:
             mode='lines+markers',
             name='Opt Mix',
             marker=dict(color='#003594'),
-            tv=df_opt_full['TV 비중'].astype(str),
-            digital=df_opt_full['Digital 비중'].astype(str),
             hovertemplate='TV: %{tv}<br>Digital: %{digital}<br>Optmized: %{y:.2f}%<extra></extra>'
         ))
 
