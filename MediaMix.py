@@ -203,7 +203,7 @@ def imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val):
 
     with np.errstate(divide='ignore', invalid='ignore'):
         imps = np.where((cprp > 0) & (uni > 0) & (budget > 0),
-                        (budget / cprp) * uni,
+                        (budget / cprp) / 100 * uni,
                         0.0)
 
     # 입력 타입 유지: 스칼라 입력이면 스칼라로 반환
