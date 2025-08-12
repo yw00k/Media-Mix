@@ -184,13 +184,52 @@ model_total = sm.OLS(y_total, X_train).fit()
 # ---------------------------
 # CPM/CPRP UI
 # ---------------------------
+def money_input(label, key, default=0.0, help=None, decimals=0, min_value=0.0):
+    """
+    천 단위 콤마를 보여주는 입력. 텍스트로 받고 float으로 반환.
+    - decimals: 소수 자릿수 (0이면 정수로 표기)
+    """
+    fmt = f"{{:,.{decimals}f}}"
+    # 초기 값 세팅 (첫 렌더링 시)
+    if key not in st.session_state:
+        st.session_state[key] = fmt.format(default)
+
+    # 입력창
+    s = st.text_input(label, value=st.session_state[key], key=f"{key}_text", help=help)
+
+    # 파싱: 콤마 제거 → float
+    try:
+        v = float(s.replace(",", ""))
+        if v < min_value:
+            raise ValueError
+        # 표기 통일(콤마 포함)로 다시 세션에 저장
+        st.session_state[key] = fmt.format(v)
+    except ValueError:
+        # 파싱 실패 시 기존값 유지 + 경고
+        st.warning("숫자만 입력하세요. 예: 1,000,000")
+        v = float(st.session_state[key].replace(",", ""))
+
+    return v
+
 col_cprp, col_cpm = st.columns(2)
 with col_cprp:
-    # TV는 CPRP를 받음 (원/RatingPoint)
-    cprp_a_global = st.number_input("TV CPRP", value=1000000.0, step=100000.0, min_value=0.0)
+    cprp_a_global = money_input(
+        "TV CPRP(원 / RP)",
+        key="cprp_input",
+        default=1_000_000.0,
+        help="천 단위 콤마로 입력/표시됩니다.",
+        decimals=0,     # 필요하면 1~2로 늘려도 OK
+        min_value=0.0
+    )
 with col_cpm:
-    # Digital은 기존처럼 CPM
-    cpm_b_global = st.number_input("Digital CPM", value=7000.0, step=100.0, min_value=0.0)
+    cpm_b_global = money_input(
+        "Digital CPM(원)",
+        key="cpm_input",
+        default=7_000.0,
+        help="천 단위 콤마로 입력/표시됩니다.",
+        decimals=0,
+        min_value=0.0
+    )
 
 # ---------------------------
 # 공통: 예산→임프레션 변환 함수 (TV=CPRP, Digital=CPM)
