@@ -569,8 +569,8 @@ with tab3:
         df_only = st.session_state.sweep_only
         fig3, ax3 = plt.subplots(figsize=(8,5))
         ax3.plot(df_opt_full['예산(억 원)'], df_opt_full['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='royalblue')
-        ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only TV'], marker='s', label='Only TV', color='olivedrab')
-        ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only Digital'], marker='^', label='Only Digital', color='hotpink')
+        ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only TV'], marker='s', label='Only TV', color='#ff7473')
+        ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only Digital'], marker='^', label='Only Digital', color='gold')
         ax3.set_xlabel("Budget Range"); ax3.set_ylabel("Reach 1+(%)")
         ax3.grid(axis='y', linestyle='--', alpha=0.7); ax3.legend()
         st.pyplot(fig3)
