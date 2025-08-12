@@ -543,7 +543,7 @@ with tab2:
     if st.session_state.single_curve is not None:
         a, pred_i, spline_i = st.session_state.single_curve
         fig2, ax2 = plt.subplots(figsize=(10,4))
-        ax2.plot(100*a, 100*pred_i, marker='o', markersize=4, label='Predicted', color='royalblue')
+        ax2.plot(100*a, 100*pred_i, marker='o', markersize=4, label='Predicted', color='#003594')
         #ax2.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
         ax2.set_xlim(0, 100)
         ax2.set_xlabel('TV ratio (%)'); ax2.set_ylabel('Reach 1+(%)')
