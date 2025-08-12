@@ -574,12 +574,7 @@ with tab3:
                                           plot_bgcolor='rgba(0,0,0,0)'))
         x_mix = (
             df_opt_full['TV 비중'].astype(str)
-              .str.replace('%','', regex=False).str.zfill(2).add('%')  # 선택: 정렬용
-              .str.cat(
-                  df_opt_full['Digital 비중'].astype(str)
-                    .str.replace('%','', regex=False).str.zfill(2).add('%'),
-                  sep=' : '
-              )
+            .str.cat(df_opt_full['Digital 비중'].astype(str), sep=' : ')
         )
 
 
@@ -589,7 +584,8 @@ with tab3:
             mode='lines+markers',
             name='Opt Mix',
             marker=dict(color='#003594'),
-            hovertemplate='%{x_mix}%<br>Reach: %{y:.2f}%<extra></extra>'
+            customdata=x_mix,
+            hovertemplate='%{customdata}<br>Reach: %{y:.2f}%<extra></extra>'
         ))
 
         fig3.add_trace(go.Scatter(
@@ -618,6 +614,14 @@ with tab3:
             template="plotly_white",
             width=800,
             height=600
+            dragmode=False,  # 줌/드래그 비활성화
+            legend=dict(
+                orientation="h",   # 가로로 표시
+                yanchor="top",
+                y=-0.2,            # 그래프 하단에 배치
+                xanchor="center",
+                x=0.5
+            )
         )
 
         st.plotly_chart(fig3, use_container_width=True)
