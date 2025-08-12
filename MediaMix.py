@@ -443,7 +443,7 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
         })
     totals_raw = np.array(totals_raw, dtype=float)
     totals_plateau = plateau_after_exceed(totals_raw, threshold=1.0)
-    total = totals_plateau
+    total = np.round(100.0 * totals_plateau, 2)
 
     df_opt_full = pd.DataFrame(results).reset_index(drop=True)
     df_opt_full['Total Reach 1+(%)'] = total    
