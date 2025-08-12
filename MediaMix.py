@@ -298,6 +298,17 @@ def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
 # ---------------------------
 UNIT = 100_000_000  # 억→원
 
+def plateau_after_exceed(arr, threshold=1.0):
+    a = np.asarray(arr, dtype=float).copy()
+    over = a > threshold
+    if np.any(over):
+        i = int(np.argmax(over))  # 첫 초과 인덱스
+        if i > 0:
+            a[i:] = a[i-1]
+        else:
+            a[:] = threshold
+    return a
+
 def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     a_won = a_eok * unit
     b_won = b_eok * unit
@@ -408,6 +419,7 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
     }).reset_index(drop=True)
 
     results = []
+    totals_raw = []
     for won, eok in zip(budget_won, budget_eok):
         a_budget = a_share * won
         b_budget = b_share * won
@@ -420,15 +432,20 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
         ab_r1 = a_r1 * b_r1
 
         X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
-        total_r1_curve = model_total.predict(X_mix).values
+        total_r1_curve = model_total.predict(X_mix).values  # 0~1 범위 가정(넘을 수 있음)
 
         idx = int(np.argmax(total_r1_curve))
+        totals_raw.append(float(total_r1_curve[idx]))
         results.append({
             '예산(억 원)': eok,
             'TV 비중': f"{int(a_share[idx]*100)}%",
             'Digital 비중': f"{int(b_share[idx]*100)}%",
-            'Total Reach 1+(%)': round(100.0 * float(total_r1_curve[idx]), 2),
         })
+    totals_raw = np.array(totals_raw, dtype=float)
+    totals_plateau = plateau_after_exceed(totals_raw, threshold=1.0)
+    total = totals_plateau
+
+    df_opt_full['Total Reach 1+(%)'] = total    
     df_opt_full = pd.DataFrame(results).reset_index(drop=True)
     df_only = df_only_full[df_only_full['예산(억 원)'] > 0].reset_index(drop=True)
     df_opt  = df_opt_full[df_opt_full['예산(억 원)'] > 0].reset_index(drop=True)
