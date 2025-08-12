@@ -640,7 +640,7 @@ with tab3:
             mode='lines+markers',
             name='Only TV',
             marker=dict(color='#ff7473'),
-            hovertemplate='Only TV R1+: %{y:.2f}%<extra></extra>'
+            hovertemplate='Only TV R1+: %{y:.2f}%'
         ))
 
         fig3.add_trace(go.Scatter(
