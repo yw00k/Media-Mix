@@ -184,7 +184,7 @@ y_ab    = df_t['r1_ab'].values
 imps  = np.arange(1, 200_000_000, 1_000_000, dtype=np.int64)
 
 def hill(x, a, b, c):
-    return c / (1.0 + (b / x)**a)
+    return np.log(c / (1.0 + (b / x)**a))
 
 initial_params = [1.0, 50_000_000.0, 0.6]
 bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
@@ -206,13 +206,21 @@ media_r1_result = pd.DataFrame({
 }, index=['TV','Digital'])
 
 # 통합 모델
+def logit(p):
+    return np.p / (0.91 - p)
+
+def original(p):
+    return 0.91 / (1 + np.exp(-p)
+
+y_logit = logit(y_total)
+
 X_train = pd.DataFrame({
-    'const': 0.0,
-    'r1_a': df_t['r1_a'].values,
-    'r1_b': df_t['r1_b'].values,
-    'r1_ab': df_t['r1_ab'].values
+    'const': 1.0,
+    'r1_a': logit(y_a),
+    'r1_b': logit(y_b),
+    'r1_ab': logit(y_ab)
 })
-model_total = sm.OLS(y_total, X_train).fit()
+model_total = sm.OLS(y_logit, X_train).fit()
 
 # ---------------------------
 # CPM/CPRP UI
@@ -310,8 +318,8 @@ def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     b_r1 = hill(np.array([b_imps]), *popt_b) if b_imps > 0 else np.array([0.0])
     ab_r1 = a_r1 * b_r1
 
-    X_user = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
-    total_r1 = model_total.predict(X_user)
+    X_user = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1), 'r1_b': logit(b_r1), 'r1_ab': logit(ab_r1)})
+    total_r1 = original(model_total.predict(X_user))
 
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)', 'Digital(억 원)', '총(억 원)', 'TV Reach 1+(%)', 'Digital Reach 1+(%)', 'Total Reach 1+(%)'],
@@ -342,8 +350,8 @@ def optimize_total_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     b_r1_curve = hill(b_imps, *popt_b)
     ab_r1_curve = a_r1_curve * b_r1_curve
 
-    X_opt = pd.DataFrame({'const': 0.0, 'r1_a': a_r1_curve, 'r1_b': b_r1_curve, 'r1_ab': ab_r1_curve})
-    total_r1_curve = model_total.predict(X_opt).values
+    X_opt = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1_curve), 'r1_b': logit(b_r1_curve), 'r1_ab': logit(ab_r1_curve)})
+    total_r1_curve = original(model_total.predict(X_opt).values)
 
     idx = int(np.argmax(total_r1_curve))
 
@@ -420,8 +428,8 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
         b_r1 = hill(b_imps, *popt_b)
         ab_r1 = a_r1 * b_r1
 
-        X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
-        total_r1_curve = model_total.predict(X_mix).values
+        X_mix = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1), 'r1_b': logit(b_r1), 'r1_ab': logit(ab_r1)})
+        total_r1_curve = original(model_total.predict(X_mix).values)
 
         idx = int(np.argmax(total_r1_curve))
         results.append({
@@ -505,8 +513,8 @@ with tab2:
         b_r1 = hill(b_imps, *popt_b)
         ab_r1 = a_r1 * b_r1
 
-        X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
-        pred = model_total.predict(X_mix).values
+        X_mix = pd.DataFrame({'const': 1.0, 'r1_a': logit(a_r1), 'r1_b': logit(b_r1), 'r1_ab': logit(ab_r1)})
+        pred = original(model_total.predict(X_mix).values)
 
         df_spline = pd.DataFrame({'a': a, 'pred': pred})
         spline_a = dmatrix("bs(a, df=12, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
