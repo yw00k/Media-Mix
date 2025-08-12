@@ -547,7 +547,7 @@ with tab2:
         #ax2.plot(100*a, 100*spline_i, color='crimson', linewidth=2, label='Spline Fit')
         ax2.set_xlim(0, 100)
         ax2.set_xlabel('TV ratio (%)'); ax2.set_ylabel('Reach 1+(%)')
-        ax2.grid(axis='x', linestyle='--', alpha=0.7)
+        ax2.grid(axis='y', linestyle='--', alpha=0.7)
         st.pyplot(fig2)
     if st.session_state.single_out is not None:
         st.dataframe(st.session_state.single_out, use_container_width=True)
@@ -572,7 +572,7 @@ with tab3:
         ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only TV'], linestyle='--', marker='s', label='Only TV', color='royalblue')
         ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only Digital'], linestyle='--', marker='^', label='Only Digital', color='crimson')
         ax3.set_xlabel("Budget Range"); ax3.set_ylabel("Reach 1+(%)")
-        ax3.grid(axis='x', linestyle='--', alpha=0.7); ax3.legend()
+        ax3.grid(axis='y', linestyle='--', alpha=0.7); ax3.legend()
         st.pyplot(fig3)
 
         st.dataframe(df_opt, use_container_width=True)
