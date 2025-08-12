@@ -450,7 +450,7 @@ with tab2:
         spline_i = spline_fit.predict(spline_a)
 
         st.session_state.single_curve = (a, pred_i, spline_i)
-        best_idx = int(np.argmax(pred))
+        best_idx = int(np.argmax(pred_i))
         out = pd.DataFrame({
             'TV 비중': [f"{int(a[best_idx]*100)}%"],
             'Digital 비중': [f"{int(b[best_idx]*100)}%"],
