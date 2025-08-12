@@ -445,8 +445,8 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, u
     totals_plateau = plateau_after_exceed(totals_raw, threshold=1.0)
     total = totals_plateau
 
-    df_opt_full['Total Reach 1+(%)'] = total    
     df_opt_full = pd.DataFrame(results).reset_index(drop=True)
+    df_opt_full['Total Reach 1+(%)'] = total    
     df_only = df_only_full[df_only_full['예산(억 원)'] > 0].reset_index(drop=True)
     df_opt  = df_opt_full[df_opt_full['예산(억 원)'] > 0].reset_index(drop=True)
     return df_opt_full, df_only_full, df_opt, df_only
