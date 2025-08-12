@@ -612,8 +612,8 @@ with tab3:
             hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
             hovermode="x unified",
             template="plotly_white",
-            width=600,
-            height=800,
+            width=1200,
+            height=900,
             dragmode=False,  # 줌/드래그 비활성화
             legend=dict(
                 orientation="h",   # 가로로 표시
