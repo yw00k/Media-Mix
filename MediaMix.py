@@ -400,7 +400,7 @@ def compare_user_vs_opt(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     ])
     return summary
 
-def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=30, unit=UNIT):
+def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=20, unit=UNIT):
     a_share = np.arange(0, 101, dtype=np.float64) / 100.0
     b_share = 1.0 - a_share
 
@@ -551,7 +551,7 @@ with tab2:
 
 # 탭3
 with tab3:
-    max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=30, value=15)
+    max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10)
     if st.button("실행", type="primary", key="sweep_run"):
         df_opt_full, df_only_full, df_opt, df_only = optimize_mix_over_budget(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
         st.session_state.sweep_opt_full = df_opt_full
