@@ -499,7 +499,6 @@ with tab1:
             y=user_vals,
             name='User',
             marker_color='gold',
-            opacity=0.7,
             text=[f"<b>{v:.2f}%<b>" for v in user_vals],
             textposition='outside',
             textfont_size=12,
