@@ -457,7 +457,7 @@ with tab2:
         spline_i = spline_fit.predict(spline_a)
 
         st.session_state.single_curve = (a, pred, spline_i)
-        best_idx = int(np.argmax(pred_i))
+        best_idx = int(np.argmax(pred))
         a_share = float(a[best_idx])
         b_share = 1.0 - a_share
         best_pred = float(pred[best_idx])
