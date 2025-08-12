@@ -574,7 +574,7 @@ with tab3:
                                           plot_bgcolor='rgba(0,0,0,0)'))
 
         fig3.add_trace(go.Scatter(
-            x=df_opt_full['TV 비중', 'Digital 비중'],
+            x=df_opt_full['TV 비중'] + ":" + df_opt_full['Digital 비중'],
             y=df_opt_full['Total Reach 1+(%)'],
             mode='lines+markers',
             name='Opt Mix',
@@ -583,7 +583,7 @@ with tab3:
         ))
 
         fig3.add_trace(go.Scatter(
-            x=df_only_full['예산(억 원)'],
+            x="100%",
             y=df_only_full['Only TV'],
             mode='lines+markers',
             name='Only TV',
@@ -592,7 +592,7 @@ with tab3:
         ))
 
         fig3.add_trace(go.Scatter(
-            x=df_only_full['예산(억 원)'],
+            x="100%",
             y=df_only_full['Only Digital'],
             mode='lines+markers',
             name='Only Digital',
@@ -603,6 +603,7 @@ with tab3:
         fig3.update_layout(
             xaxis_title="Budget Range (억 원)",
             yaxis_title="Reach 1+(%)",
+            hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)',
             hovermode="x unified",
             template="plotly_white",
             width=800,
