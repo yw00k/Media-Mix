@@ -214,7 +214,7 @@ def money_input(label, key, default=0.0, help=None, decimals=0, min_value=0.0):
 col_cprp, col_cpm = st.columns(2)
 with col_cprp:
     cprp_a_global = money_input(
-        "TV CPRP(원 / RP)",
+        "TV CPRP(원)",
         key="cprp_input",
         default=1_000_000.0,
         help="천 단위 콤마로 입력/표시됩니다.",
