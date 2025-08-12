@@ -161,15 +161,17 @@ media_r1_result = pd.DataFrame({
     'MAE(%)':     [mean_absolute_error(y_a, pred_a_fit)*100, mean_absolute_error(y_b, pred_b_fit)*100]
 }, index=['TV','Digital'])
 
-# 통합 모델 학습
-X_train = pd.DataFrame({
-    'const': 0.0,
-    'r1_a': df_t['r1_a'].values,
-    'r1_b': df_t['r1_b'].values,
-    'r1_ab': df_t['r1_ab'].values
+# 통합 모델
+y_logit = logit(_clip01(y_total))
+X_train_logit = pd.DataFrame({
+    'const': 1.0,
+    'r1_a':  logit(_clip01(df_t['r1_a'].values)),
+    'r1_b':  logit(_clip01(df_t['r1_b'].values)),
+    'r1_ab': logit(_clip01(df_t['r1_ab'].values)),
 })
-model_total = sm.OLS(y_total, X_train).fit()
-pred_in = model_total.predict(X_train)
+model_total = sm.OLS(y_logit, X_train_logit).fit()
+pred_in_logit = model_total.predict(X_train_logit)
+pred_in = inv_logit(pred_in_logit)
 
 # 시각화: 미디어별 Reach 1+(%)
 ##st.subheader("미디어별 Reach 1+(%)")
@@ -183,6 +185,20 @@ pred_in = model_total.predict(X_train)
 ##st.pyplot(fig)
 
 # 공통 계산 함수들
+
+EPS = 1e-9
+
+def _clip01(arr, eps: float = EPS):
+    return np.clip(arr, eps, 1.0 - eps)
+
+def logit(p):
+    p = _clip01(np.asarray(p, dtype=float))
+    return np.log(p / (1.0 - p))
+
+def inv_logit(z):
+    z = np.asarray(z, dtype=float)
+    return 1.0 / (1.0 + np.exp(-z))
+
 def analyze_custom_budget(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
     # 억→원
     a_won = a_eok * unit
@@ -196,13 +212,13 @@ def analyze_custom_budget(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
     b_r1 = hill(np.array([b_imps]), *popt_b) if b_imps > 0 else np.array([0.0])
     ab_r1 = a_r1 * b_r1
 
-    X_user = pd.DataFrame({
-        'const': 0.0,
-        'r1_a': a_r1,
-        'r1_b': b_r1,
-        'r1_ab': ab_r1
+    X_user_logit = pd.DataFrame({
+        'const': 1.0,
+        'r1_a':  logit(_clip01(a_r1)),
+        'r1_b':  logit(_clip01(b_r1)),
+        'r1_ab': logit(_clip01(ab_r1)),
     })
-    total_r1 = model_total.predict(X_user)
+    total_r1 = inv_logit(model_total.predict(X_user_logit))
 
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)', 'Digital(억 원)', '총(억 원)', 'TV Reach 1+(%)', 'Digital Reach 1+(%)', 'Total Reach 1+(%)'],
@@ -230,13 +246,13 @@ def optimize_total_budget(a_eok, b_eok, cpm_a, cpm_b, unit=100_000_000):
     b_r1_curve = hill(b_imps, *popt_b)
     ab_r1_curve = a_r1_curve * b_r1_curve
 
-    X_opt = pd.DataFrame({
-        'const': 0.0,
-        'r1_a': a_r1_curve,
-        'r1_b': b_r1_curve,
-        'r1_ab': ab_r1_curve
+    X_opt_logit = pd.DataFrame({
+        'const': 1.0,
+        'r1_a':  logit(_clip01(a_r1_curve)),
+        'r1_b':  logit(_clip01(b_r1_curve)),
+        'r1_ab': logit(_clip01(ab_r1_curve)),
     })
-    total_r1_curve = model_total.predict(X_opt).values
+    total_r1_curve = inv_logit(model_total.predict(X_opt_logit).values)
     idx = int(np.argmax(total_r1_curve))
 
     out = {
@@ -313,8 +329,13 @@ def optimize_mix_over_budget(cpm_a, cpm_b, max_budget_units=30, unit=100_000_000
         b_r1 = hill(b_imps, *popt_b)
         ab_r1 = a_r1 * b_r1
 
-        X_mix = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
-        total_r1_curve = model_total.predict(X_mix).values
+        X_mix_logit = pd.DataFrame({
+            'const': 1.0,
+            'r1_a':  logit(_clip01(a_r1)),
+            'r1_b':  logit(_clip01(b_r1)),
+            'r1_ab': logit(_clip01(ab_r1)),
+        })
+        total_r1_curve = inv_logit(model_total.predict(X_mix_logit).values)
 
         idx = int(np.argmax(total_r1_curve))
         a_share = float(a[idx])
@@ -414,8 +435,14 @@ with tab2:
         a_r1 = hill(a_imps, *popt_a)
         b_r1 = hill(b_imps, *popt_b)
         ab_r1 = a_r1 * b_r1
-        X_mix = pd.DataFrame({'const': 1.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
-        pred = model_total.predict(X_mix)
+        X_mix_logit = pd.DataFrame({
+            'const': 1.0,
+            'r1_a':  logit(_clip01(a_r1)),
+            'r1_b':  logit(_clip01(b_r1)),
+            'r1_ab': logit(_clip01(ab_r1)),
+        })
+        pred_logit = model_total.predict(X_mix_logit)
+        pred = inv_logit(pred_logit)
 
         df_spline = pd.DataFrame({'a': a, 'pred': pred})
         spline_a = dmatrix("bs(a, df=12, degree=2, include_intercept=True)", data=df_spline, return_type='dataframe')
