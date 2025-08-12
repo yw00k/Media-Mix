@@ -575,6 +575,7 @@ with tab3:
         
         tv=df_opt_full['TV 비중'].astype(str)
         digital=df_opt_full['Digital 비중'].astype(str)
+        customdata = np.column_stack([tv.values, digital.values])
 
 
         fig3.add_trace(go.Scatter(
@@ -582,10 +583,9 @@ with tab3:
             y=df_opt_full['Total Reach 1+(%)'],
             mode='lines+markers',
             name='Opt Mix',
-            tv=tv,
-            digital=digital,
+            customdata=customdata,
             marker=dict(color='#003594'),
-            hovertemplate='TV: %{tv}<br>Digital: %{digital}<br>Optmized: %{y:.2f}%<extra></extra>'
+            hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Optmized: %{y:.2f}%<extra></extra>'
         ))
 
         fig3.add_trace(go.Scatter(
