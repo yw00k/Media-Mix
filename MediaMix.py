@@ -166,7 +166,7 @@ media_r1_result = pd.DataFrame({
 EPS = 1e-9
 
 def _clip01(arr, eps: float = EPS):
-    return np.clip(arr, eps1, 1.0 - eps)
+    return np.clip(arr, eps, 1.0 - eps)
 
 def logit(p):
     p = _clip01(np.asarray(p, dtype=float))
