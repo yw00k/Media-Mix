@@ -6,6 +6,7 @@ import statsmodels.api as sm
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 from patsy import dmatrix
 import dropbox
 from io import BytesIO
@@ -568,12 +569,46 @@ with tab3:
         df_only_full = st.session_state.sweep_only_full
         df_opt  = st.session_state.sweep_opt
         df_only = st.session_state.sweep_only
-        fig3, ax3 = plt.subplots(figsize=(8,5))
-        ax3.plot(df_opt_full['예산(억 원)'], df_opt_full['Total Reach 1+(%)'], marker='o', label='Opt Mix', color='#003594')
-        ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only TV'], marker='s', label='Only TV', color='#ff7473')
-        ax3.plot(df_only_full['예산(억 원)'], df_only_full['Only Digital'], marker='^', label='Only Digital', color='gold')
-        ax3.set_xlabel("Budget Range"); ax3.set_ylabel("Reach 1+(%)")
-        ax3.grid(axis='y', linestyle='--', alpha=0.7); ax3.legend()
-        st.pyplot(fig3)
 
+        fig3 = go.Figure()
+
+        fig3.add_trace(go.Scatter(
+            x=df_opt_full['예산(억 원)'],
+            y=df_opt_full['Total Reach 1+(%)'],
+            mode='lines+markers',
+            name='Opt Mix',
+            marker=dict(color='#003594'),
+            hovertemplate='예산: %{x}억<br>Reach: %{y:.2f}%'
+        ))
+
+        fig3.add_trace(go.Scatter(
+            x=df_only_full['예산(억 원)'],
+            y=df_only_full['Only TV'],
+            mode='lines+markers',
+            name='Only TV',
+            marker=dict(color='#ff7473'),
+            hovertemplate='예산: %{x}억<br>Reach: %{y:.2f}%'
+        ))
+
+        fig3.add_trace(go.Scatter(
+            x=df_only_full['예산(억 원)'],
+            y=df_only_full['Only Digital'],
+            mode='lines+markers',
+            name='Only Digital',
+            marker=dict(color='gold'),
+            hovertemplate='예산: %{x}억<br>Reach: %{y:.2f}%'
+        ))
+
+        fig3.update_layout(
+            xaxis_title="Budget Range (억 원)",
+            yaxis_title="Reach 1+(%)",
+            hovermode="x unified",
+            template="plotly_white",
+            width=800,
+            height=600
+        )
+
+        st.plotly_chart(fig3, use_container_width=True)
+
+        # 표 출력
         st.dataframe(df_opt, use_container_width=True)

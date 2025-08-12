@@ -8,3 +8,4 @@ statsmodels
 patsy
 dropbox
 pyarrow
+plotly
