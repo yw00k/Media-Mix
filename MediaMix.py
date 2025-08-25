@@ -660,7 +660,7 @@ with tab3:
             name='Opt Mix',
             customdata=customdata,
             marker=dict(color='#003594'),
-            hoverlabel=dict(bgcolor='white')
+            hoverlabel=dict(bgcolor='white'),
             hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Reach 1+: %{y:.2f}%'
         ))
 
@@ -670,7 +670,7 @@ with tab3:
             mode='lines+markers',
             name='Only TV',
             marker=dict(color='#ff7473'),
-            hoverlabel=dict(bgcolor='white')
+            hoverlabel=dict(bgcolor='white'),
             hovertemplate='Reach 1+: %{y:.2f}%'
         ))
 
@@ -680,7 +680,7 @@ with tab3:
             mode='lines+markers',
             name='Only Digital',
             marker=dict(color='gold'),
-            hoverlabel=dict(bgcolor='white')
+            hoverlabel=dict(bgcolor='white'),
             hovertemplate='Reach 1+: %{y:.2f}%'
         ))
 
