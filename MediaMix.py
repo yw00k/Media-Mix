@@ -350,15 +350,20 @@ def optimize_total_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     b_r1_curve = hill(b_imps, *popt_b)
     ab_r1_curve = a_r1_curve * b_r1_curve
 
-    X_opt = pd.DataFrame({'const': 0.0, 'r1_a': a_r1_curve, 'r1_b': b_r1_curve, 'r1_ab': ab_r1_curve})
+    X_opt = pd.DataFrame({
+        'const': 0.0,
+        'r1_a': a_r1_curve,
+        'r1_b': b_r1_curve,
+        'r1_ab': ab_r1_curve
+    })
     total_r1_curve_raw = model_total.predict(X_opt).values
     total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
 
     idx = int(np.argmax(total_r1_curve))
 
-    if a_share[idx] == 1.0:   # TV 100%
+    if a_share[idx] >= 0.99:   
         total_r1_value = a_r1_curve[idx]
-    elif b_share[idx] == 1.0: # Digital 100%
+    elif b_share[idx] >= 0.99: 
         total_r1_value = b_r1_curve[idx]
     else:
         total_r1_value = total_r1_curve[idx]
