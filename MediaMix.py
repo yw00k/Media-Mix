@@ -189,7 +189,7 @@ def hill(x, a, b, c):
 
 initial_params = [1.0, 25_000_000.0, 0.6]
 bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
-bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.8])
+bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.7])
 
 popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=20000)
 popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=20000)
@@ -660,6 +660,7 @@ with tab3:
             name='Opt Mix',
             customdata=customdata,
             marker=dict(color='#003594'),
+            hoverlabel=dict(bgcolor='white')
             hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Reach 1+: %{y:.2f}%'
         ))
 
@@ -669,6 +670,7 @@ with tab3:
             mode='lines+markers',
             name='Only TV',
             marker=dict(color='#ff7473'),
+            hoverlabel=dict(bgcolor='white')
             hovertemplate='Reach 1+: %{y:.2f}%'
         ))
 
@@ -678,6 +680,7 @@ with tab3:
             mode='lines+markers',
             name='Only Digital',
             marker=dict(color='gold'),
+            hoverlabel=dict(bgcolor='white')
             hovertemplate='Reach 1+: %{y:.2f}%'
         ))
 
