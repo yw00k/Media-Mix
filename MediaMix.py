@@ -319,7 +319,14 @@ def analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     ab_r1 = a_r1 * b_r1
 
     X_user = pd.DataFrame({'const': 0.0, 'r1_a': a_r1, 'r1_b': b_r1, 'r1_ab': ab_r1})
-    total_r1 = model_total.predict(X_user)
+    if a_won > 0 and b_won == 0:
+        total_r1 = a_r1
+    elif b_won > 0 and a_won == 0:
+        total_r1 = b_r1
+    else:
+        total_r1 = model_total.predict(X_user).values
+        if np.isscalar(total_r1):
+            total_r1 = np.array([total_r1], dtype=float)
 
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)', 'Digital(억 원)', '총(억 원)', 'TV Reach 1+(%)', 'Digital Reach 1+(%)', 'Total Reach 1+(%)'],
@@ -360,10 +367,10 @@ def optimize_total_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
 
     idx = int(np.argmax(total_r1_curve))
-
-    if a_share[idx] >= 0.99:   
+    
+    if np.isclose(a_share[idx], 1.0):
         total_r1_value = a_r1_curve[idx]
-    elif b_share[idx] >= 0.99: 
+    elif np.isclose(b_share[idx], 1.0):
         total_r1_value = b_r1_curve[idx]
     else:
         total_r1_value = total_r1_curve[idx]
@@ -445,18 +452,27 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=20, u
         total_r1_curve = model_total.predict(X_mix).values
 
         idx = int(np.argmax(total_r1_curve))
-        totals_raw.append(float(total_r1_curve[idx]))
+
+        if np.isclose(a_share[idx], 1.0):
+            best_total = float(a_r1[idx])
+        elif np.isclose(b_share[idx], 1.0):
+            best_total = float(b_r1[idx])
+        else:
+            best_total = float(total_r1_curve[idx])
+
+        totals_raw.append(best_total)
         results.append({
             '예산(억 원)': eok,
             'TV 비중': f"{int(a_share[idx]*100)}%",
             'Digital 비중': f"{int(b_share[idx]*100)}%",
         })
+
     totals_raw = np.array(totals_raw, dtype=float)
     totals_plateau = plateau_after_exceed(totals_raw, threshold=1.0)
     total = np.round(100.0 * totals_plateau, 2)
 
     df_opt_full = pd.DataFrame(results).reset_index(drop=True)
-    df_opt_full['Total Reach 1+(%)'] = total    
+    df_opt_full['Total Reach 1+(%)'] = total   
     df_only = df_only_full[df_only_full['예산(억 원)'] > 0].reset_index(drop=True)
     df_opt  = df_opt_full[df_opt_full['예산(억 원)'] > 0].reset_index(drop=True)
     return df_opt_full, df_only_full, df_opt, df_only
