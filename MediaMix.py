@@ -368,9 +368,9 @@ def optimize_total_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
 
     idx = int(np.argmax(total_r1_curve))
     
-    if a_share[idx] >= 0.9:
+    if a_share[idx] >= 0.5:
         total_r1_value = float(a_r1_curve[idx])
-    elif b_share[idx] >= 0.9:
+    elif b_share[idx] >= 0.5:
         total_r1_value = float(b_r1_curve[idx])
     else:
         total_r1_value = float(total_r1_curve[idx])
@@ -452,9 +452,9 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=20, u
 
         idx = int(np.argmax(total_r1_curve))
 
-        if a_share[idx] >= 0.9:
+        if a_share[idx] >= 0.5:
             best_total = float(a_r1[idx])
-        elif b_share[idx] >= 0.9:
+        elif b_share[idx] >= 0.5:
             best_total = float(b_r1[idx])
         else:
             best_total = float(total_r1_curve[idx])
