@@ -253,7 +253,7 @@ with col_cpm:
     cpm_b_global = money_input(
         "Digital CPM(원)",
         key="cpm_input",
-        default=7_000.0,
+        default=10_300.0,
         help="천 단위 콤마(,)로 입력/표시됩니다.",
         decimals=0,
         min_value=0.0
