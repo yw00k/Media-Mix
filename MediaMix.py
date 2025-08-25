@@ -684,9 +684,9 @@ with tab3:
         fig3.update_layout(
             xaxis_title="Budget Range (억 원)",
             yaxis_title="Reach 1+(%)",
-            hoverlabel=dict(bgcolor='white', font_color='black'),
+            hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
             hovermode='x',
-            template="plotly_white",
+            template="none",
             width=700,
             height=400,
             dragmode=False,
@@ -695,8 +695,7 @@ with tab3:
                 yanchor="top",
                 y=-0.2,
                 xanchor="center",
-                x=0.5,
-                bgcolor="white"
+                x=0.5
             )
         )
 
