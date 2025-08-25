@@ -356,12 +356,19 @@ def optimize_total_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
 
     idx = int(np.argmax(total_r1_curve))
 
+    if a_share[idx] == 1.0:   # TV 100%
+        total_r1_value = a_r1_curve[idx]
+    elif b_share[idx] == 1.0: # Digital 100%
+        total_r1_value = b_r1_curve[idx]
+    else:
+        total_r1_value = total_r1_curve[idx]
+
     return {
         'a_share': float(a_share[idx]),
         'b_share': float(b_share[idx]),
         'a_r1': float(a_r1_curve[idx]),
         'b_r1': float(b_r1_curve[idx]),
-        'total_r1': float(total_r1_curve[idx]),
+        'total_r1': float(total_r1_value),
     }
 
 def compare_user_vs_opt(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
