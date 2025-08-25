@@ -696,7 +696,7 @@ with tab3:
                 y=-0.2,
                 xanchor="center",
                 x=0.5,
-                bgcolor='white'
+                bgcolor="white"
             )
         )
 
