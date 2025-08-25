@@ -53,7 +53,7 @@ def load_csv_from_dropbox(path: str, usecols=None, parse_dates=None) -> pd.DataF
         try:
             return pd.read_csv(bio, usecols=usecols, low_memory=False, encoding="utf-8-sig", parse_dates=parse_dates)
         except Exception as e:
-            st.error(f"⚠ CSV 파싱 실패 ({path}): {e}")
+            st.error(f"⚠ CSV 불러오기 실패 ({path}): {e}")
             return None
 
 # ---------------------------
@@ -187,9 +187,9 @@ imps  = np.arange(1, 200_000_000, 1_000_000, dtype=np.int64)
 def hill(x, a, b, c):
     return c / (1.0 + (b / x)**a)
 
-initial_params = [1.0, 50_000_000.0, 0.6]
-bounds_a = ([0, 0, 0], [np.inf, np.inf, 0.9])
-bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.7])
+initial_params = [1.0, 25_000_000.0, 0.6]
+bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
+bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.8])
 
 popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=20000)
 popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=20000)
@@ -368,20 +368,20 @@ def optimize_total_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
 
     idx = int(np.argmax(total_r1_curve))
     
-        if a_share[idx] >= 0.99:
-            total_r1_value = float(a_r1_curve[idx])
-        elif b_share[idx] >= 0.99:
-            total_r1_value = float(b_r1_curve[idx])
-        else:
-            total_r1_value = float(total_r1_curve[idx])
+    if a_share[idx] >= 0.99:
+        total_r1_value = float(a_r1_curve[idx])
+    elif b_share[idx] >= 0.99:
+        total_r1_value = float(b_r1_curve[idx])
+    else:
+        total_r1_value = float(total_r1_curve[idx])
 
-        return {
-            'a_share': float(a_share[idx]),
-            'b_share': float(b_share[idx]),
-            'a_r1': float(a_r1_curve[idx]),
-            'b_r1': float(b_r1_curve[idx]),
-            'total_r1': float(total_r1_value),
-        }
+    return {
+        'a_share': float(a_share[idx]),
+        'b_share': float(b_share[idx]),
+        'a_r1': float(a_r1_curve[idx]),
+        'b_r1': float(b_r1_curve[idx]),
+        'total_r1': float(total_r1_value),
+    }
 
 def compare_user_vs_opt(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     user_df, user_parts = analyze_custom_budget(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit)
@@ -452,12 +452,12 @@ def optimize_mix_over_budget(cprp_a, cpm_b, universe_val, max_budget_units=20, u
 
         idx = int(np.argmax(total_r1_curve))
 
-            if a_share[idx] >= 0.99:
-                best_total = float(a_r1[idx])
-            elif b_share[idx] >= 0.99:
-                best_total = float(b_r1[idx])
-            else:
-                best_total = float(total_r1_curve[idx])
+        if a_share[idx] >= 0.99:
+            best_total = float(a_r1[idx])
+        elif b_share[idx] >= 0.99:
+            best_total = float(b_r1[idx])
+        else:
+            best_total = float(total_r1_curve[idx])
 
         totals_raw.append(best_total)
         results.append({
