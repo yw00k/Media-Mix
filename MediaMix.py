@@ -108,10 +108,10 @@ missing = [c for c in required_cols if c not in pivot.columns]
 if missing:
     st.error(f"필수 데이터가 없습니다: {missing}")
     st.stop()
-    
-df1 = pivot.copy()
-df0 = pivot.dropna(subset=required_cols).copy()
-df0['r1_ab'] = df0['r1_a'] * df0['r1_b']
+
+pivot_all    = pivot.copy()
+pivot_strict = pivot.dropna(subset=required_cols).copy()
+pivot_strict['r1_ab'] = pivot_strict['r1_a'] * pivot_strict['r1_b']
 
 # Target select
 target_list = sorted(df0['target'].unique())
@@ -119,8 +119,9 @@ if not target_list:
     st.error("⚠ 선택 가능한 타겟이 없습니다.")
     st.stop()
 selected_target = st.selectbox("Target", target_list, index=0)
-df_t = df0[df0['target'] == selected_target].reset_index(drop=True)
-df_r = df1[df1['target'] == selected_target]
+df_total = pivot_strict[pivot_strict['target'] == selected_target].reset_index(drop=True)
+df_media = pivot_all[pivot_all['target'] == selected_target].reset_index(drop=True)
+
 st.caption(f"✅ **{selected_target}** 데이터가 적용되었습니다.")
 
 # ---------------------------
@@ -176,17 +177,14 @@ if st.session_state.last_target_for_cprp != selected_target:
 # ---------------------------
 # Prepare arrays
 # ---------------------------
-x_total = df_t['imps'].values
-y_total = df_t['r1'].values
-x_a     = df_t['imps_a'].values   # a = TV
-y_a     = df_t['r1_a'].values
-x_b     = df_t['imps_b'].values   # b = Digital
-y_b     = df_t['r1_b'].values
-y_ab    = df_t['r1_ab'].values
-x_a_1   = df_r['imps_a'].values
-y_a_1   = df_r['r1_a'].values
-x_b_1   = df_r['imps_b'].values
-y_b_1   = df_r['r1_b'].values
+x_total = df_total['imps'].values
+y_total = df_total['r1'].values
+tv_mask = df_media[['imps_a', 'r1_a']].notna().all(axis=1)
+dg_mask = df_media[['imps_b', 'r1_b']].notna().all(axis=1)
+x_a = df_media.loc[tv_mask, 'imps_a'].values   # TV
+y_a = df_media.loc[tv_mask, 'r1_a'].values
+x_b = df_media.loc[dg_mask, 'imps_b'].values   # Digital
+y_b = df_media.loc[dg_mask, 'r1_b'].values
 
 imps  = np.arange(1, 200_000_000, 1_000_000, dtype=np.int64)
 
@@ -197,9 +195,8 @@ initial_params = [1.0, 25_000_000.0, 0.6]
 bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
 bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.7])
 
-popt_a, _ = curve_fit(hill, x_a_1, y_a_1, p0=initial_params, bounds=bounds_a, maxfev=20000)
-popt_b, _ = curve_fit(hill, x_b_1, y_b_1, p0=initial_params, bounds=bounds_b, maxfev=20000)
-popt_t, _ = curve_fit(hill, x_total, y_total, p0=initial_params, bounds=bounds_a, maxfev=20000)
+popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=20000)
+popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=20000)
 
 pred_a_fit = hill(x_a, *popt_a)
 pred_b_fit = hill(x_b, *popt_b)
@@ -208,16 +205,16 @@ media_r1_result = pd.DataFrame({
     'Hill n (a)': [popt_a[0], popt_b[0]],
     'EC50 (b)':   [popt_a[1], popt_b[1]],
     'Max (c)':    [popt_a[2], popt_b[2]],
-    'R-squared':  [r2_score(y_a_1, pred_a_fit), r2_score(y_b_1, pred_b_fit)],
-    'MAE(%)':     [mean_absolute_error(y_a_1, pred_a_fit)*100, mean_absolute_error(y_b_1, pred_b_fit)*100]
+    'R-squared':  [r2_score(y_a, pred_a_fit), r2_score(y_b, pred_b_fit)],
+    'MAE(%)':     [mean_absolute_error(y_a, pred_a_fit)*100, mean_absolute_error(y_b, pred_b_fit)*100]
 }, index=['TV','Digital'])
 
 # Total Reach 1+ Model
 X_train = pd.DataFrame({
     'const': 0.0,
-    'r1_a': df_t['r1_a'].values,
-    'r1_b': df_t['r1_b'].values,
-    'r1_ab': df_t['r1_ab'].values
+    'r1_a': df_total['r1_a'].values,
+    'r1_b': df_total['r1_b'].values,
+    'r1_ab': df_total['r1_ab'].values
 })
 model_total = sm.OLS(y_total, X_train).fit()
 
