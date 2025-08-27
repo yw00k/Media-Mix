@@ -114,7 +114,7 @@ pivot_strict = pivot.dropna(subset=required_cols).copy()
 pivot_strict['r1_ab'] = pivot_strict['r1_a'] * pivot_strict['r1_b']
 
 # Target select
-target_list = sorted(df0['target'].unique())
+target_list = sorted(pivot_strict['target'].unique())
 if not target_list:
     st.error("⚠ 선택 가능한 타겟이 없습니다.")
     st.stop()
