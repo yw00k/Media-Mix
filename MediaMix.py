@@ -193,7 +193,7 @@ def hill(x, a, b, c):
 
 initial_params = [1.0, 25_000_000.0, 0.6]
 bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
-bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.7])
+bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.8])
 
 popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=20000)
 popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=20000)
