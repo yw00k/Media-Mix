@@ -110,6 +110,7 @@ if missing:
     st.stop()
 
 df0 = pivot.dropna(subset=required_cols).copy()
+df1 = pivot.copy()
 df0['r1_ab'] = df0['r1_a'] * df0['r1_b']
 
 # Target select
@@ -119,6 +120,7 @@ if not target_list:
     st.stop()
 selected_target = st.selectbox("Target", target_list, index=0)
 df_t = df0[df0['target'] == selected_target].reset_index(drop=True)
+df_r = df1[df1['target'] == selected_target].reset_index(drop=True)
 st.caption(f"✅ **{selected_target}** 데이터가 적용되었습니다.")
 
 # ---------------------------
@@ -181,6 +183,10 @@ y_a     = df_t['r1_a'].values
 x_b     = df_t['imps_b'].values   # b = Digital
 y_b     = df_t['r1_b'].values
 y_ab    = df_t['r1_ab'].values
+x_a_1   = df_r['imps_a'].values
+y_a_1   = df_r['r1_a'].values
+x_b_1   = df_r['imps_b'].values
+y_b_1   = df_r['r1_b'].values
 
 imps  = np.arange(1, 200_000_000, 1_000_000, dtype=np.int64)
 
@@ -191,8 +197,8 @@ initial_params = [1.0, 25_000_000.0, 0.6]
 bounds_a = ([0, 0, 0], [np.inf, np.inf, 1.0])
 bounds_b = ([0, 0, 0], [np.inf, np.inf, 0.7])
 
-popt_a, _ = curve_fit(hill, x_a, y_a, p0=initial_params, bounds=bounds_a, maxfev=20000)
-popt_b, _ = curve_fit(hill, x_b, y_b, p0=initial_params, bounds=bounds_b, maxfev=20000)
+popt_a, _ = curve_fit(hill, x_a_1, y_a_1, p0=initial_params, bounds=bounds_a, maxfev=20000)
+popt_b, _ = curve_fit(hill, x_b_1, y_b_1, p0=initial_params, bounds=bounds_b, maxfev=20000)
 popt_t, _ = curve_fit(hill, x_total, y_total, p0=initial_params, bounds=bounds_a, maxfev=20000)
 
 pred_a_fit = hill(x_a, *popt_a)
@@ -202,8 +208,8 @@ media_r1_result = pd.DataFrame({
     'Hill n (a)': [popt_a[0], popt_b[0]],
     'EC50 (b)':   [popt_a[1], popt_b[1]],
     'Max (c)':    [popt_a[2], popt_b[2]],
-    'R-squared':  [r2_score(y_a, pred_a_fit), r2_score(y_b, pred_b_fit)],
-    'MAE(%)':     [mean_absolute_error(y_a, pred_a_fit)*100, mean_absolute_error(y_b, pred_b_fit)*100]
+    'R-squared':  [r2_score(y_a_1, pred_a_fit), r2_score(y_b_1, pred_b_fit)],
+    'MAE(%)':     [mean_absolute_error(y_a_1, pred_a_fit)*100, mean_absolute_error(y_b_1, pred_b_fit)*100]
 }, index=['TV','Digital'])
 
 # Total Reach 1+ Model
