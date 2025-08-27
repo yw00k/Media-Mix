@@ -108,9 +108,9 @@ missing = [c for c in required_cols if c not in pivot.columns]
 if missing:
     st.error(f"필수 데이터가 없습니다: {missing}")
     st.stop()
-
-df0 = pivot.dropna(subset=required_cols).copy()
+    
 df1 = pivot.copy()
+df0 = pivot.dropna(subset=required_cols).copy()
 df0['r1_ab'] = df0['r1_a'] * df0['r1_b']
 
 # Target select
@@ -120,7 +120,7 @@ if not target_list:
     st.stop()
 selected_target = st.selectbox("Target", target_list, index=0)
 df_t = df0[df0['target'] == selected_target].reset_index(drop=True)
-df_r = df1[df1['target'] == selected_target].reset_index(drop=True)
+df_r = df1[df1['target'] == selected_target]
 st.caption(f"✅ **{selected_target}** 데이터가 적용되었습니다.")
 
 # ---------------------------
