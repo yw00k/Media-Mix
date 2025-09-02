@@ -651,7 +651,7 @@ page1, page3 = st.tabs(["Reach 1+ 최적화", "Reach 3+ 최적화"])
 for key in [
     "r1_compare_result", "r1_single_curve", "r1_single_out",
     "r1_sweep_opt_full", "r1_sweep_only_full", "r1_sweep_opt", "r1_sweep_only",
-    "r3_compare_result",
+    "r3_compare_result", "r3_single_curve", "r3_single_out",
     "r3_sweep_opt_full", "r3_sweep_only_full", "r3_sweep_opt", "r3_sweep_only"
 ]:
     if key not in st.session_state:
