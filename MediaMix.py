@@ -814,9 +814,9 @@ with page3:
     with tab3_1:
         c_a, c_b = st.columns([1, 1])
         with c_a:
-            a_eok_input3 = st.number_input("TV 예산(억 원)", value=3.5, step=0.1, min_value=0.0)
+            a_eok_input3 = st.number_input("TV 예산(억 원)", value=3.5, step=0.1, min_value=0.0, key="r3_tv_eok")
         with c_b:
-            b_eok_input3 = st.number_input("Digital 예산(억 원)", value=3.5, step=0.1, min_value=0.0)
+            b_eok_input3 = st.number_input("Digital 예산(억 원)", value=3.5, step=0.1, min_value=0.0, key="r3_dg_eok")
 
         if st.button("실행", type="primary", key="r3_compare_run"):
             summary_df3 = compare_user_vs_opt3(a_eok_input3, b_eok_input3, cprp_a_global, cpm_b_global, universe)
@@ -858,7 +858,7 @@ with page3:
             st.dataframe(summary_wide3, use_container_width=True)
 
     with tab3_2:
-        total_eok_input = st.number_input("총 예산(억 원)", value=7.0, step=0.1, min_value=0.0)
+        total_eok_input = st.number_input("총 예산(억 원)", value=7.0, step=0.1, min_value=0.0, key="r3_total_eok")
         if st.button("실행", type="primary", key="r3_single_run"):
             a = np.arange(0, 101, dtype=np.float64) / 100.0
             b = 1.0 - a
