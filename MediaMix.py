@@ -634,11 +634,9 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         idx3 = int(np.argmax(total_r3_curve))
         best_total_r3 = (a_r3[idx3] if a3_share[idx3] >= 0.99
                          else b_r3[idx3] if b3_share[idx3] >= 0.99
+                         else a_r3[idx3] if best_total_r3 < a_r3[idx3]
+                         else b_r3[idx3] if best_total_r3 < b_r3[idx3]
                          else total_r3_curve[idx3])
-        if best_total_r3 < a_r3[idx3]:
-            best_total_r3 = a_r3[idx3]
-        if best_total_r3 < b_r3[idx3]:
-            best_total_r3 = b_r3[idx3]
 
         total_r3_raw.append(best_total_r3)
         results3.append({'예산(억 원)': eok,
