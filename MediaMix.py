@@ -186,24 +186,24 @@ x_total = df_total['imps'].values
 y_total = df_total['r1'].values
 tv_mask_r1 = df_media[['imps_a','r1_a']].notna().all(axis=1)
 dg_mask_r1 = df_media[['imps_b','r1_b']].notna().all(axis=1)
-x_a  = df_media.loc[tv_mask_r1, 'imps_a'].values
-y_a1 = df_media.loc[tv_mask_r1, 'r1_a'].values
-x_b  = df_media.loc[dg_mask_r1, 'imps_b'].values
-y_b1 = df_media.loc[dg_mask_r1, 'r1_b'].values
+x_a  = df_total.loc[tv_mask_r1, 'imps_a'].values
+y_a1 = df_total.loc[tv_mask_r1, 'r1_a'].values
+x_b  = df_total.loc[dg_mask_r1, 'imps_b'].values
+y_b1 = df_total.loc[dg_mask_r1, 'r1_b'].values
 
-tv_mask_r2 = df_media[['imps_a','r2_a']].notna().all(axis=1)
-dg_mask_r2 = df_media[['imps_b','r2_b']].notna().all(axis=1)
-x_a2 = df_media.loc[tv_mask_r2, 'imps_a'].values
-y_a2 = df_media.loc[tv_mask_r2, 'r2_a'].values
-x_b2 = df_media.loc[dg_mask_r2, 'imps_b'].values
-y_b2 = df_media.loc[dg_mask_r2, 'r2_b'].values
+tv_mask_r2 = df_total[['imps_a','r2_a']].notna().all(axis=1)
+dg_mask_r2 = df_total[['imps_b','r2_b']].notna().all(axis=1)
+x_a2 = df_total.loc[tv_mask_r2, 'imps_a'].values
+y_a2 = df_total.loc[tv_mask_r2, 'r2_a'].values
+x_b2 = df_total.loc[dg_mask_r2, 'imps_b'].values
+y_b2 = df_total.loc[dg_mask_r2, 'r2_b'].values
 
-tv_mask_r3 = df_media[['imps_a','r3_a']].notna().all(axis=1)
-dg_mask_r3 = df_media[['imps_b','r3_b']].notna().all(axis=1)
-x_a3 = df_media.loc[tv_mask_r3, 'imps_a'].values
-y_a3 = df_media.loc[tv_mask_r3, 'r3_a'].values
-x_b3 = df_media.loc[dg_mask_r3, 'imps_b'].values
-y_b3 = df_media.loc[dg_mask_r3, 'r3_b'].values
+tv_mask_r3 = df_total[['imps_a','r3_a']].notna().all(axis=1)
+dg_mask_r3 = df_total[['imps_b','r3_b']].notna().all(axis=1)
+x_a3 = df_total.loc[tv_mask_r3, 'imps_a'].values
+y_a3 = df_total.loc[tv_mask_r3, 'r3_a'].values
+x_b3 = df_total.loc[dg_mask_r3, 'imps_b'].values
+y_b3 = df_total.loc[dg_mask_r3, 'r3_b'].values
 
 def hill(x, a, b, c):
     return c / (1.0 + (b / x)**a)
@@ -213,7 +213,7 @@ initial_params2 = [1.0, 25_000_000.0, 0.4]
 initial_params3 = [1.0, 25_000_000.0, 0.2]
 
 bounds_a = ([0,0,0],[np.inf,np.inf,1.0])
-bounds_b1 = ([0,0,0],[np.inf,np.inf,1.0])
+bounds_b1 = ([0,0,0],[np.inf,np.inf,0.7])
 bounds_b2 = ([0,0,0],[np.inf,np.inf,0.5])
 bounds_b3 = ([0,0,0],[np.inf,np.inf,0.3])
 
