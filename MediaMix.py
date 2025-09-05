@@ -208,12 +208,12 @@ y_b3 = df_total.loc[dg_mask_r3, 'r3_b'].values
 def hill(x, a, b, c):
     return c / (1.0 + (b / x)**a)
 
-initial_params1 = [1.0, 25_000_000.0, 0.99]
+initial_params1 = [1.0, 25_000_000.0, 0.6]
 initial_params2 = [1.0, 25_000_000.0, 0.4]
 initial_params3 = [1.0, 25_000_000.0, 0.2]
 
 bounds_a = ([0,0,0],[np.inf,np.inf,1.0])
-bounds_b1 = ([0,0,0.99],[np.inf,np.inf,1.0])
+bounds_b1 = ([0,0,0],[np.inf,np.inf,0.7])
 bounds_b2 = ([0,0,0],[np.inf,np.inf,0.5])
 bounds_b3 = ([0,0,0],[np.inf,np.inf,0.3])
 
