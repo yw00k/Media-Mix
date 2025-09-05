@@ -750,7 +750,7 @@ with page1:
         if st.session_state.r1_single_curve is not None:
             a, pred = st.session_state.r1_single_curve
             fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*a, y=100*np.round(pred, 4), mode='lines+markers',
+            fig2.add_trace(go.Scatter(x=100*a, y=out['Total Reach 1+(%)'], mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig2.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
@@ -915,7 +915,7 @@ with page3:
         if st.session_state.r3_single_curve is not None:
             a, pred_r3 = st.session_state.r3_single_curve
             fig32 = go.Figure()
-            fig32.add_trace(go.Scatter(x=100*a, y=100*np.round(pred_r3, 4), mode='lines+markers',
+            fig32.add_trace(go.Scatter(x=100*a, y=out['Total Reach 3+(%)'], mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig32.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
