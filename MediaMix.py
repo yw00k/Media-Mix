@@ -720,7 +720,7 @@ with page1:
             b = 1.0 - a
             won = total_eok_input * UNIT
 
-            won, results, total_r1_raw = [], [], []
+            won, results, total_r1_raw, pred = [], [], [], []
 
             for a, b, won in zip(a, b, won):
                 
