@@ -78,7 +78,7 @@ msg_placeholder.success("✅ 데이터 불러오기 성공")
 time.sleep(1)
 msg_placeholder.empty()
 
-df = df_raw[df_raw['r1'] >= 0.03].copy()
+df = df_raw[df_raw['r1'] !=0].copy()
 
 metrics = ['impression','r1','r2','r3']
 pivot = df.pivot_table(
@@ -183,7 +183,8 @@ if st.session_state.last_target_for_cprp != selected_target:
 # Prepare arrays
 # ---------------------------
 x_total = df_total['imps'].values
-y_total = df_total['r1'].values
+y1_total = df_total['r1'].values
+y3_total = df_total['r3'].values
 tv_mask_r1 = df_media[['imps_a','r1_a']].notna().all(axis=1)
 dg_mask_r1 = df_media[['imps_b','r1_b']].notna().all(axis=1)
 x_a  = df_media.loc[tv_mask_r1, 'imps_a'].values
@@ -235,20 +236,31 @@ media_r1_result = pd.DataFrame({
     'MAE(%)':     [mean_absolute_error(y_a1, pred_a1_fit)*100, mean_absolute_error(y_b1, pred_b1_fit)*100]
 }, index=['TV','Digital'])
 
-X_train = pd.DataFrame({
+X1_train = pd.DataFrame({
     'r1_a': df_total['r1_a'].values,
     'r1_b': df_total['r1_b'].values,
     'r1_ab': df_total['r1_ab'].values
 })
-model_total = sm.OLS(y_total, X_train).fit()
+model1_total = sm.OLS(y1_total, X1_train).fit()
 
-B_A  = float(model_total.params['r1_a'])
-B_B  = float(model_total.params['r1_b'])
-B_AB = float(model_total.params['r1_ab'])
+X3_train = pd.DataFrame({
+    'r3_a': df_total['r3_a'].values,
+    'r3_b': df_total['r3_b'].values,
+    'r3_ab': df_total['r3_ab'].values
+})
+model3_total = sm.OLS(y3_total, X3_train).fit()
+
+B1_A  = float(model_total.params['r1_a'])
+B1_B  = float(model_total.params['r1_b'])
+B1_AB = float(model_total.params['r1_ab'])
 
 def predict_total_r1_np(r1_a, r1_b):
 
-    return B_A * r1_a + B_B * r1_b + B_AB * (r1_a * r1_b)
+    return B1_A * r1_a + B1_B * r1_b + B1_AB * (r1_a * r1_b)
+
+def predict_total_r3_np(r3_a, r3_b):
+
+    return B3_A * r3_a + B3_B * r3_b + B3_AB * (r3_a * r3_b)
 
 # ---------------------------
 # CPM/CPRP UI
@@ -453,16 +465,11 @@ def optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT)
     a_imps = imps_from_tv_budget_by_cprp(a3_share * total_won, cprp_a, universe_val)
     b_imps = imps_from_digital_budget_by_cpm(b3_share * total_won, cpm_b)
 
-    a_r1_curve = hill(a_imps, *popt_a1); a_r2_curve = hill(a_imps, *popt_a2); a_r3_curve = hill(a_imps, *popt_a3)
-    b_r1_curve = hill(b_imps, *popt_b1); b_r2_curve = hill(b_imps, *popt_b2); b_r3_curve = hill(b_imps, *popt_b3)
+    a_r3_curve = hill(a_imps, *popt_a3)
+    b_r3_curve = hill(b_imps, *popt_b3)
 
-    total_r1_curve_raw = predict_total_r1_np(a_r1_curve, b_r1_curve)
-    total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
-
-    a_r0_ = 1 - a_r1_curve; a_r1_ = a_r1_curve - a_r2_curve; a_r2_ = a_r2_curve - a_r3_curve
-    b_r0_ = 1 - b_r1_curve; b_r1_ = b_r1_curve - b_r2_curve; b_r2_ = b_r2_curve - b_r3_curve
-    total_r2_curve = total_r1_curve - (a_r1_ * b_r0_ + b_r1_ * a_r0_)
-    total_r3_curve = total_r2_curve - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
+    total_r3_curve_raw = predict_total_r3_np(a_r3_curve, b_r3_curve)
+    total_r3_curve = plateau_after_exceed(total_r3_curve_raw, threshold=1.0)
 
     idx3 = int(np.argmax(total_r3_curve))
     total_r3_value = (a_r3_curve[idx3] if a3_share[idx3] >= 0.99
@@ -642,16 +649,11 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
         b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b)
 
-        a_r1 = hill(a_imps, *popt_a1); a_r2 = hill(a_imps, *popt_a2); a_r3 = hill(a_imps, *popt_a3)
-        b_r1 = hill(b_imps, *popt_b1); b_r2 = hill(b_imps, *popt_b2); b_r3 = hill(b_imps, *popt_b3)
+        a_r3 = hill(a_imps, *popt_a3)
+        b_r3 = hill(b_imps, *popt_b3)
 
-        total_r1_curve_raw = predict_total_r1_np(a_r1, b_r1)
-        total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
-
-        a_r0_ = 1 - a_r1; a_r1_ = a_r1 - a_r2; a_r2_ = a_r2 - a_r3
-        b_r0_ = 1 - b_r1; b_r1_ = b_r1 - b_r2; b_r2_ = b_r2 - b_r3
-        total_r2_curve = total_r1_curve - (a_r1_ * b_r0_ + b_r1_ * a_r0_)
-        total_r3_curve = total_r2_curve - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
+        total_r3_curve_raw = predict_total_r3_np(a_r3, b_r3)
+        total_r3_curve = plateau_after_exceed(total_r3_curve_raw, threshold=1.0)
 
         idx3 = int(np.argmax(total_r3_curve))
 
