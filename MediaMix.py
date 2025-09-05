@@ -731,16 +731,19 @@ with page1:
             pred_raw = predict_total_r1_np(a_r1, b_r1)
             pred = plateau_after_exceed(pred_raw, threshold=1.0)
 
-            pred[0] = b_r1[0]
-            pred[-1] = a_r1[-1]
-
             best_idx = int(np.argmax(pred))
             
+            best_total_r1 = (
+                a_r1[best_idx] if a[best_idx] >= 0.99
+                else b_r1[best_idx] if (1.0 - a[best_idx]) >= 0.99
+                else pred[best_idx]
+            )
+
             st.session_state.r1_single_curve = (a, pred)
             out = pd.DataFrame({
                 'TV 비중': [f"{int(a[best_idx]*100)}%"],
-                'Digital 비중': [f"{int(b[best_idx]*100)}%"],
-                'Total Reach 1+(%)': [round(100.0 * float(pred[best_idx]), 2)]
+                'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
+                'Total Reach 1+(%)': [round(100.0 * float(best_total_r1), 2)]
             })
             st.session_state.r1_single_out = out
 
@@ -893,16 +896,19 @@ with page3:
             pred_r2 = pred_r1 - (a_r1_ * b_r0 + b_r1_ * a_r0)
             pred_r3 = pred_r2 - (a_r2_ * b_r0 + b_r2_ * a_r0 + a_r1_ * b_r1_)
 
-            pred_r3[0] = b_r3[0]
-            pred_r3[-1] = a_r3[-1]
-
             best_idx = int(np.argmax(pred_r3))
             
+            best_total_r3 = (
+                a_r3[best_idx] if a[best_idx] >= 0.99
+                else b_r3[best_idx] if (1.0 - a[best_idx]) >= 0.99
+                else pred_r3[best_idx]
+            )
+
             st.session_state.r3_single_curve = (a, pred_r3)
             out = pd.DataFrame({
                 'TV 비중': [f"{int(a[best_idx]*100)}%"],
-                'Digital 비중': [f"{int(b[best_idx]*100)}%"],
-                'Total Reach 3+(%)': [round(100.0 * float(pred_r3[best_idx]), 2)]
+                'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
+                'Total Reach 3+(%)': [round(100.0 * float(best_total_r3), 2)]
             })
             st.session_state.r3_single_out = out
 
