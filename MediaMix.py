@@ -465,8 +465,8 @@ def optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT)
     total_r3_curve = total_r2_curve - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
 
     idx3 = int(np.argmax(total_r3_curve))
-    total_r3_value = (a_r3_curve[idx3] if a_share[idx3] >= 0.99
-                      else b_r3_curve[idx3] if b_share[idx3] >= 0.99
+    total_r3_value = (a_r3_curve[idx3] if a3_share[idx3] >= 0.99
+                      else b_r3_curve[idx3] if b3_share[idx3] >= 0.99
                       else total_r3_curve[idx3])
 
     return {
@@ -625,8 +625,8 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         total_r3_curve = total_r2_curve - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
 
         idx3 = int(np.argmax(total_r3_curve))
-        best_total_r3 = (a_r3[idx3] if a_share[idx3] >= 0.99
-                         else b_r3[idx3] if b_share[idx3] >= 0.99
+        best_total_r3 = (a_r3[idx3] if a3_share[idx3] >= 0.99
+                         else b_r3[idx3] if b3_share[idx3] >= 0.99
                          else total_r3_curve[idx3])
 
         total_r3_raw.append(best_total_r3)
