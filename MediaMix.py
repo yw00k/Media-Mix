@@ -722,7 +722,7 @@ with page1:
 
             results, total_r1_raw = [], []
 
-            for a, b, won in zip(a, b, budget):
+            for a, b, won in zip(a, b, won):
                 
                 a_budget = a * won
                 b_budget = b * won
