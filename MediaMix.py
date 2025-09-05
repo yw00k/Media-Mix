@@ -209,11 +209,11 @@ def hill(x, a, b, c):
     return c / (1.0 + (b / x)**a)
 
 initial_params1 = [1.0, 25_000_000.0, 0.6]
-initial_params2 = [1.0, 25_000_000.0, 0.4]
+initial_params2 = [1.0, 25_000_000.0, 0.3]
 initial_params3 = [1.0, 25_000_000.0, 0.2]
 
 bounds_a = ([0,0,0],[np.inf,np.inf,1.0])
-bounds_b1 = ([0,0,0],[np.inf,np.inf,0.68])
+bounds_b1 = ([0,0,0],[np.inf,np.inf,0.706])
 bounds_b2 = ([0,0,0],[np.inf,np.inf,0.45])
 bounds_b3 = ([0,0,0],[np.inf,np.inf,0.3])
 
