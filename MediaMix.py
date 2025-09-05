@@ -447,8 +447,8 @@ def optimize_total_budget1(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT)
 
 def optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     total_won = (a_eok + b_eok) * unit
-    a3_share = np.arange(0, 101, dtype=np.float64) / 100.0
-    b3_share = 1.0 - a_share
+    a_share = np.arange(0, 101, dtype=np.float64) / 100.0
+    b_share = 1.0 - a_share
 
     a_imps = imps_from_tv_budget_by_cprp(a_share * total_won, cprp_a, universe_val)
     b_imps = imps_from_digital_budget_by_cpm(b_share * total_won, cpm_b)
@@ -465,8 +465,8 @@ def optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT)
     total_r3_curve = total_r2_curve - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
 
     idx3 = int(np.argmax(total_r3_curve))
-    total_r3_value = (a_r3_curve[idx3] if a3_share[idx3] >= 0.99
-                      else b_r3_curve[idx3] if b3_share[idx3] >= 0.99
+    total_r3_value = (a_r3_curve[idx3] if a_share[idx3] >= 0.99
+                      else b_r3_curve[idx3] if b_share[idx3] >= 0.99
                       else total_r3_curve[idx3])
 
     return {
@@ -571,8 +571,7 @@ def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         a_r1 = hill(a_imps, *popt_a1)
         b_r1 = hill(b_imps, *popt_b1)
 
-        total_r1_curve_raw = predict_total_r1_np(a_r1_curve, b_r1_curve)
-        total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
+        total_r1_curve = predict_total_r1_np(a_r1, b_r1)
 
         idx1 = int(np.argmax(total_r1_curve))
         best_total_r1 = (a_r1[idx1] if a_share[idx1] >= 0.99
@@ -593,24 +592,24 @@ def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, 
     return df_opt1_full, df_only1_full, df_opt1, df_only1
 
 def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, unit=UNIT):
-    a3_share = np.arange(0,101,dtype=np.float64)/100.0
-    b3_share = 1.0 - a3_share
+    a_share = np.arange(0,101,dtype=np.float64)/100.0
+    b_share = 1.0 - a_share
 
     budget_eok = np.arange(0, max_budget_units+1)
     budget_won = budget_eok * unit
 
-    a3_imps_only = imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val)
-    b3_imps_only = imps_from_digital_budget_by_cpm(budget_won, cpm_b)
-    only_a3 = hill(a3_imps_only, *popt_a3)
-    only_b3 = hill(b3_imps_only, *popt_b3)
+    a_imps_only = imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val)
+    b_imps_only = imps_from_digital_budget_by_cpm(budget_won, cpm_b)
+    only_a3 = hill(a_imps_only, *popt_a3)
+    only_b3 = hill(b_imps_only, *popt_b3)
     df_only3_full = pd.DataFrame({'예산(억 원)': budget_eok,
                                   'Only TV': np.round(100*only_a3, 2),
                                   'Only Digital': np.round(100*only_b3, 2)})
 
     results3, total_r3_raw = [], []
     for won, eok in zip(budget_won, budget_eok):
-        a3_budget = a3_share * won
-        b3_budget = b3_share * won
+        a_budget = a_share * won
+        b_budget = b_share * won
 
         a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
         b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b)
@@ -618,8 +617,7 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         a_r1 = hill(a_imps, *popt_a1); a_r2 = hill(a_imps, *popt_a2); a_r3 = hill(a_imps, *popt_a3)
         b_r1 = hill(b_imps, *popt_b1); b_r2 = hill(b_imps, *popt_b2); b_r3 = hill(b_imps, *popt_b3)
 
-        total_r1_curve_raw = predict_total_r1_np(a_r1_curve, b_r1_curve)
-        total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
+        total_r1_curve = predict_total_r1_np(a_r1, b_r1)
 
         a_r0_ = 1 - a_r1; a_r1_ = a_r1 - a_r2; a_r2_ = a_r2 - a_r3
         b_r0_ = 1 - b_r1; b_r1_ = b_r1 - b_r2; b_r2_ = b_r2 - b_r3
@@ -627,8 +625,8 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         total_r3_curve = total_r2_curve - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
 
         idx3 = int(np.argmax(total_r3_curve))
-        best_total_r3 = (a_r3[idx3] if a3_share[idx3] >= 0.99
-                         else b_r3[idx3] if b3_share[idx3] >= 0.99
+        best_total_r3 = (a_r3[idx3] if a_share[idx3] >= 0.99
+                         else b_r3[idx3] if b_share[idx3] >= 0.99
                          else total_r3_curve[idx3])
 
         total_r3_raw.append(best_total_r3)
@@ -764,11 +762,11 @@ with page1:
     with tab1_3:
         max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10, key="r1_max_units")
         if st.button("실행", type="primary", key="r1_sweep_run"):
-            df_opt1_full, df_only1_full, df_opt1, df_only1 = optimize_mix_over_budget1(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
-            st.session_state.r1_sweep_opt_full = df_opt1_full
-            st.session_state.r1_sweep_only_full = df_only1_full
-            st.session_state.r1_sweep_opt = df_opt1
-            st.session_state.r1_sweep_only = df_only1
+            df_opt_full, df_only_full, df_opt, df_only = optimize_mix_over_budget1(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
+            st.session_state.r1_sweep_opt_full = df_opt_full
+            st.session_state.r1_sweep_only_full = df_only_full
+            st.session_state.r1_sweep_opt = df_opt
+            st.session_state.r1_sweep_only = df_only
 
         if (st.session_state.r1_sweep_opt_full is not None) and (st.session_state.r1_sweep_only_full is not None):
             df_opt_full = st.session_state.r1_sweep_opt_full
@@ -862,12 +860,12 @@ with page3:
     with tab3_2:
         total_eok_input = st.number_input("총 예산(억 원)", value=7.0, step=0.1, min_value=0.0, key="r3_total_eok")
         if st.button("실행", type="primary", key="r3_single_run"):
-            a3 = np.arange(0, 101, dtype=np.float64) / 100.0
-            b3 = 1.0 - a
+            a = np.arange(0, 101, dtype=np.float64) / 100.0
+            b = 1.0 - a
             won = total_eok_input * UNIT
 
-            a_budget = a3 * won
-            b_budget = b3 * won
+            a_budget = a * won
+            b_budget = b * won
             a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a_global, universe)
             b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b_global)
 
@@ -877,8 +875,8 @@ with page3:
             b_r2 = hill(b_imps, *popt_b2)
             a_r3 = hill(a_imps, *popt_a3)
             b_r3 = hill(b_imps, *popt_b3)
-            a_r0_ = 1 - a_r1
-            b_r0_ = 1 - b_r1
+            a_r0 = 1 - a_r1
+            b_r0 = 1 - b_r1
             a_r1_ = a_r1 - a_r2
             b_r1_ = b_r1 - b_r2
             a_r2_ = a_r2 - a_r3
@@ -886,20 +884,20 @@ with page3:
 
             pred_r1_raw = predict_total_r1_np(a_r1, b_r1)
             pred_r1 = plateau_after_exceed(pred_r1_raw, threshold=1.0)
-            pred_r2 = pred_r1 - (a_r1_ * b_r0_ + b_r1_ * a_r0_)
-            pred_r3 = pred_r2 - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
+            pred_r2 = pred_r1 - (a_r1_ * b_r0 + b_r1_ * a_r0)
+            pred_r3 = pred_r2 - (a_r2_ * b_r0 + b_r2_ * a_r0 + a_r1_ * b_r1_)
 
-            st.session_state.r3_single_curve = (a3, pred_r3)
-            best_idx3 = int(np.argmax(pred_r3))
+            st.session_state.r3_single_curve = (a, pred_r3)
+            best_idx = int(np.argmax(pred_r3))
             out = pd.DataFrame({
-                'TV 비중': [f"{int(a3[best_idx3]*100)}%"],
-                'Digital 비중': [f"{int(b3[best_idx3]*100)}%"],
-                'Total Reach 3+(%)': [round(100.0 * float(pred_r3[best_idx3]), 2)]
+                'TV 비중': [f"{int(a[best_idx]*100)}%"],
+                'Digital 비중': [f"{int(b[best_idx]*100)}%"],
+                'Total Reach 3+(%)': [round(100.0 * float(pred_r3[best_idx]), 2)]
             })
             st.session_state.r3_single_out = out
 
         if st.session_state.r3_single_curve is not None:
-            a3, pred_r3 = st.session_state.r3_single_curve
+            a, pred_r3 = st.session_state.r3_single_curve
             fig32 = go.Figure()
             fig32.add_trace(go.Scatter(x=100*a, y=100*np.round(pred_r3, 4), mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
