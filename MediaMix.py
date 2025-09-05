@@ -545,6 +545,79 @@ def compare_user_vs_opt3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     ])
     return summary3
 
+def optimize_single_mix1(total_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
+
+    a = np.arange(0, 101, dtype=np.float64) / 100.0
+    b = 1.0 - a
+    won = total_eok * unit
+
+    a_budget = a * won
+    b_budget = b * won
+    a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
+    b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b)
+
+    a_r1 = hill(a_imps, *popt_a1)
+    b_r1 = hill(b_imps, *popt_b1)
+
+    pred_raw = predict_total_r1_np(a_r1, b_r1)
+    pred_r1 = plateau_after_exceed(pred_raw, threshold=1.0)
+
+    best_idx = int(np.argmax(pred_r1))
+    best_total_r1 = (
+        a_r1[best_idx] if a[best_idx] >= 0.99
+        else b_r1[best_idx] if (1.0 - a[best_idx]) >= 0.99
+        else pred_r1[best_idx]
+    )
+
+    out_df = pd.DataFrame({
+        'TV 비중': [f"{int(a[best_idx]*100)}%"],
+        'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
+        'Total Reach 1+(%)': [round(100.0 * float(best_total_r1), 2)]
+    })
+
+    return a, pred_r1, a_r1, b_r1, best_idx, float(best_total_r1), out_df
+
+def optimize_single_mix3(total_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
+
+    a = np.arange(0, 101, dtype=np.float64) / 100.0
+    b = 1.0 - a
+    won = total_eok * unit
+
+    a_budget = a * won
+    b_budget = b * won
+    a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
+    b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b)
+
+    # per-media reach curves
+    a_r1 = hill(a_imps, *popt_a1); b_r1 = hill(b_imps, *popt_b1)
+    a_r2 = hill(a_imps, *popt_a2); b_r2 = hill(b_imps, *popt_b2)
+    a_r3 = hill(a_imps, *popt_a3); b_r3 = hill(b_imps, *popt_b3)
+
+    # decomposition
+    a_r0 = 1 - a_r1; b_r0 = 1 - b_r1
+    a_r1_ = a_r1 - a_r2; b_r1_ = b_r1 - b_r2
+    a_r2_ = a_r2 - a_r3; b_r2_ = b_r2 - b_r3
+
+    pred_r1_raw = predict_total_r1_np(a_r1, b_r1)
+    pred_r1 = plateau_after_exceed(pred_r1_raw, threshold=1.0)
+    pred_r2 = pred_r1 - (a_r1_ * b_r0 + b_r1_ * a_r0)
+    pred_r3 = pred_r2 - (a_r2_ * b_r0 + b_r2_ * a_r0 + a_r1_ * b_r1_)
+
+    best_idx = int(np.argmax(pred_r3))
+    best_total_r3 = (
+        a_r3[best_idx] if a[best_idx] >= 0.99
+        else b_r3[best_idx] if (1.0 - a[best_idx]) >= 0.99
+        else pred_r3[best_idx]
+    )
+
+    out_df = pd.DataFrame({
+        'TV 비중': [f"{int(a[best_idx]*100)}%"],
+        'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
+        'Total Reach 3+(%)': [round(100.0 * float(best_total_r3), 2)]
+    })
+
+    return a, pred_r3, best_idx, float(best_total_r3), out_df
+
 def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, unit=UNIT):
     a_share = np.arange(0,101,dtype=np.float64)/100.0
     b_share = 1.0 - a_share
@@ -716,43 +789,17 @@ with page1:
     with tab1_2:
         total_eok_input = st.number_input("총 예산(억 원)", value=7.0, step=0.1, min_value=0.0)
         if st.button("실행", type="primary", key="r1_single_run"):
-            a = np.arange(0, 101, dtype=np.float64) / 100.0
-            b = 1.0 - a
-            won = total_eok_input * UNIT
-
-            a_budget = a * won
-            b_budget = b * won
-            a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a_global, universe)
-            b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b_global)
-
-            a_r1 = hill(a_imps, *popt_a1)
-            b_r1 = hill(b_imps, *popt_b1)
-
-            pred_raw = predict_total_r1_np(a_r1, b_r1)
-            pred = plateau_after_exceed(pred_raw, threshold=1.0)
-
-            best_idx = int(np.argmax(pred))
-            
-            best_total_r1 = (
-                a_r1[best_idx] if a[best_idx] >= 0.99
-                else b_r1[best_idx] if (1.0 - a[best_idx]) >= 0.99
-                else pred[best_idx]
+            a, pred, a_r1, b_r1, best_idx, best_total_r1, out = optimize_single_mix1(
+                total_eok_input, cprp_a_global, cpm_b_global, universe, unit=UNIT
             )
-
             st.session_state.r1_single_curve = (a, pred, a_r1, b_r1)
-            out = pd.DataFrame({
-                'TV 비중': [f"{int(a[best_idx]*100)}%"],
-                'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
-                'Total Reach 1+(%)': [round(100.0 * float(best_total_r1), 2)]
-            })
-
             st.session_state.r1_single_out = out
 
         if st.session_state.r1_single_curve is not None:
             a, pred, a_r1, b_r1 = st.session_state.r1_single_curve
             
             fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*a, y=100*np.round(pred, 4), mode='lines+markers',
+            fig2.add_trace(go.Scatter(x=a, y=pred, mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig2.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
