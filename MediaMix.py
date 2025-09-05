@@ -571,7 +571,8 @@ def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         a_r1 = hill(a_imps, *popt_a1)
         b_r1 = hill(b_imps, *popt_b1)
 
-        total_r1_curve = predict_total_r1_np(a_r1, b_r1)
+        total_r1_curve_raw = predict_total_r1_np(a_r1, b_r1)
+        total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
 
         idx1 = int(np.argmax(total_r1_curve))
         best_total_r1 = (a_r1[idx1] if a_share[idx1] >= 0.99
@@ -583,7 +584,7 @@ def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, 
                          'TV 비중': f"{int(a_share[idx1]*100)}%",
                          'Digital 비중': f"{int(b_share[idx1]*100)}%"})
 
-    total_r1 = np.round(100.0 * plateau_after_exceed(np.array(total_r1_raw), threshold=1.0), 2)
+    total_r1 = np.round(100.0 * np.clip(np.array(total_r1_raw), 0.0, 1.0), 2)
 
     df_opt1_full = pd.DataFrame(results1)
     df_opt1_full['Total Reach 1+(%)'] = total_r1
@@ -635,7 +636,7 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
                          'TV 비중': f"{int(a3_share[idx3]*100)}%",
                          'Digital 비중': f"{int(b3_share[idx3]*100)}%"})
 
-    total_r3 = np.round(100.0 * plateau_after_exceed(np.array(total_r3_raw), threshold=1.0), 2)
+    total_r3 = np.round(100.0 * np.clip(np.array(total_r3_raw), 0.0, 1.0), 2)
 
     df_opt3_full = pd.DataFrame(results3)
     df_opt3_full['Total Reach 3+(%)'] = total_r3
