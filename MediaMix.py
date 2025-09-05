@@ -545,79 +545,6 @@ def compare_user_vs_opt3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     ])
     return summary3
 
-def optimize_single_mix1(total_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
-
-    a = np.arange(0, 101, dtype=np.float64) / 100.0
-    b = 1.0 - a
-    won = total_eok * unit
-
-    a_budget = a * won
-    b_budget = b * won
-    a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
-    b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b)
-
-    a_r1 = hill(a_imps, *popt_a1)
-    b_r1 = hill(b_imps, *popt_b1)
-
-    pred_raw = predict_total_r1_np(a_r1, b_r1)
-    pred_r1 = plateau_after_exceed(pred_raw, threshold=1.0)
-
-    best_idx = int(np.argmax(pred_r1))
-    best_total_r1 = (
-        a_r1[best_idx] if a[best_idx] >= 0.99
-        else b_r1[best_idx] if (1.0 - a[best_idx]) >= 0.99
-        else pred_r1[best_idx]
-    )
-
-    out_df = pd.DataFrame({
-        'TV 비중': [f"{int(a[best_idx]*100)}%"],
-        'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
-        'Total Reach 1+(%)': [round(100.0 * float(best_total_r1), 2)]
-    })
-
-    return a, pred_r1, a_r1, b_r1, best_idx, float(best_total_r1), out_df
-
-def optimize_single_mix3(total_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
-
-    a = np.arange(0, 101, dtype=np.float64) / 100.0
-    b = 1.0 - a
-    won = total_eok * unit
-
-    a_budget = a * won
-    b_budget = b * won
-    a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
-    b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b)
-
-    # per-media reach curves
-    a_r1 = hill(a_imps, *popt_a1); b_r1 = hill(b_imps, *popt_b1)
-    a_r2 = hill(a_imps, *popt_a2); b_r2 = hill(b_imps, *popt_b2)
-    a_r3 = hill(a_imps, *popt_a3); b_r3 = hill(b_imps, *popt_b3)
-
-    # decomposition
-    a_r0 = 1 - a_r1; b_r0 = 1 - b_r1
-    a_r1_ = a_r1 - a_r2; b_r1_ = b_r1 - b_r2
-    a_r2_ = a_r2 - a_r3; b_r2_ = b_r2 - b_r3
-
-    pred_r1_raw = predict_total_r1_np(a_r1, b_r1)
-    pred_r1 = plateau_after_exceed(pred_r1_raw, threshold=1.0)
-    pred_r2 = pred_r1 - (a_r1_ * b_r0 + b_r1_ * a_r0)
-    pred_r3 = pred_r2 - (a_r2_ * b_r0 + b_r2_ * a_r0 + a_r1_ * b_r1_)
-
-    best_idx = int(np.argmax(pred_r3))
-    best_total_r3 = (
-        a_r3[best_idx] if a[best_idx] >= 0.99
-        else b_r3[best_idx] if (1.0 - a[best_idx]) >= 0.99
-        else pred_r3[best_idx]
-    )
-
-    out_df = pd.DataFrame({
-        'TV 비중': [f"{int(a[best_idx]*100)}%"],
-        'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
-        'Total Reach 3+(%)': [round(100.0 * float(best_total_r3), 2)]
-    })
-
-    return a, pred_r3, best_idx, float(best_total_r3), out_df
-
 def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, unit=UNIT):
     a_share = np.arange(0,101,dtype=np.float64)/100.0
     b_share = 1.0 - a_share
@@ -724,9 +651,9 @@ page1, page3 = st.tabs(["Reach 1+ 최적화", "Reach 3+ 최적화"])
 
 # 공통: 세션 키 초기화
 for key in [
-    "r1_compare_result", "r1_single_curve", "r1_single_out",
+    "r1_compare_result",
     "r1_sweep_opt_full", "r1_sweep_only_full", "r1_sweep_opt", "r1_sweep_only",
-    "r3_compare_result", "r3_single_curve", "r3_single_out",
+    "r3_compare_result",
     "r3_sweep_opt_full", "r3_sweep_only_full", "r3_sweep_opt", "r3_sweep_only"
 ]:
     if key not in st.session_state:
@@ -736,7 +663,7 @@ for key in [
 # Reach 1+ Page
 # ===========================
 with page1:
-    tab1_1, tab1_2, tab1_3 = st.tabs(["개별 예산 최적화", "총 예산 최적화", "예산 범위 최적화"])
+    tab1_1, tab1_2 = st.tabs(["개별 예산 최적화", "총 예산 최적화", "예산 범위 최적화"])
 
     # --- 개별 예산 최적화 (사용자안 vs 최적화안) ---
     with tab1_1:
@@ -785,39 +712,8 @@ with page1:
             st.plotly_chart(fig1, use_container_width=True)
             st.dataframe(summary_wide, use_container_width=True)
 
-    # --- 총 예산 최적화(비중 곡선) ---
-    with tab1_2:
-        total_eok_input = st.number_input("총 예산(억 원)", value=7.0, step=0.1, min_value=0.0)
-        if st.button("실행", type="primary", key="r1_single_run"):
-            a, pred_r1, a_r1, b_r1, best_idx, best_total_r1, out = optimize_single_mix1(
-                total_eok_input, cprp_a_global, cpm_b_global, universe, unit=UNIT
-            )
-            st.session_state.r1_single_curve = (a, pred_r1, a_r1, b_r1)
-            st.session_state.r1_single_out = out
-
-        if st.session_state.r1_single_curve is not None:
-            a, pred_r1, a_r1, b_r1 = st.session_state.r1_single_curve
-            
-            fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*a, y=100*pred_r1, mode='lines+markers',
-                                      name='Predicted', marker=dict(size=4, color='#003594')))
-            fig2.update_layout(
-                xaxis=dict(title='TV ratio (%)', range=[0, 100]),
-                yaxis=dict(title='Reach 1+(%)'),
-                hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
-                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                hovermode='x', template="plotly_white",
-                width=700, height=400, dragmode=False,
-                legend=dict(yanchor="top", y=1, xanchor="left", x=0),
-            )
-            fig2.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(0,0,0,0.2)')
-            st.plotly_chart(fig2, use_container_width=True)
-
-        if st.session_state.r1_single_out is not None:
-            st.dataframe(st.session_state.r1_single_out, use_container_width=True)
-
     # --- 예산 범위 최적화 ---
-    with tab1_3:
+    with tab1_2:
         max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10, key="r1_max_units")
         if st.button("실행", type="primary", key="r1_sweep_run"):
             df_opt1_full, df_only1_full, df_opt1, df_only1 = optimize_mix_over_budget1(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
@@ -866,7 +762,7 @@ with page1:
 # Reach 3+ Page
 # ===========================
 with page3:
-    tab3_1, tab3_2, tab3_3 = st.tabs(["개별 예산 최적화", "총 예산 최적화", "예산 범위 최적화"])
+    tab3_1, tab3_2 = st.tabs(["개별 예산 최적화", "총 예산 최적화", "예산 범위 최적화"])
 
     # --- 개별 예산 최적화 (사용자안 vs 최적화안) ---
     with tab3_1:
@@ -915,74 +811,8 @@ with page3:
             st.plotly_chart(fig31, use_container_width=True)
             st.dataframe(summary_wide3, use_container_width=True)
 
-    with tab3_2:
-        total_eok_input = st.number_input("총 예산(억 원)", value=7.0, step=0.1, min_value=0.0, key="r3_total_eok")
-        if st.button("실행", type="primary", key="r3_single_run"):
-            a = np.arange(0, 101, dtype=np.float64) / 100.0
-            b = 1.0 - a
-            won = total_eok_input * UNIT
-
-            a_budget = a * won
-            b_budget = b * won
-            a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a_global, universe)
-            b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b_global)
-
-            a_r1 = hill(a_imps, *popt_a1)
-            b_r1 = hill(b_imps, *popt_b1)
-            a_r2 = hill(a_imps, *popt_a2)
-            b_r2 = hill(b_imps, *popt_b2)
-            a_r3 = hill(a_imps, *popt_a3)
-            b_r3 = hill(b_imps, *popt_b3)
-            a_r0 = 1 - a_r1
-            b_r0 = 1 - b_r1
-            a_r1_ = a_r1 - a_r2
-            b_r1_ = b_r1 - b_r2
-            a_r2_ = a_r2 - a_r3
-            b_r2_ = b_r2 - b_r3
-
-            pred_r1_raw = predict_total_r1_np(a_r1, b_r1)
-            pred_r1 = plateau_after_exceed(pred_r1_raw, threshold=1.0)
-            pred_r2 = pred_r1 - (a_r1_ * b_r0 + b_r1_ * a_r0)
-            pred_r3 = pred_r2 - (a_r2_ * b_r0 + b_r2_ * a_r0 + a_r1_ * b_r1_)
-
-            best_idx = int(np.argmax(pred_r3))
-            
-            best_total_r3 = (
-                a_r3[best_idx] if a[best_idx] >= 0.99
-                else b_r3[best_idx] if (1.0 - a[best_idx]) >= 0.99
-                else pred_r3[best_idx]
-            )
-
-            st.session_state.r3_single_curve = (a, pred_r3)
-            out = pd.DataFrame({
-                'TV 비중': [f"{int(a[best_idx]*100)}%"],
-                'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
-                'Total Reach 3+(%)': [round(100.0 * float(best_total_r3), 2)]
-            })
-            st.session_state.r3_single_out = out
-
-        if st.session_state.r3_single_curve is not None:
-            a, pred_r3 = st.session_state.r3_single_curve
-            fig32 = go.Figure()
-            fig32.add_trace(go.Scatter(x=100*a, y=100*np.round(pred_r3, 4), mode='lines+markers',
-                                      name='Predicted', marker=dict(size=4, color='#003594')))
-            fig32.update_layout(
-                xaxis=dict(title='TV ratio (%)', range=[0, 100]),
-                yaxis=dict(title='Reach 3+(%)'),
-                hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
-                plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)',
-                hovermode='x', template="plotly_white",
-                width=700, height=400, dragmode=False,
-                legend=dict(yanchor="top", y=1, xanchor="left", x=0),
-            )
-            fig32.update_yaxes(showgrid=True, gridwidth=1, gridcolor='rgba(0,0,0,0.2)')
-            st.plotly_chart(fig32, use_container_width=True)
-
-        if st.session_state.r3_single_out is not None:
-            st.dataframe(st.session_state.r3_single_out, use_container_width=True)
-
     # --- 예산 범위 최적화(스윕) ---
-    with tab3_3:
+    with tab3_2:
         max_units3 = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10, key="r3_max_units")
         if st.button("실행", type="primary", key="r3_sweep_run"):
             df_opt_full3, df_only_full3, df_opt3, df_only3 = optimize_mix_over_budget3(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units3)
