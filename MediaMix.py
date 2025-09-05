@@ -556,12 +556,16 @@ def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, 
     b_imps_only = imps_from_digital_budget_by_cpm(budget_won, cpm_b)
     only_a1 = hill(a_imps_only, *popt_a1)
     only_b1 = hill(b_imps_only, *popt_b1)
-    df_only1_full = pd.DataFrame({'예산(억 원)': budget_eok,
-                                  'Only TV': np.round(100*only_a1, 2),
-                                  'Only Digital': np.round(100*only_b1, 2)})
+
+    df_only1_full = pd.DataFrame({
+        '예산(억 원)': budget_eok,
+        'Only TV': np.round(100*only_a1, 2),
+        'Only Digital': np.round(100*only_b1, 2)
+    })
 
     results1, total_r1_raw = [], []
-    for won, eok in zip(budget_won, budget_eok):
+
+    for i, (won, eok) in enumerate(zip(budget_won, budget_eok)):
         a_budget = a_share * won
         b_budget = b_share * won
 
@@ -575,14 +579,33 @@ def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
 
         idx1 = int(np.argmax(total_r1_curve))
-        best_total_r1 = (a_r1[idx1] if a_share[idx1] >= 0.99
-                         else b_r1[idx1] if b_share[idx1] >= 0.99
-                         else total_r1_curve[idx1])
+
+        if a_share[idx1] >= 0.99:
+            best_total_r1 = a_r1[idx1]
+            best_a_share, best_b_share = 1.0, 0.0
+        elif b_share[idx1] >= 0.99:
+            best_total_r1 = b_r1[idx1]
+            best_a_share, best_b_share = 0.0, 1.0
+        else:
+            best_total_r1 = total_r1_curve[idx1]
+            best_a_share, best_b_share = float(a_share[idx1]), float(b_share[idx1])
+
+        if (best_a_share >= 0.99) or (best_b_share >= 0.99):
+            if only_a1[i] >= only_b1[i]:
+                if only_a1[i] > best_total_r1:
+                    best_total_r1 = float(only_a1[i])
+                best_a_share, best_b_share = 1.0, 0.0
+            else:
+                if only_b1[i] > best_total_r1:
+                    best_total_r1 = float(only_b1[i])
+                best_a_share, best_b_share = 0.0, 1.0
 
         total_r1_raw.append(best_total_r1)
-        results1.append({'예산(억 원)': eok,
-                         'TV 비중': f"{int(a_share[idx1]*100)}%",
-                         'Digital 비중': f"{int(b_share[idx1]*100)}%"})
+        results1.append({
+            '예산(억 원)': eok,
+            'TV 비중': f"{int(round(best_a_share*100))}%",
+            'Digital 비중': f"{int(round(best_b_share*100))}%"
+        })
 
     total_r1 = np.round(100.0 * np.clip(np.array(total_r1_raw), 0.0, 1.0), 2)
 
