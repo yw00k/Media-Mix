@@ -447,11 +447,11 @@ def optimize_total_budget1(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT)
 
 def optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     total_won = (a_eok + b_eok) * unit
-    a_share = np.arange(0, 101, dtype=np.float64) / 100.0
-    b_share = 1.0 - a_share
+    a3_share = np.arange(0, 101, dtype=np.float64) / 100.0
+    b3_share = 1.0 - a3_share
 
-    a_imps = imps_from_tv_budget_by_cprp(a_share * total_won, cprp_a, universe_val)
-    b_imps = imps_from_digital_budget_by_cpm(b_share * total_won, cpm_b)
+    a_imps = imps_from_tv_budget_by_cprp(a3_share * total_won, cprp_a, universe_val)
+    b_imps = imps_from_digital_budget_by_cpm(b3_share * total_won, cpm_b)
 
     a_r1_curve = hill(a_imps, *popt_a1); a_r2_curve = hill(a_imps, *popt_a2); a_r3_curve = hill(a_imps, *popt_a3)
     b_r1_curve = hill(b_imps, *popt_b1); b_r2_curve = hill(b_imps, *popt_b2); b_r3_curve = hill(b_imps, *popt_b3)
@@ -470,7 +470,7 @@ def optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT)
                       else total_r3_curve[idx3])
 
     return {
-        'a_share': float(a_share[idx3]), 'b_share': float(b_share[idx3]),
+        'a3_share': float(a_share[idx3]), 'b3_share': float(b_share[idx3]),
         'a_r3': float(a_r3_curve[idx3]), 'b_r3': float(b_r3_curve[idx3]),
         'total_r3': float(total_r3_value),
     }
@@ -518,8 +518,8 @@ def compare_user_vs_opt3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
 
     opt = optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit)
     total_eok = a_eok + b_eok
-    a_eok_opt = round(total_eok * opt['a_share'], 2)
-    b_eok_opt = round(total_eok * opt['b_share'], 2)
+    a_eok_opt = round(total_eok * opt['a3_share'], 2)
+    b_eok_opt = round(total_eok * opt['b3_share'], 2)
 
     summary3 = pd.DataFrame([
         {
@@ -536,8 +536,8 @@ def compare_user_vs_opt3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
             '구분': '최적화안',
             'TV 예산(억 원)': a_eok_opt,
             'Digital 예산(억 원)': b_eok_opt,
-            'TV 비중': f"{int(round(100 * opt['a_share']))}%",
-            'Digital 비중': f"{int(round(100 * opt['b_share']))}%",
+            'TV 비중': f"{int(round(100 * opt['a3_share']))}%",
+            'Digital 비중': f"{int(round(100 * opt['b3_share']))}%",
             'TV Reach 3+(%)': round(100 * opt['a_r3'], 2),
             'Digital Reach 3+(%)': round(100 * opt['b_r3'], 2),
             'Total Reach 3+(%)': round(100 * opt['total_r3'], 2),
@@ -592,8 +592,8 @@ def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, 
     return df_opt1_full, df_only1_full, df_opt1, df_only1
 
 def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, unit=UNIT):
-    a_share = np.arange(0,101,dtype=np.float64)/100.0
-    b_share = 1.0 - a_share
+    a3_share = np.arange(0,101,dtype=np.float64)/100.0
+    b3_share = 1.0 - a3_share
 
     budget_eok = np.arange(0, max_budget_units+1)
     budget_won = budget_eok * unit
@@ -608,8 +608,8 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
 
     results3, total_r3_raw = [], []
     for won, eok in zip(budget_won, budget_eok):
-        a_budget = a_share * won
-        b_budget = b_share * won
+        a_budget = a3_share * won
+        b_budget = b3_share * won
 
         a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
         b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b)
@@ -631,8 +631,8 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
 
         total_r3_raw.append(best_total_r3)
         results3.append({'예산(억 원)': eok,
-                         'TV 비중': f"{int(a_share[idx3]*100)}%",
-                         'Digital 비중': f"{int(b_share[idx3]*100)}%"})
+                         'TV 비중': f"{int(a3_share[idx3]*100)}%",
+                         'Digital 비중': f"{int(b3_share[idx3]*100)}%"})
 
     total_r3 = np.round(100.0 * plateau_after_exceed(np.array(total_r3_raw), threshold=1.0), 2)
 
