@@ -739,7 +739,7 @@ with page1:
                 else pred[best_idx]
             )
 
-            st.session_state.r1_single_curve = (a, pred)
+            st.session_state.r1_single_curve = (a, a_r1, b_r1, pred)
             out = pd.DataFrame({
                 'TV 비중': [f"{int(a[best_idx]*100)}%"],
                 'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
