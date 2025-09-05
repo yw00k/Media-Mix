@@ -78,7 +78,7 @@ msg_placeholder.success("✅ 데이터 불러오기 성공")
 time.sleep(1)
 msg_placeholder.empty()
 
-df = df_raw[df_raw['r1'] != 0].copy()
+df = df_raw[df_raw['r1'] >= 0.03].copy()
 
 metrics = ['impression','r1','r2','r3']
 pivot = df.pivot_table(
