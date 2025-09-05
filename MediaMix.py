@@ -764,11 +764,11 @@ with page1:
     with tab1_3:
         max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10, key="r1_max_units")
         if st.button("실행", type="primary", key="r1_sweep_run"):
-            df_opt_full, df_only_full, df_opt, df_only = optimize_mix_over_budget1(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
-            st.session_state.r1_sweep_opt_full = df_opt_full
-            st.session_state.r1_sweep_only_full = df_only_full
-            st.session_state.r1_sweep_opt = df_opt
-            st.session_state.r1_sweep_only = df_only
+            df_opt1_full, df_only1_full, df_opt1, df_only1 = optimize_mix_over_budget1(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
+            st.session_state.r1_sweep_opt_full = df_opt1_full
+            st.session_state.r1_sweep_only_full = df_only1_full
+            st.session_state.r1_sweep_opt = df_opt1
+            st.session_state.r1_sweep_only = df_only1
 
         if (st.session_state.r1_sweep_opt_full is not None) and (st.session_state.r1_sweep_only_full is not None):
             df_opt_full = st.session_state.r1_sweep_opt_full
