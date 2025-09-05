@@ -986,5 +986,5 @@ with page3:
                 legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5)
             )
             st.plotly_chart(fig33, use_container_width=True)
-            st.dataframe(df_opt3, use_container_width=True)
+            st.dataframe(df_opt, use_container_width=True)
 
