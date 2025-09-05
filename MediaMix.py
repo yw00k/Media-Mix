@@ -78,7 +78,7 @@ msg_placeholder.success("✅ 데이터 불러오기 성공")
 time.sleep(1)
 msg_placeholder.empty()
 
-df = df_raw[df_raw['r1'] !=0].copy()
+df = df_raw[df_raw['r1'] >= 0.03].copy()
 
 metrics = ['impression','r1','r2','r3']
 pivot = df.pivot_table(
@@ -117,7 +117,6 @@ if missing:
 pivot_all    = pivot.copy()
 pivot_strict = pivot.dropna(subset=required_cols_total).copy()
 pivot_strict['r1_ab'] = pivot_strict['r1_a'] * pivot_strict['r1_b']
-pivot_strict['r3_ab'] = pivot_strict['r3_a'] * pivot_strict['r3_b']
 
 # Target select
 target_list = sorted(pivot_strict['target'].unique())
@@ -184,8 +183,7 @@ if st.session_state.last_target_for_cprp != selected_target:
 # Prepare arrays
 # ---------------------------
 x_total = df_total['imps'].values
-y1_total = df_total['r1'].values
-y3_total = df_total['r3'].values
+y_total = df_total['r1'].values
 tv_mask_r1 = df_media[['imps_a','r1_a']].notna().all(axis=1)
 dg_mask_r1 = df_media[['imps_b','r1_b']].notna().all(axis=1)
 x_a  = df_media.loc[tv_mask_r1, 'imps_a'].values
@@ -237,36 +235,20 @@ media_r1_result = pd.DataFrame({
     'MAE(%)':     [mean_absolute_error(y_a1, pred_a1_fit)*100, mean_absolute_error(y_b1, pred_b1_fit)*100]
 }, index=['TV','Digital'])
 
-X1_train = pd.DataFrame({
+X_train = pd.DataFrame({
     'r1_a': df_total['r1_a'].values,
     'r1_b': df_total['r1_b'].values,
     'r1_ab': df_total['r1_ab'].values
 })
-y1 = y1_total
+model_total = sm.OLS(y_total, X_train).fit()
 
-quantiles = np.arange(0.1, 1.0, 0.1)
-model1_total = sm.QuantReg(y1, X1_train)
+B_A  = float(model_total.params['r1_a'])
+B_B  = float(model_total.params['r1_b'])
+B_AB = float(model_total.params['r1_ab'])
 
-predictions_r1 = {}
-coef_r1 = []
-for q in quantiles:
-    res_r1 = model1_total.fit(q=q)
-    predictions_r1[f'q={q:.1f}'] = res_r1.predict(X1_train)
-    coef_r1.append({'Quantile': q, **res_r1.params.to_dict(), 'Reach 1+': pd.Series(y1).quantile(q)})
-coef_df_r1 = pd.DataFrame(coef_r1)
-coef_df_r1 = coef_df_r1.set_index('Quantile').sort_index()
+def predict_total_r1_np(r1_a, r1_b):
 
-# downstream 계산에 사용할 대표 분위수(중앙값) 계수
-q_sel = 0.7
-res1_sel = model1_total.fit(q=q_sel)
-B1_A  = float(res1_sel.params['r1_a'])
-B1_B  = float(res1_sel.params['r1_b'])
-B1_AB = float(res1_sel.params['r1_ab'])
-
-def predict_total_r1_np(r1_a, r1_b)
-    r1_a = np.asarray(r1_a, dtype=float)
-    r1_b = np.asarray(r1_b, dtype=float)
-return B1_A * r1_a + B1_B * r1_b + B1_AB * (r1_a * r1_b)
+    return B_A * r1_a + B_B * r1_b + B_AB * (r1_a * r1_b)
 
 # ---------------------------
 # CPM/CPRP UI
