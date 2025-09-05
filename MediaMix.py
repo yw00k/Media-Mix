@@ -796,10 +796,10 @@ with page1:
             st.session_state.r1_single_out = out
 
         if st.session_state.r1_single_curve is not None:
-            a, pred, a_r1, b_r1 = st.session_state.r1_single_curve
+            a, pred_r1, a_r1, b_r1 = st.session_state.r1_single_curve
             
             fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*a, y=100*pred, mode='lines+markers',
+            fig2.add_trace(go.Scatter(x=100*a, y=100*pred_r1, mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig2.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
