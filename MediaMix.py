@@ -720,52 +720,47 @@ with page1:
             b = 1.0 - a
             won = total_eok_input * UNIT
 
-            won, results, total_r1_raw, pred = [], [], [], []
+            a_budget = a * won
+            b_budget = b * won
+            a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a_global, universe)
+            b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b_global)
 
-            for a, b, won in zip(a, b, won):
-                
-                a_budget = a * won
-                b_budget = b * won
-                a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a_global, universe)
-                b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b_global)
+            a_r1 = hill(a_imps, *popt_a1)
+            b_r1 = hill(b_imps, *popt_b1)
 
-                a_r1 = hill(a_imps, *popt_a1)
-                b_r1 = hill(b_imps, *popt_b1)
+            pred_raw = predict_total_r1_np(a_r1, b_r1)
+            pred = plateau_after_exceed(pred_raw, threshold=1.0)
 
-                pred_raw = predict_total_r1_np(a_r1, b_r1)
-                pred = plateau_after_exceed(pred_raw, threshold=1.0)
-
-                best_idx = int(np.argmax(pred))
-                
-                best_total_r1 = (
-                    a_r1[best_idx] if a[best_idx] >= 0.99
-                    else b_r1[best_idx] if (1.0 - a[best_idx]) >= 0.99
-                    else pred[best_idx]
-                )
-
-                results, total_r1_raw = [], []
-
-                total_r1_raw.append(best_total_r1)
-
-                results.append({
-                    'TV (%)': a,
-                    'TV 비중': [f"{int(a[best_idx]*100)}%"],
-                    'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"]
-                })
-
-            total_r1 = np.round(100.0 * np.clip(np.array(total_r1_raw), 0.0, 1.0), 2)
-
-            out = pd.DataFrame(results)
-            out['Total Reach 1+(%)'] = total_r1
+            best_idx = int(np.argmax(pred))
+            
+            best_total_r1 = (
+                a_r1[best_idx] if a[best_idx] >= 0.99
+                else b_r1[best_idx] if (1.0 - a[best_idx]) >= 0.99
+                else pred[best_idx]
+            )
 
             st.session_state.r1_single_curve = (a, pred)
+            out = pd.DataFrame({
+                'TV 비중': [f"{int(a[best_idx]*100)}%"],
+                'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
+                'Total Reach 1+(%)': [round(100.0 * float(best_total_r1), 2)]
+            })
+
             st.session_state.r1_single_out = out
 
-        if (st.session_state.r1_single_curve is not None) and (st.session_state.r1_single_out is not None):
-            out = st.session_state.r1_single_out
+        if st.session_state.r1_single_curve is not None:
             a, pred = st.session_state.r1_single_curve
+            y_curve = []
+            for i in range(len(a)):
+                if a[i] >= 0.99:
+                    y_curve.append(a_r1[i])
+                elif (1.0 - a[i]) >= 0.99:
+                    y_curve.append(b_r1[i])
+                else:
+                    y_curve.append(pred[i])
+            y_curve = np.array(y_curve)
             fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*a, y=out['Total Reach 1+(%)'], mode='lines+markers',
+            fig2.add_trace(go.Scatter(x=100*a, y=100*np.round(y_curve, 4), mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig2.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
@@ -780,8 +775,7 @@ with page1:
             st.plotly_chart(fig2, use_container_width=True)
 
         if st.session_state.r1_single_out is not None:
-            out = st.session_state.r1_single_out
-            st.dataframe(out, use_container_width=True)
+            st.dataframe(st.session_state.r1_single_out, use_container_width=True)
 
     # --- 예산 범위 최적화 ---
     with tab1_3:
@@ -952,35 +946,35 @@ with page3:
     with tab3_3:
         max_units3 = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10, key="r3_max_units")
         if st.button("실행", type="primary", key="r3_sweep_run"):
-            df_opt3_full, df_only3_full, df_opt3, df_only3 = optimize_mix_over_budget3(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units3)
-            st.session_state.r3_sweep_opt_full = df_opt3_full
-            st.session_state.r3_sweep_only_full = df_only3_full
+            df_opt_full3, df_only_full3, df_opt3, df_only3 = optimize_mix_over_budget3(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units3)
+            st.session_state.r3_sweep_opt_full = df_opt_full3
+            st.session_state.r3_sweep_only_full = df_only_full3
             st.session_state.r3_sweep_opt = df_opt3
             st.session_state.r3_sweep_only = df_only3
 
         if (st.session_state.r3_sweep_opt_full is not None) and (st.session_state.r3_sweep_only_full is not None):
-            df_opt_full = st.session_state.r3_sweep_opt_full
-            df_only_full = st.session_state.r3_sweep_only_full
-            df_opt  = st.session_state.r3_sweep_opt
+            df_opt_full3 = st.session_state.r3_sweep_opt_full
+            df_only_full3 = st.session_state.r3_sweep_only_full
+            df_opt3  = st.session_state.r3_sweep_opt
 
             fig33 = go.Figure(layout=go.Layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'))
-            tv=df_opt_full['TV 비중'].astype(str)
-            digital=df_opt_full['Digital 비중'].astype(str)
+            tv=df_opt_full3['TV 비중'].astype(str)
+            digital=df_opt_full3['Digital 비중'].astype(str)
             customdata = np.column_stack([tv.values, digital.values])
 
             fig33.add_trace(go.Scatter(
-                x=df_opt_full['예산(억 원)'], y=df_opt_full['Total Reach 3+(%)'],
+                x=df_opt_full3['예산(억 원)'], y=df_opt_full3['Total Reach 3+(%)'],
                 mode='lines+markers', name='Opt Mix',
                 customdata=customdata, marker=dict(color='#003594'),
                 hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Reach 3+: %{y:.2f}%'
             ))
             fig33.add_trace(go.Scatter(
-                x=df_only_full['예산(억 원)'], y=df_only_full['Only TV'],
+                x=df_only_full3['예산(억 원)'], y=df_only_full3['Only TV'],
                 mode='lines+markers', name='Only TV', marker=dict(color='#ff7473'),
                 hovertemplate='Reach 3+: %{y:.2f}%'
             ))
             fig33.add_trace(go.Scatter(
-                x=df_only_full['예산(억 원)'], y=df_only_full['Only Digital'],
+                x=df_only_full3['예산(억 원)'], y=df_only_full3['Only Digital'],
                 mode='lines+markers', name='Only Digital', marker=dict(color='gold'),
                 hovertemplate='Reach 3+: %{y:.2f}%'
             ))
@@ -992,5 +986,5 @@ with page3:
                 legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5)
             )
             st.plotly_chart(fig33, use_container_width=True)
-            st.dataframe(df_opt, use_container_width=True)
+            st.dataframe(df_opt3, use_container_width=True)
 
