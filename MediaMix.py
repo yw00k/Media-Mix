@@ -748,10 +748,11 @@ with page1:
 
             st.session_state.r1_single_out = out
 
-        if st.session_state.r1_single_curve is not None:
+        if (st.session_state.r1_single_curve is not None) and (st.session_state.r1_single_out is not None):
+            out = st.session_state.r1_single_out
             a, pred = st.session_state.r1_single_curve
             fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*a, y=100*np.round(pred, 4), mode='lines+markers',
+            fig2.add_trace(go.Scatter(x=100*a, y=out['Total Reach 1+(%)'], mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig2.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
@@ -789,18 +790,18 @@ with page1:
             customdata = np.column_stack([tv.values, digital.values])
 
             fig3.add_trace(go.Scatter(
-                x=df_opt_full['예산(억 원)'], y=df_opt_full['Total Reach 1+(%)'],
+                x=df_opt1_full['예산(억 원)'], y=df_opt1_full['Total Reach 1+(%)'],
                 mode='lines+markers', name='Opt Mix',
                 customdata=customdata, marker=dict(color='#003594'),
                 hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Reach 1+: %{y:.2f}%'
             ))
             fig3.add_trace(go.Scatter(
-                x=df_only_full['예산(억 원)'], y=df_only_full['Only TV'],
+                x=df_only_full['예산(억 원)'], y=df_only1_full['Only TV'],
                 mode='lines+markers', name='Only TV', marker=dict(color='#ff7473'),
                 hovertemplate='Reach 1+: %{y:.2f}%'
             ))
             fig3.add_trace(go.Scatter(
-                x=df_only_full['예산(억 원)'], y=df_only_full['Only Digital'],
+                x=df_only_full['예산(억 원)'], y=df_only1_full['Only Digital'],
                 mode='lines+markers', name='Only Digital', marker=dict(color='gold'),
                 hovertemplate='Reach 1+: %{y:.2f}%'
             ))
