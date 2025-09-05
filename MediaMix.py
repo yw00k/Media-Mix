@@ -780,7 +780,8 @@ with page1:
             st.plotly_chart(fig2, use_container_width=True)
 
         if st.session_state.r1_single_out is not None:
-            st.dataframe(st.session_state.r1_single_out, use_container_width=True)
+            out = st.session_state.r1_single_out
+            st.dataframe(out, use_container_width=True)
 
     # --- 예산 범위 최적화 ---
     with tab1_3:
