@@ -263,8 +263,17 @@ B1_B  = float(res1_sel.params['r1_b'])
 B1_AB = float(res1_sel.params['r1_ab'])
 
 def predict_total_r1_np(r1_a, r1_b):
-    r1_a = np.asarray(r1_a, dtype=float); r1_b = np.asarray(r1_b, dtype=float)
-    return B1_A * r1_a + B1_B * r1_b + B1_AB * (r1_a * r1_b)
+    r1_a = np.asarray(r1_a, dtype=float)
+    r1_b = np.asarray(r1_b, dtype=float)
+    if r1_a.ndim == 0: r1_a = r1_a[None]
+    if r1_b.ndim == 0: r1_b = r1_b[None]
+
+    out = {}
+    for q, row in coef_df_r1.iterrows():
+        BA, BB, BAB = float(row['r1_a']), float(row['r1_b']), float(row['r1_ab'])
+        y = BA*r1_a + BB*r1_b + BAB*(r1_a*r1_b)
+        out[f"q={q:.1f}"] = y
+    return pd.DataFrame(out)
 
 # ---------------------------
 # CPM/CPRP UI
