@@ -579,12 +579,6 @@ def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, 
                          else b_r1[idx1] if b_share[idx1] >= 0.99
                          else total_r1_curve[idx1])
 
-        if a_share[idx1] >= 0.99:
-            df_only1_full.loc[df_only1_full['예산(억 원)'] == eok, 'Only TV'] = round(100.0*float(best_total_r1), 2)
-        elif b_share[idx1] >= 0.99:
-            df_only1_full.loc[df_only1_full['예산(억 원)'] == eok, 'Only Digital'] = round(100.0*float(best_total_r1), 2)
-
-
         total_r1_raw.append(best_total_r1)
         results1.append({'예산(억 원)': eok,
                          'TV 비중': f"{int(a_share[idx1]*100)}%",
@@ -609,12 +603,16 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
     b_imps_only = imps_from_digital_budget_by_cpm(budget_won, cpm_b)
     only_a3 = hill(a_imps_only, *popt_a3)
     only_b3 = hill(b_imps_only, *popt_b3)
-    df_only3_full = pd.DataFrame({'예산(억 원)': budget_eok,
-                                  'Only TV': np.round(100*only_a3, 2),
-                                  'Only Digital': np.round(100*only_b3, 2)})
+
+    df_only3_full = pd.DataFrame({
+        '예산(억 원)': budget_eok,
+        'Only TV': np.round(100*only_a3, 2),
+        'Only Digital': np.round(100*only_b3, 2)
+    })
 
     results3, total_r3_raw = [], []
-    for won, eok in zip(budget_won, budget_eok):
+
+    for i, (won, eok) in enumerate(zip(budget_won, budget_eok)):
         a_budget = a3_share * won
         b_budget = b3_share * won
 
@@ -633,18 +631,33 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         total_r3_curve = total_r2_curve - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
 
         idx3 = int(np.argmax(total_r3_curve))
-        best_total_r3 = (a_r3[idx3] if a3_share[idx3] >= 0.99
-                         else b_r3[idx3] if b3_share[idx3] >= 0.99
-                         else total_r3_curve[idx3])
+
         if a3_share[idx3] >= 0.99:
-            df_only3_full.loc[df_only3_full['예산(억 원)'] == eok, 'Only TV'] = round(100.0*float(best_total_r3), 2)
+            best_total_r3 = a_r3[idx3]
+            best_a_share, best_b_share = 1.0, 0.0
         elif b3_share[idx3] >= 0.99:
-            df_only3_full.loc[df_only3_full['예산(억 원)'] == eok, 'Only Digital'] = round(100.0*float(best_total_r3), 2)
+            best_total_r3 = b_r3[idx3]
+            best_a_share, best_b_share = 0.0, 1.0
+        else:
+            best_total_r3 = total_r3_curve[idx3]
+            best_a_share, best_b_share = float(a3_share[idx3]), float(b3_share[idx3])
+
+        if (best_a_share >= 0.99) or (best_b_share >= 0.99):
+            if only_a3[i] >= only_b3[i]:
+                if only_a3[i] > best_total_r3:
+                    best_total_r3 = float(only_a3[i])
+                best_a_share, best_b_share = 1.0, 0.0
+            else:
+                if only_b3[i] > best_total_r3:
+                    best_total_r3 = float(only_b3[i])
+                best_a_share, best_b_share = 0.0, 1.0
 
         total_r3_raw.append(best_total_r3)
-        results3.append({'예산(억 원)': eok,
-                         'TV 비중': f"{int(a3_share[idx3]*100)}%",
-                         'Digital 비중': f"{int(b3_share[idx3]*100)}%"})
+        results3.append({
+            '예산(억 원)': eok,
+            'TV 비중': f"{int(round(best_a_share*100))}%",
+            'Digital 비중': f"{int(round(best_b_share*100))}%"
+        })
 
     total_r3 = np.round(100.0 * np.clip(np.array(total_r3_raw), 0.0, 1.0), 2)
 
