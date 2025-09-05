@@ -946,35 +946,35 @@ with page3:
     with tab3_3:
         max_units3 = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10, key="r3_max_units")
         if st.button("실행", type="primary", key="r3_sweep_run"):
-            df_opt_full3, df_only_full3, df_opt3, df_only3 = optimize_mix_over_budget3(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units3)
-            st.session_state.r3_sweep_opt_full = df_opt_full3
-            st.session_state.r3_sweep_only_full = df_only_full3
+            df_opt3_full, df_only3_full, df_opt3, df_only3 = optimize_mix_over_budget3(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units3)
+            st.session_state.r3_sweep_opt_full = df_opt3_full
+            st.session_state.r3_sweep_only_full = df_only3_full
             st.session_state.r3_sweep_opt = df_opt3
             st.session_state.r3_sweep_only = df_only3
 
         if (st.session_state.r3_sweep_opt_full is not None) and (st.session_state.r3_sweep_only_full is not None):
-            df_opt_full3 = st.session_state.r3_sweep_opt_full
-            df_only_full3 = st.session_state.r3_sweep_only_full
-            df_opt3  = st.session_state.r3_sweep_opt
+            df_opt_full = st.session_state.r3_sweep_opt_full
+            df_only_full = st.session_state.r3_sweep_only_full
+            df_opt  = st.session_state.r3_sweep_opt
 
             fig33 = go.Figure(layout=go.Layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'))
-            tv=df_opt_full3['TV 비중'].astype(str)
+            tv=df_opt_full['TV 비중'].astype(str)
             digital=df_opt_full3['Digital 비중'].astype(str)
             customdata = np.column_stack([tv.values, digital.values])
 
             fig33.add_trace(go.Scatter(
-                x=df_opt_full3['예산(억 원)'], y=df_opt_full3['Total Reach 3+(%)'],
+                x=df_opt_full['예산(억 원)'], y=df_opt_full['Total Reach 3+(%)'],
                 mode='lines+markers', name='Opt Mix',
                 customdata=customdata, marker=dict(color='#003594'),
                 hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Reach 3+: %{y:.2f}%'
             ))
             fig33.add_trace(go.Scatter(
-                x=df_only_full3['예산(억 원)'], y=df_only_full3['Only TV'],
+                x=df_only_full['예산(억 원)'], y=df_only_full['Only TV'],
                 mode='lines+markers', name='Only TV', marker=dict(color='#ff7473'),
                 hovertemplate='Reach 3+: %{y:.2f}%'
             ))
             fig33.add_trace(go.Scatter(
-                x=df_only_full3['예산(억 원)'], y=df_only_full3['Only Digital'],
+                x=df_only_full['예산(억 원)'], y=df_only_full['Only Digital'],
                 mode='lines+markers', name='Only Digital', marker=dict(color='gold'),
                 hovertemplate='Reach 3+: %{y:.2f}%'
             ))
