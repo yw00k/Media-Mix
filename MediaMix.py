@@ -739,12 +739,13 @@ with page1:
                 else pred[best_idx]
             )
 
+            results, total_r1_raw = []. []
+
             total_r1_raw.append(best_total_r1)
 
             results.append({
                 'TV 비중': [f"{int(a[best_idx]*100)}%"],
-                'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
-                'Total Reach 1+(%)': [round(100.0 * float(best_total_r1), 2)]
+                'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"]
             })
 
             total_r1 = np.round(100.0 * np.clip(np.array(total_r1_raw), 0.0, 1.0), 2)
