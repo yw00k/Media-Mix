@@ -184,45 +184,45 @@ if st.session_state.last_target_for_cprp != selected_target:
 # ---------------------------
 x_total = df_total['imps'].values
 y_total = df_total['r1'].values
-tv_mask_r1 = df_media[['imps_a','r1_a']].notna().all(axis=1)
-dg_mask_r1 = df_media[['imps_b','r1_b']].notna().all(axis=1)
-x_a  = df_media.loc[tv_mask_r1, 'imps_a'].values
-y_a1 = df_media.loc[tv_mask_r1, 'r1_a'].values
-x_b  = df_media.loc[dg_mask_r1, 'imps_b'].values
-y_b1 = df_media.loc[dg_mask_r1, 'r1_b'].values
+tv_mask_r1 = df_total[['imps_a','r1_a']].notna().all(axis=1)
+dg_mask_r1 = df_total[['imps_b','r1_b']].notna().all(axis=1)
+x_a  = df_total.loc[tv_mask_r1, 'imps_a'].values
+y_a1 = df_total.loc[tv_mask_r1, 'r1_a'].values
+x_b  = df_total.loc[dg_mask_r1, 'imps_b'].values
+y_b1 = df_total.loc[dg_mask_r1, 'r1_b'].values
 
-tv_mask_r2 = df_media[['imps_a','r2_a']].notna().all(axis=1)
-dg_mask_r2 = df_media[['imps_b','r2_b']].notna().all(axis=1)
-x_a2 = df_media.loc[tv_mask_r2, 'imps_a'].values
-y_a2 = df_media.loc[tv_mask_r2, 'r2_a'].values
-x_b2 = df_media.loc[dg_mask_r2, 'imps_b'].values
-y_b2 = df_media.loc[dg_mask_r2, 'r2_b'].values
+tv_mask_r2 = df_total[['imps_a','r2_a']].notna().all(axis=1)
+dg_mask_r2 = df_total[['imps_b','r2_b']].notna().all(axis=1)
+x_a2 = df_total.loc[tv_mask_r2, 'imps_a'].values
+y_a2 = df_total.loc[tv_mask_r2, 'r2_a'].values
+x_b2 = df_total.loc[dg_mask_r2, 'imps_b'].values
+y_b2 = df_total.loc[dg_mask_r2, 'r2_b'].values
 
-tv_mask_r3 = df_media[['imps_a','r3_a']].notna().all(axis=1)
-dg_mask_r3 = df_media[['imps_b','r3_b']].notna().all(axis=1)
-x_a3 = df_media.loc[tv_mask_r3, 'imps_a'].values
-y_a3 = df_media.loc[tv_mask_r3, 'r3_a'].values
-x_b3 = df_media.loc[dg_mask_r3, 'imps_b'].values
-y_b3 = df_media.loc[dg_mask_r3, 'r3_b'].values
+tv_mask_r3 = df_total[['imps_a','r3_a']].notna().all(axis=1)
+dg_mask_r3 = df_total[['imps_b','r3_b']].notna().all(axis=1)
+x_a3 = df_total.loc[tv_mask_r3, 'imps_a'].values
+y_a3 = df_total.loc[tv_mask_r3, 'r3_a'].values
+x_b3 = df_total.loc[dg_mask_r3, 'imps_b'].values
+y_b3 = df_total.loc[dg_mask_r3, 'r3_b'].values
 
 def hill(x, a, b, c):
     return c / (1.0 + (b / x)**a)
 
-initial_params1 = [1.0, 25_000_000.0, 0.5]
-initial_params2 = [1.0, 25_000_000.0, 0.2]
-initial_params3 = [1.0, 25_000_000.0, 0.1]
+initial_params1 = [1.0, 25_000_000.0, 0.6]
+initial_params2 = [1.0, 25_000_000.0, 0.4]
+initial_params3 = [1.0, 25_000_000.0, 0.2]
 
 bounds_a = ([0,0,0],[np.inf,np.inf,1.0])
-bounds_b1 = ([0,0,0],[np.inf,np.inf,0.68])
-bounds_b2 = ([0,0,0],[np.inf,np.inf,0.4])
-bounds_b3 = ([0,0,0],[np.inf,np.inf,0.3])
+bounds_b1 = ([0,0,0],[np.inf,np.inf,0.706])
+bounds_b2 = ([0,0,0],[np.inf,np.inf,0.6])
+bounds_b3 = ([0,0,0],[np.inf,np.inf,0.4])
 
 popt_a1, _ = curve_fit(hill, x_a,  y_a1, p0=initial_params1, bounds=bounds_a, maxfev=20000)
-popt_b1, _ = curve_fit(hill, x_b,  y_b1, p0=initial_params1, bounds=bounds_a, maxfev=20000)
+popt_b1, _ = curve_fit(hill, x_b,  y_b1, p0=initial_params1, bounds=bounds_b1, maxfev=20000)
 popt_a2, _ = curve_fit(hill, x_a2, y_a2, p0=initial_params1, bounds=bounds_a, maxfev=20000)
-popt_b2, _ = curve_fit(hill, x_b2, y_b2, p0=initial_params2, bounds=bounds_a, maxfev=20000)
+popt_b2, _ = curve_fit(hill, x_b2, y_b2, p0=initial_params2, bounds=bounds_b2, maxfev=20000)
 popt_a3, _ = curve_fit(hill, x_a3, y_a3, p0=initial_params1, bounds=bounds_a, maxfev=20000)
-popt_b3, _ = curve_fit(hill, x_b3, y_b3, p0=initial_params3, bounds=bounds_a, maxfev=20000)
+popt_b3, _ = curve_fit(hill, x_b3, y_b3, p0=initial_params3, bounds=bounds_b3, maxfev=20000)
 
 pred_a1_fit = hill(x_a, *popt_a1)
 pred_b1_fit = hill(x_b, *popt_b1)
