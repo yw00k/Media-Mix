@@ -255,9 +255,9 @@ B1_A  = float(model1_total.params['r1_a'])
 B1_B  = float(model1_total.params['r1_b'])
 B1_AB = float(model1_total.params['r1_ab'])
 
-B3_A  = float(model3_total.params['r1_a'])
-B3_B  = float(model3_total.params['r1_b'])
-B3_AB = float(model3_total.params['r1_ab'])
+B3_A  = float(model3_total.params['r3_a'])
+B3_B  = float(model3_total.params['r3_b'])
+B3_AB = float(model3_total.params['r3_ab'])
 
 def predict_total_r1_np(r1_a, r1_b):
 
