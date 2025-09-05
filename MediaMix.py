@@ -117,6 +117,7 @@ if missing:
 pivot_all    = pivot.copy()
 pivot_strict = pivot.dropna(subset=required_cols_total).copy()
 pivot_strict['r1_ab'] = pivot_strict['r1_a'] * pivot_strict['r1_b']
+pivot_strict['r3_ab'] = pivot_strict['r3_a'] * pivot_strict['r3_b']
 
 # Target select
 target_list = sorted(pivot_strict['target'].unique())
@@ -403,24 +404,13 @@ def analyze_custom_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT)
     b_r3 = hill(np.array([b_imps]), *popt_b3) if b_imps > 0 else np.array([0.0])
 
     if a_won > 0 and b_won == 0:
-        total_r1 = a_r1.copy()
-    elif b_won > 0 and a_won == 0:
-        total_r1 = b_r1.copy()
-    else:
-        total_r1 = predict_total_r1_np(a_r1, b_r1)
-        if np.isscalar(total_r1):
-            total_r1 = np.array([total_r1], dtype=float)
-
-    a_r0_ = 1.0 - a_r1; a_r1_ = a_r1 - a_r2; a_r2_ = a_r2 - a_r3
-    b_r0_ = 1.0 - b_r1; b_r1_ = b_r1 - b_r2; b_r2_ = b_r2 - b_r3
-
-    total_r2 = total_r1 - (a_r1_ * b_r0_ + b_r1_ * a_r0_)
-    total_r3 = total_r2 - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
-
-    if a_won > 0 and b_won == 0:
         total_r3 = a_r3.copy()
     elif b_won > 0 and a_won == 0:
         total_r3 = b_r3.copy()
+    else:
+        total_r3 = predict_total_r3_np(a_r3, b_r3)
+        if np.isscalar(total_r3):
+            total_r3 = np.array([total_r3], dtype=float)
 
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)','Digital(억 원)','총(억 원)','TV Reach 3+(%)','Digital Reach 3+(%)','Total Reach 3+(%)'],
