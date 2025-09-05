@@ -739,7 +739,7 @@ with page1:
                 else pred[best_idx]
             )
 
-            st.session_state.r1_single_curve = (a, pred)
+            st.session_state.r1_single_curve = (a, best_total_r1)
             out = pd.DataFrame({
                 'TV 비중': [f"{int(a[best_idx]*100)}%"],
                 'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
@@ -748,9 +748,9 @@ with page1:
             st.session_state.r1_single_out = out
 
         if st.session_state.r1_single_curve is not None:
-            a, pred = st.session_state.r1_single_curve
+            a, best_total_r1 = st.session_state.r1_single_curve
             fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*a, y=out['Total Reach 1+(%)'], mode='lines+markers',
+            fig2.add_trace(go.Scatter(x=100*a, y=y=100*np.round(best_total_r1, 4), mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig2.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
@@ -904,7 +904,7 @@ with page3:
                 else pred_r3[best_idx]
             )
 
-            st.session_state.r3_single_curve = (a, pred_r3)
+            st.session_state.r3_single_curve = (a, best_total_r3)
             out = pd.DataFrame({
                 'TV 비중': [f"{int(a[best_idx]*100)}%"],
                 'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
@@ -913,9 +913,9 @@ with page3:
             st.session_state.r3_single_out = out
 
         if st.session_state.r3_single_curve is not None:
-            a, pred_r3 = st.session_state.r3_single_curve
+            a, best_total_r3 = st.session_state.r3_single_curve
             fig32 = go.Figure()
-            fig32.add_trace(go.Scatter(x=100*a, y=out['Total Reach 3+(%)'], mode='lines+markers',
+            fig32.add_trace(go.Scatter(x=100*a, y=100*np.round(best_total_r3, 4), mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig32.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
