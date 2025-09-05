@@ -262,36 +262,9 @@ B1_A  = float(res1_sel.params['r1_a'])
 B1_B  = float(res1_sel.params['r1_b'])
 B1_AB = float(res1_sel.params['r1_ab'])
 
-# --- r3: Quantile Regression (중앙값 q=0.5 사용) ---
-X3_train = pd.DataFrame({
-    'r3_a': df_total['r3_a'].values,
-    'r3_b': df_total['r3_b'].values,
-    'r3_ab': df_total['r3_ab'].values
-})
-y3 = y3_total
-
-model3_total = sm.QuantReg(y3, X3_train)
-
-predictions_r3 = {}
-coef_r3 = []
-for q in quantiles:
-    res_r3 = model3_total.fit(q=q)
-    predictions_r3[f'q={q:.1f}'] = res_r3.predict(X3_train)
-    coef_r3.append({'Quantile': q, **res_r3.params.to_dict(), 'Reach 3+': pd.Series(y3).quantile(q)})
-coef_df_r3 = pd.DataFrame(coef_r3)
-
-res3_sel = model3_total.fit(q=q_sel)
-B3_A  = float(res3_sel.params['r3_a'])
-B3_B  = float(res3_sel.params['r3_b'])
-B3_AB = float(res3_sel.params['r3_ab'])
-
 def predict_total_r1_np(r1_a, r1_b):
     r1_a = np.asarray(r1_a, dtype=float); r1_b = np.asarray(r1_b, dtype=float)
     return B1_A * r1_a + B1_B * r1_b + B1_AB * (r1_a * r1_b)
-
-def predict_total_r3_np(r3_a, r3_b):
-    r3_a = np.asarray(r3_a, dtype=float); r3_b = np.asarray(r3_b, dtype=float)
-    return B3_A * r3_a + B3_B * r3_b + B3_AB * (r3_a * r3_b)
 
 # ---------------------------
 # CPM/CPRP UI
@@ -434,13 +407,24 @@ def analyze_custom_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT)
     b_r3 = hill(np.array([b_imps]), *popt_b3) if b_imps > 0 else np.array([0.0])
 
     if a_won > 0 and b_won == 0:
+        total_r1 = a_r1.copy()
+    elif b_won > 0 and a_won == 0:
+        total_r1 = b_r1.copy()
+    else:
+        total_r1 = predict_total_r1_np(a_r1, b_r1)
+        if np.isscalar(total_r1):
+            total_r1 = np.array([total_r1], dtype=float)
+
+    a_r0_ = 1.0 - a_r1; a_r1_ = a_r1 - a_r2; a_r2_ = a_r2 - a_r3
+    b_r0_ = 1.0 - b_r1; b_r1_ = b_r1 - b_r2; b_r2_ = b_r2 - b_r3
+
+    total_r2 = total_r1 - (a_r1_ * b_r0_ + b_r1_ * a_r0_)
+    total_r3 = total_r2 - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
+
+    if a_won > 0 and b_won == 0:
         total_r3 = a_r3.copy()
     elif b_won > 0 and a_won == 0:
         total_r3 = b_r3.copy()
-    else:
-        total_r3 = predict_total_r3_np(a_r3, b_r3)
-        if np.isscalar(total_r3):
-            total_r3 = np.array([total_r3], dtype=float)
 
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)','Digital(억 원)','총(억 원)','TV Reach 3+(%)','Digital Reach 3+(%)','Total Reach 3+(%)'],
@@ -485,11 +469,16 @@ def optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT)
     a_imps = imps_from_tv_budget_by_cprp(a3_share * total_won, cprp_a, universe_val)
     b_imps = imps_from_digital_budget_by_cpm(b3_share * total_won, cpm_b)
 
-    a_r3_curve = hill(a_imps, *popt_a3)
-    b_r3_curve = hill(b_imps, *popt_b3)
+    a_r1_curve = hill(a_imps, *popt_a1); a_r2_curve = hill(a_imps, *popt_a2); a_r3_curve = hill(a_imps, *popt_a3)
+    b_r1_curve = hill(b_imps, *popt_b1); b_r2_curve = hill(b_imps, *popt_b2); b_r3_curve = hill(b_imps, *popt_b3)
 
-    total_r3_curve_raw = predict_total_r3_np(a_r3_curve, b_r3_curve)
-    total_r3_curve = plateau_after_exceed(total_r3_curve_raw, threshold=1.0)
+    total_r1_curve_raw = predict_total_r1_np(a_r1_curve, b_r1_curve)
+    total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
+
+    a_r0_ = 1 - a_r1_curve; a_r1_ = a_r1_curve - a_r2_curve; a_r2_ = a_r2_curve - a_r3_curve
+    b_r0_ = 1 - b_r1_curve; b_r1_ = b_r1_curve - b_r2_curve; b_r2_ = b_r2_curve - b_r3_curve
+    total_r2_curve = total_r1_curve - (a_r1_ * b_r0_ + b_r1_ * a_r0_)
+    total_r3_curve = total_r2_curve - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
 
     idx3 = int(np.argmax(total_r3_curve))
     total_r3_value = (a_r3_curve[idx3] if a3_share[idx3] >= 0.99
@@ -669,11 +658,16 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
         b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b)
 
-        a_r3 = hill(a_imps, *popt_a3)
-        b_r3 = hill(b_imps, *popt_b3)
+        a_r1 = hill(a_imps, *popt_a1); a_r2 = hill(a_imps, *popt_a2); a_r3 = hill(a_imps, *popt_a3)
+        b_r1 = hill(b_imps, *popt_b1); b_r2 = hill(b_imps, *popt_b2); b_r3 = hill(b_imps, *popt_b3)
 
-        total_r3_curve_raw = predict_total_r3_np(a_r3, b_r3)
-        total_r3_curve = plateau_after_exceed(total_r3_curve_raw, threshold=1.0)
+        total_r1_curve_raw = predict_total_r1_np(a_r1, b_r1)
+        total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
+
+        a_r0_ = 1 - a_r1; a_r1_ = a_r1 - a_r2; a_r2_ = a_r2 - a_r3
+        b_r0_ = 1 - b_r1; b_r1_ = b_r1 - b_r2; b_r2_ = b_r2 - b_r3
+        total_r2_curve = total_r1_curve - (a_r1_ * b_r0_ + b_r1_ * a_r0_)
+        total_r3_curve = total_r2_curve - (a_r2_ * b_r0_ + b_r2_ * a_r0_ + a_r1_ * b_r1_)
 
         idx3 = int(np.argmax(total_r3_curve))
 
