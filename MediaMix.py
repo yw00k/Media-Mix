@@ -470,7 +470,7 @@ def optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT)
                       else total_r3_curve[idx3])
 
     return {
-        'a3_share': float(a_share[idx3]), 'b3_share': float(b_share[idx3]),
+        'a3_share': float(a3_share[idx3]), 'b3_share': float(b3_share[idx3]),
         'a_r3': float(a_r3_curve[idx3]), 'b_r3': float(b_r3_curve[idx3]),
         'total_r3': float(total_r3_value),
     }
@@ -617,7 +617,8 @@ def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, 
         a_r1 = hill(a_imps, *popt_a1); a_r2 = hill(a_imps, *popt_a2); a_r3 = hill(a_imps, *popt_a3)
         b_r1 = hill(b_imps, *popt_b1); b_r2 = hill(b_imps, *popt_b2); b_r3 = hill(b_imps, *popt_b3)
 
-        total_r1_curve = predict_total_r1_np(a_r1, b_r1)
+        total_r1_curve_raw = predict_total_r1_np(a_r1, b_r1)
+        total_r1_curve = plateau_after_exceed(total_r1_curve_raw, threshold=1.0)
 
         a_r0_ = 1 - a_r1; a_r1_ = a_r1 - a_r2; a_r2_ = a_r2 - a_r3
         b_r0_ = 1 - b_r1; b_r1_ = b_r1 - b_r2; b_r2_ = b_r2 - b_r3
