@@ -749,7 +749,7 @@ with page1:
             st.session_state.r1_single_out = out
 
         if st.session_state.r1_single_curve is not None:
-            a, pred = st.session_state.r1_single_curve
+            a, pred, a_r1, b_r1 = st.session_state.r1_single_curve
             y_curve = []
             for i in range(len(a)):
                 if a[i] >= 0.99:
