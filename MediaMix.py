@@ -765,7 +765,7 @@ with page1:
             out = st.session_state.r1_single_out
             a, pred = st.session_state.r1_single_curve
             fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*out['TV (%)'], y=out['Total Reach 1+(%)'], mode='lines+markers',
+            fig2.add_trace(go.Scatter(x=100*a, y=out['Total Reach 1+(%)'], mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig2.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
