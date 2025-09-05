@@ -731,8 +731,12 @@ with page1:
             pred_raw = predict_total_r1_np(a_r1, b_r1)
             pred = plateau_after_exceed(pred_raw, threshold=1.0)
 
-            st.session_state.r1_single_curve = (a, pred)
+            pred[0] = b_r1[0]
+            pred[-1] = a_r1[-1]
+
             best_idx = int(np.argmax(pred))
+            
+            st.session_state.r1_single_curve = (a, pred)
             out = pd.DataFrame({
                 'TV 비중': [f"{int(a[best_idx]*100)}%"],
                 'Digital 비중': [f"{int(b[best_idx]*100)}%"],
@@ -889,8 +893,12 @@ with page3:
             pred_r2 = pred_r1 - (a_r1_ * b_r0 + b_r1_ * a_r0)
             pred_r3 = pred_r2 - (a_r2_ * b_r0 + b_r2_ * a_r0 + a_r1_ * b_r1_)
 
-            st.session_state.r3_single_curve = (a, pred_r3)
+            pred_r3[0] = b_r3[0]
+            pred_r3[-1] = a_r3[-1]
+
             best_idx = int(np.argmax(pred_r3))
+            
+            st.session_state.r3_single_curve = (a, pred_r3)
             out = pd.DataFrame({
                 'TV 비중': [f"{int(a[best_idx]*100)}%"],
                 'Digital 비중': [f"{int(b[best_idx]*100)}%"],
