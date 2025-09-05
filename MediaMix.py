@@ -789,10 +789,10 @@ with page1:
     with tab1_2:
         total_eok_input = st.number_input("총 예산(억 원)", value=7.0, step=0.1, min_value=0.0)
         if st.button("실행", type="primary", key="r1_single_run"):
-            a, pred, a_r1, b_r1, best_idx, best_total_r1, out = optimize_single_mix1(
+            a, pred_r1, a_r1, b_r1, best_idx, best_total_r1, out = optimize_single_mix1(
                 total_eok_input, cprp_a_global, cpm_b_global, universe, unit=UNIT
             )
-            st.session_state.r1_single_curve = (a, pred, a_r1, b_r1)
+            st.session_state.r1_single_curve = (a, pred_r1, a_r1, b_r1)
             st.session_state.r1_single_out = out
 
         if st.session_state.r1_single_curve is not None:
