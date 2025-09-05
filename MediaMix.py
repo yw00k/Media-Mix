@@ -798,18 +798,18 @@ with page1:
             customdata = np.column_stack([tv.values, digital.values])
 
             fig3.add_trace(go.Scatter(
-                x=df_opt1_full['예산(억 원)'], y=df_opt1_full['Total Reach 1+(%)'],
+                x=df_opt_full['예산(억 원)'], y=df_opt_full['Total Reach 1+(%)'],
                 mode='lines+markers', name='Opt Mix',
                 customdata=customdata, marker=dict(color='#003594'),
                 hovertemplate='TV: %{customdata[0]}<br>Digital: %{customdata[1]}<br>Reach 1+: %{y:.2f}%'
             ))
             fig3.add_trace(go.Scatter(
-                x=df_only_full['예산(억 원)'], y=df_only1_full['Only TV'],
+                x=df_only_full['예산(억 원)'], y=df_only_full['Only TV'],
                 mode='lines+markers', name='Only TV', marker=dict(color='#ff7473'),
                 hovertemplate='Reach 1+: %{y:.2f}%'
             ))
             fig3.add_trace(go.Scatter(
-                x=df_only_full['예산(억 원)'], y=df_only1_full['Only Digital'],
+                x=df_only_full['예산(억 원)'], y=df_only_full['Only Digital'],
                 mode='lines+markers', name='Only Digital', marker=dict(color='gold'),
                 hovertemplate='Reach 1+: %{y:.2f}%'
             ))
