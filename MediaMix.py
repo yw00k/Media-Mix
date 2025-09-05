@@ -739,7 +739,7 @@ with page1:
                 else pred[best_idx]
             )
 
-            results, total_r1_raw = []. []
+            results, total_r1_raw = [], []
 
             total_r1_raw.append(best_total_r1)
 
