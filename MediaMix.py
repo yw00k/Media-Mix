@@ -720,33 +720,38 @@ with page1:
             b = 1.0 - a
             won = total_eok_input * UNIT
 
-            a_budget = a * won
-            b_budget = b * won
-            a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a_global, universe)
-            b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b_global)
-
-            a_r1 = hill(a_imps, *popt_a1)
-            b_r1 = hill(b_imps, *popt_b1)
-
-            pred_raw = predict_total_r1_np(a_r1, b_r1)
-            pred = plateau_after_exceed(pred_raw, threshold=1.0)
-
-            best_idx = int(np.argmax(pred))
-            
-            best_total_r1 = (
-                a_r1[best_idx] if a[best_idx] >= 0.99
-                else b_r1[best_idx] if (1.0 - a[best_idx]) >= 0.99
-                else pred[best_idx]
-            )
-
             results, total_r1_raw = [], []
 
-            total_r1_raw.append(best_total_r1)
+            for a, b, won in zip(a, b, budget):
+                
+                a_budget = a * won
+                b_budget = b * won
+                a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a_global, universe)
+                b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b_global)
 
-            results.append({
-                'TV 비중': [f"{int(a[best_idx]*100)}%"],
-                'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"]
-            })
+                a_r1 = hill(a_imps, *popt_a1)
+                b_r1 = hill(b_imps, *popt_b1)
+
+                pred_raw = predict_total_r1_np(a_r1, b_r1)
+                pred = plateau_after_exceed(pred_raw, threshold=1.0)
+
+                best_idx = int(np.argmax(pred))
+                
+                best_total_r1 = (
+                    a_r1[best_idx] if a[best_idx] >= 0.99
+                    else b_r1[best_idx] if (1.0 - a[best_idx]) >= 0.99
+                    else pred[best_idx]
+                )
+
+                results, total_r1_raw = [], []
+
+                total_r1_raw.append(best_total_r1)
+
+                results.append({
+                    'TV (%)': a,
+                    'TV 비중': [f"{int(a[best_idx]*100)}%"],
+                    'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"]
+                })
 
             total_r1 = np.round(100.0 * np.clip(np.array(total_r1_raw), 0.0, 1.0), 2)
 
@@ -760,7 +765,7 @@ with page1:
             out = st.session_state.r1_single_out
             a, pred = st.session_state.r1_single_curve
             fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*a, y=out['Total Reach 1+(%)'], mode='lines+markers',
+            fig2.add_trace(go.Scatter(x=100*out['TV (%)'], y=out['Total Reach 1+(%)'], mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig2.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
