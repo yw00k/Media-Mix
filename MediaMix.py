@@ -739,7 +739,7 @@ with page1:
                 else pred[best_idx]
             )
 
-            st.session_state.r1_single_curve = (a, a_r1, b_r1, pred)
+            st.session_state.r1_single_curve = (a, pred, a_r1, b_r1)
             out = pd.DataFrame({
                 'TV 비중': [f"{int(a[best_idx]*100)}%"],
                 'Digital 비중': [f"{int((1.0-a[best_idx])*100)}%"],
@@ -750,17 +750,9 @@ with page1:
 
         if st.session_state.r1_single_curve is not None:
             a, pred, a_r1, b_r1 = st.session_state.r1_single_curve
-            y_curve = []
-            for i in range(len(a)):
-                if a[i] >= 0.99:
-                    y_curve.append(a_r1[i])
-                elif (1.0 - a[i]) >= 0.99:
-                    y_curve.append(b_r1[i])
-                else:
-                    y_curve.append(pred[i])
-            y_curve = np.array(y_curve)
+            
             fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*a, y=100*np.round(y_curve, 4), mode='lines+markers',
+            fig2.add_trace(go.Scatter(x=100*a, y=100*np.round(pred, 4), mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig2.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
