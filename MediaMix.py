@@ -254,26 +254,19 @@ for q in quantiles:
     predictions_r1[f'q={q:.1f}'] = res_r1.predict(X1_train)
     coef_r1.append({'Quantile': q, **res_r1.params.to_dict(), 'Reach 1+': pd.Series(y1).quantile(q)})
 coef_df_r1 = pd.DataFrame(coef_r1)
+coef_df_r1 = coef_df_r1.set_index('Quantile').sort_index()
 
 # downstream 계산에 사용할 대표 분위수(중앙값) 계수
-q_sel = 0.5
+q_sel = 0.7
 res1_sel = model1_total.fit(q=q_sel)
 B1_A  = float(res1_sel.params['r1_a'])
 B1_B  = float(res1_sel.params['r1_b'])
 B1_AB = float(res1_sel.params['r1_ab'])
 
-def predict_total_r1_np(r1_a, r1_b):
+def predict_total_r1_np(r1_a, r1_b)
     r1_a = np.asarray(r1_a, dtype=float)
     r1_b = np.asarray(r1_b, dtype=float)
-    if r1_a.ndim == 0: r1_a = r1_a[None]
-    if r1_b.ndim == 0: r1_b = r1_b[None]
-
-    out = {}
-    for q, row in coef_df_r1.iterrows():
-        BA, BB, BAB = float(row['r1_a']), float(row['r1_b']), float(row['r1_ab'])
-        y = BA*r1_a + BB*r1_b + BAB*(r1_a*r1_b)
-        out[f"q={q:.1f}"] = y
-    return pd.DataFrame(out)
+return B1_A * r1_a + B1_B * r1_b + B1_AB * (r1_a * r1_b)
 
 # ---------------------------
 # CPM/CPRP UI
