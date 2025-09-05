@@ -78,7 +78,7 @@ msg_placeholder.success("✅ 데이터 불러오기 성공")
 time.sleep(1)
 msg_placeholder.empty()
 
-df = df_raw[df_raw['r1'] !=0].copy()
+df = df_raw[df_raw['r1'] >= 0.03].copy()
 
 metrics = ['impression','r1','r2','r3']
 pivot = df.pivot_table(
@@ -117,7 +117,6 @@ if missing:
 pivot_all    = pivot.copy()
 pivot_strict = pivot.dropna(subset=required_cols_total).copy()
 pivot_strict['r1_ab'] = pivot_strict['r1_a'] * pivot_strict['r1_b']
-pivot_strict['r3_ab'] = pivot_strict['r3_a'] * pivot_strict['r3_b']
 
 # Target select
 target_list = sorted(pivot_strict['target'].unique())
@@ -184,8 +183,7 @@ if st.session_state.last_target_for_cprp != selected_target:
 # Prepare arrays
 # ---------------------------
 x_total = df_total['imps'].values
-y1_total = df_total['r1'].values
-y3_total = df_total['r3'].values
+y_total = df_total['r1'].values
 tv_mask_r1 = df_media[['imps_a','r1_a']].notna().all(axis=1)
 dg_mask_r1 = df_media[['imps_b','r1_b']].notna().all(axis=1)
 x_a  = df_media.loc[tv_mask_r1, 'imps_a'].values
@@ -237,63 +235,20 @@ media_r1_result = pd.DataFrame({
     'MAE(%)':     [mean_absolute_error(y_a1, pred_a1_fit)*100, mean_absolute_error(y_b1, pred_b1_fit)*100]
 }, index=['TV','Digital'])
 
-X1_train = pd.DataFrame({
+X_train = pd.DataFrame({
     'r1_a': df_total['r1_a'].values,
     'r1_b': df_total['r1_b'].values,
     'r1_ab': df_total['r1_ab'].values
 })
-y1 = y1_total
+model_total = sm.OLS(y_total, X_train).fit()
 
-quantiles = np.arange(0.1, 1.0, 0.1)
-model1_total = sm.QuantReg(y1, X1_train)
+B_A  = float(model_total.params['r1_a'])
+B_B  = float(model_total.params['r1_b'])
+B_AB = float(model_total.params['r1_ab'])
 
-predictions_r1 = {}
-coef_r1 = []
-for q in quantiles:
-    res_r1 = model1_total.fit(q=q)
-    predictions_r1[f'q={q:.1f}'] = res_r1.predict(X1_train)
-    coef_r1.append({'Quantile': q, **res_r1.params.to_dict(), 'Reach 1+': pd.Series(y1).quantile(q)})
-coef_df_r1 = pd.DataFrame(coef_r1)
-coef_df_r1 = coef_df_r1.set_index('Quantile').sort_index()
+def predict_total_r1_np(r1_a, r1_b):
 
-# 1) 학습 타깃 y1의 분위수 경계값(0.1~0.9) 계산 -> 예측값을 어떤 분위수로 볼지 결정하는 기준
-q_list   = np.array(sorted(coef_df_r1.index.values))                 # [0.1, 0.2, ..., 0.9]
-y1_edges = np.quantile(y1, q_list)                                   # 경계들(len=9)
-
-# 2) 분위수별 계수 벡터 준비(빠른 인덱싱용)
-BA_arr  = coef_df_r1.loc[q_list, 'r1_a'].to_numpy()                  # shape: (9,)
-BB_arr  = coef_df_r1.loc[q_list, 'r1_b'].to_numpy()
-BAB_arr = coef_df_r1.loc[q_list, 'r1_ab'].to_numpy()
-
-def _predict_with_q_scalar(r1_a, r1_b, q: float):
-    """단일 q의 계수로 예측(내부용)."""
-    # q가 0.1~0.9 사이여야 함. searchsorted로 가장 가까운 인덱스 선택(부동소수 보정)
-    idx = np.searchsorted(q_list, q, side='left')
-    idx = max(0, min(idx, len(q_list)-1))
-    return BA_arr[idx]*r1_a + BB_arr[idx]*r1_b + BAB_arr[idx]*(r1_a*r1_b)
-
-def predict_total_r1_np(r1_a, r1_b, iters: int = 2):
-    """
-    '예측치가 속한 분위수'의 계수를 사용해 예측하는 적응형 함수.
-    - 초기에는 q=0.5(중앙값)로 예측한 뒤,
-    - 예측 y를 y1 분위수 경계(y1_edges)에 매핑하여 분위수(bin)를 정하고,
-    - 해당 분위수의 계수로 다시 예측 (iters회 반복, 보통 1~2면 충분)
-    """
-    r1_a = np.asarray(r1_a, dtype=float)
-    r1_b = np.asarray(r1_b, dtype=float)
-    # 1) 초기값: q=0.5
-    y_hat = _predict_with_q_scalar(r1_a, r1_b, 0.5)
-    # 2) 분위수 bin에 맞춰 계수를 선택 → 재예측 (수 회 반복해 안정화)
-    for _ in range(iters):
-        # y_hat을 경계(y1_edges)에 삽입할 위치(0..len(q_list)) → 분위수 인덱스로 사용
-        idx = np.searchsorted(y1_edges, y_hat, side='left')
-        idx = np.clip(idx, 0, len(q_list)-1)  # 상/하한 보정
-        # 각 샘플별로 해당 분위수의 계수 선택
-        BA  = BA_arr[idx]
-        BB  = BB_arr[idx]
-        BAB = BAB_arr[idx]
-        y_hat = BA*r1_a + BB*r1_b + BAB*(r1_a*r1_b)
-    return y_hat
+    return B_A * r1_a + B_B * r1_b + B_AB * (r1_a * r1_b)
 
 # ---------------------------
 # CPM/CPRP UI
