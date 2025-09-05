@@ -242,29 +242,55 @@ X1_train = pd.DataFrame({
     'r1_b': df_total['r1_b'].values,
     'r1_ab': df_total['r1_ab'].values
 })
-model1_total = sm.OLS(y1_total, X1_train).fit()
+y1 = y1_total
 
+quantiles = np.arange(0.1, 1.0, 0.1)
+model1_total = sm.QuantReg(y1, X1_train)
+
+predictions_r1 = {}
+coef_r1 = []
+for q in quantiles:
+    res_r1 = model1_total.fit(q=q)
+    predictions_r1[f'q={q:.1f}'] = res_r1.predict(X1_train)
+    coef_r1.append({'Quantile': q, **res_r1.params.to_dict(), 'Reach 1+': pd.Series(y1).quantile(q)})
+coef_df_r1 = pd.DataFrame(coef_r1)
+
+# downstream 계산에 사용할 대표 분위수(중앙값) 계수
+q_sel = 0.5
+res1_sel = model1_total.fit(q=q_sel)
+B1_A  = float(res1_sel.params['r1_a'])
+B1_B  = float(res1_sel.params['r1_b'])
+B1_AB = float(res1_sel.params['r1_ab'])
+
+# --- r3: Quantile Regression (중앙값 q=0.5 사용) ---
 X3_train = pd.DataFrame({
     'r3_a': df_total['r3_a'].values,
     'r3_b': df_total['r3_b'].values,
     'r3_ab': df_total['r3_ab'].values
 })
-model3_total = sm.OLS(y3_total, X3_train).fit()
+y3 = y3_total
 
-B1_A  = float(model1_total.params['r1_a'])
-B1_B  = float(model1_total.params['r1_b'])
-B1_AB = float(model1_total.params['r1_ab'])
+model3_total = sm.QuantReg(y3, X3_train)
 
-B3_A  = float(model3_total.params['r3_a'])
-B3_B  = float(model3_total.params['r3_b'])
-B3_AB = float(model3_total.params['r3_ab'])
+predictions_r3 = {}
+coef_r3 = []
+for q in quantiles:
+    res_r3 = model3_total.fit(q=q)
+    predictions_r3[f'q={q:.1f}'] = res_r3.predict(X3_train)
+    coef_r3.append({'Quantile': q, **res_r3.params.to_dict(), 'Reach 3+': pd.Series(y3).quantile(q)})
+coef_df_r3 = pd.DataFrame(coef_r3)
+
+res3_sel = model3_total.fit(q=q_sel)
+B3_A  = float(res3_sel.params['r3_a'])
+B3_B  = float(res3_sel.params['r3_b'])
+B3_AB = float(res3_sel.params['r3_ab'])
 
 def predict_total_r1_np(r1_a, r1_b):
-
+    r1_a = np.asarray(r1_a, dtype=float); r1_b = np.asarray(r1_b, dtype=float)
     return B1_A * r1_a + B1_B * r1_b + B1_AB * (r1_a * r1_b)
 
 def predict_total_r3_np(r3_a, r3_b):
-
+    r3_a = np.asarray(r3_a, dtype=float); r3_b = np.asarray(r3_b, dtype=float)
     return B3_A * r3_a + B3_B * r3_b + B3_AB * (r3_a * r3_b)
 
 # ---------------------------
