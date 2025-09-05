@@ -750,7 +750,7 @@ with page1:
         if st.session_state.r1_single_curve is not None:
             a, best_total_r1 = st.session_state.r1_single_curve
             fig2 = go.Figure()
-            fig2.add_trace(go.Scatter(x=100*a, y=y=100*np.round(best_total_r1, 4), mode='lines+markers',
+            fig2.add_trace(go.Scatter(x=100*a, y=100*np.round(best_total_r1, 4), mode='lines+markers',
                                       name='Predicted', marker=dict(size=4, color='#003594')))
             fig2.update_layout(
                 xaxis=dict(title='TV ratio (%)', range=[0, 100]),
