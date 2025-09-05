@@ -959,7 +959,7 @@ with page3:
 
             fig33 = go.Figure(layout=go.Layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)'))
             tv=df_opt_full['TV 비중'].astype(str)
-            digital=df_opt_full3['Digital 비중'].astype(str)
+            digital=df_opt_full['Digital 비중'].astype(str)
             customdata = np.column_stack([tv.values, digital.values])
 
             fig33.add_trace(go.Scatter(
