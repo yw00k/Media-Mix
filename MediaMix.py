@@ -315,10 +315,10 @@ cpm_b_global = money_input(
 # ---------------------------
 # Cost to Impression (TV=CPRP, Digital=CPM)
 # ---------------------------
-def imps_from_tv_budget_by_cprp(budget_won, universe_val):
+def imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val):
 
     budget = np.asarray(budget_won, dtype=float)
-    cprp = float(cprp_a_global)
+    cprp = float(cprp_a)
     uni  = float(universe_val)
 
     with np.errstate(divide='ignore', invalid='ignore'):
@@ -330,10 +330,10 @@ def imps_from_tv_budget_by_cprp(budget_won, universe_val):
         return float(imps)
     return imps
 
-def imps_from_digital_budget_by_cpm(budget_won):
+def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
 
     budget = np.asarray(budget_won, dtype=float)
-    cpm = float(cpm_b_global)
+    cpm = float(cpm_b)
 
     with np.errstate(divide='ignore', invalid='ignore'):
         imps = np.where((cpm > 0) & (budget > 0),
