@@ -260,39 +260,24 @@ def money_input(label, key, default=0.0, help=None, decimals=0, min_value=0.0):
     if key not in st.session_state:
         st.session_state[key] = fmt.format(default)
 
-    # 입력창
-    s = st.text_input(label, value=st.session_state[key], key=f"{key}_text", help=help)
 
-    try:
-        v = float(s.replace(",", ""))
-        if v < min_value:
-            raise ValueError
-        st.session_state[key] = fmt.format(v)
-    except ValueError:
-        st.warning("숫자만 입력하세요. 예: 1,000,000")
-        v = float(st.session_state[key].replace(",", ""))
+cprp_a_global = money_input(
+    "TV CPRP(원)",
+    key="cprp_input",
+    default=cprp_default_for_target,
+    help="천 단위 콤마(,)로 입력/표시됩니다.",
+    decimals=0,
+    min_value=0.0
+)
 
-    return v
-
-col_cprp, col_cpm = st.columns(2)
-with col_cprp:
-    cprp_a_global = money_input(
-        "TV CPRP(원)",
-        key="cprp_input",
-        default=cprp_default_for_target,
-        help="천 단위 콤마(,)로 입력/표시됩니다.",
-        decimals=0,
-        min_value=0.0
-    )
-with col_cpm:
-    cpm_b_global = money_input(
-        "Digital CPM(원)",
-        key="cpm_input",
-        default=10_300.0,
-        help="천 단위 콤마(,)로 입력/표시됩니다.",
-        decimals=0,
-        min_value=0.0
-    )
+cpm_b_global = money_input(
+    "Digital CPM(원)",
+    key="cpm_input",
+    default=10_300.0,
+    help="천 단위 콤마(,)로 입력/표시됩니다.",
+    decimals=0,
+    min_value=0.0
+)
 
 # ---------------------------
 # Cost to Impression (TV=CPRP, Digital=CPM)
