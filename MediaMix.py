@@ -218,12 +218,12 @@ if st.session_state.last_target_for_cpm != selected_target:
 # ---------------------------
 x_total = df_total['imps'].values
 y_total = df_total['r1'].values
-tv_mask_r1 = df_total[['imps_a','r1_a']].notna().all(axis=1)
-dg_mask_r1 = df_total[['imps_b','r1_b']].notna().all(axis=1)
-x_a  = df_total.loc[tv_mask_r1, 'imps_a'].values
-y_a1 = df_total.loc[tv_mask_r1, 'r1_a'].values
-x_b  = df_total.loc[dg_mask_r1, 'imps_b'].values
-y_b1 = df_total.loc[dg_mask_r1, 'r1_b'].values
+tv_mask_r1 = df_media[['imps_a','r1_a']].notna().all(axis=1)
+dg_mask_r1 = df_media[['imps_b','r1_b']].notna().all(axis=1)
+x_a  = df_media.loc[tv_mask_r1, 'imps_a'].values
+y_a1 = df_media.loc[tv_mask_r1, 'r1_a'].values
+x_b  = df_media.loc[dg_mask_r1, 'imps_b'].values
+y_b1 = df_media.loc[dg_mask_r1, 'r1_b'].values
 
 tv_mask_r2 = df_total[['imps_a','r2_a']].notna().all(axis=1)
 dg_mask_r2 = df_total[['imps_b','r2_b']].notna().all(axis=1)
