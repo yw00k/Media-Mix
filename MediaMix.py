@@ -180,6 +180,40 @@ if st.session_state.last_target_for_cprp != selected_target:
     st.session_state.last_target_for_cprp = selected_target
 
 # ---------------------------
+# Load CPRP default for target
+# ---------------------------
+
+CPRP_PATH = "/Media Mix/cprp.csv"
+
+cpm_df = load_csv_from_dropbox(CPRP_PATH)
+default_cpm_value = 10_000
+
+
+if cpm_df is None or 'target' not in cpm_df.columns or 'cpm' not in cpm_df.columns:
+    st.warning("⚠ 데이터를 찾지 못했습니다. 기본값을 사용합니다.")
+    cpm_default_for_target = default_cpm_value
+else:
+
+    row_cpm = cpm_df.loc[cpm_df['target'] == selected_target, 'cpm']
+    if row_cpm.empty:
+        st.warning("⚠ 선택한 타겟의 CPM 값을 찾지 못했습니다. 기본값을 사용합니다.")
+        cpm_default_for_target = default_cpm_value
+    else:
+        try:
+            cpm_default_for_target = float(row_cpm.iloc[0])
+        except Exception:
+            st.warning("⚠ 데이터를 찾지 못했습니다. 기본값을 사용합니다.")
+            cpm_default_for_target = default_cpm_value
+
+if 'last_target_for_cpm' not in st.session_state:
+    st.session_state.last_target_for_cpm = None
+
+if st.session_state.last_target_for_cpm != selected_target:
+
+    st.session_state['cpm_input'] = f"{cpm_default_for_target:,.0f}"
+    st.session_state.last_target_for_cpm = selected_target
+
+# ---------------------------
 # Prepare arrays
 # ---------------------------
 x_total = df_total['imps'].values
@@ -274,25 +308,24 @@ def money_input(label, key, default=0.0, help=None, decimals=0, min_value=0.0):
 
     return v
 
-col_cprp, col_cpm = st.columns(2)
-with col_cprp:
-    cprp_a_global = money_input(
-        "TV CPRP(원)",
-        key="cprp_input",
-        default=cprp_default_for_target,
-        help="천 단위 콤마(,)로 입력/표시됩니다.",
-        decimals=0,
-        min_value=0.0
-    )
-with col_cpm:
-    cpm_b_global = money_input(
-        "Digital CPM(원)",
-        key="cpm_input",
-        default=10_300.0,
-        help="천 단위 콤마(,)로 입력/표시됩니다.",
-        decimals=0,
-        min_value=0.0
-    )
+
+cprp_a_global = money_input(
+    "TV CPRP(원)",
+    key="cprp_input",
+    default=cprp_default_for_target,
+    help="천 단위 콤마(,)로 입력/표시됩니다.",
+    decimals=0,
+    min_value=0.0
+)
+
+cpm_b_global = money_input(
+    "Digital CPM(원)",
+    key="cpm_input",
+    default=cpm_default_for_target,
+    help="천 단위 콤마(,)로 입력/표시됩니다.",
+    decimals=0,
+    min_value=0.0
+)
 
 # ---------------------------
 # Cost to Impression (TV=CPRP, Digital=CPM)
