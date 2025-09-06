@@ -780,7 +780,7 @@ with page1:
     with tab1_2:
         max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10, key="r1_max_units")
         if st.button("실행", type="primary", key="r1_sweep_run"):
-            df_opt1_full, df_only1_full, df_opt1, df_only1 = optimize_mix_over_budget1(universe, max_budget_units=max_units)
+            df_opt1_full, df_only1_full, df_opt1, df_only1 = optimize_mix_over_budget1(universe_val=universe, max_budget_units=max_units)
             st.session_state.r1_sweep_opt_full = df_opt1_full
             st.session_state.r1_sweep_only_full = df_only1_full
             st.session_state.r1_sweep_opt = df_opt1
@@ -879,7 +879,7 @@ with page3:
     with tab3_2:
         max_units3 = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10, key="r3_max_units")
         if st.button("실행", type="primary", key="r3_sweep_run"):
-            df_opt_full3, df_only_full3, df_opt3, df_only3 = optimize_mix_over_budget3(universe, max_budget_units=max_units3)
+            df_opt_full3, df_only_full3, df_opt3, df_only3 = optimize_mix_over_budget3(universe_val=universe, max_budget_units=max_units3)
             st.session_state.r3_sweep_opt_full = df_opt_full3
             st.session_state.r3_sweep_only_full = df_only_full3
             st.session_state.r3_sweep_opt = df_opt3
