@@ -357,7 +357,7 @@ def analyze_custom_budget1(a_eok, b_eok, universe_val, unit=UNIT):
         if np.isscalar(total_r1):
             total_r1 = np.array([total_r1], dtype=float)
             
-    total_r1 = np.maximum(total_r1, a_r1 + b_r1)
+    total_r1 = np.minimum(total_r1, a_r1 + b_r1)
     
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)','Digital(억 원)','총(억 원)','TV Reach 1+(%)','Digital Reach 1+(%)','Total Reach 1+(%)'],
@@ -408,7 +408,7 @@ def analyze_custom_budget3(a_eok, b_eok, universe_val, unit=UNIT):
     elif b_won > 0 and a_won == 0:
         total_r3 = b_r3.copy()
 
-    total_r3 = np.maximum(total_r3, a_r3 + b_r3)
+    total_r3 = np.minimum(total_r3, a_r3 + b_r3)
    
     df_out = pd.DataFrame({
         '항목': ['TV(억 원)','Digital(억 원)','총(억 원)','TV Reach 3+(%)','Digital Reach 3+(%)','Total Reach 3+(%)'],
