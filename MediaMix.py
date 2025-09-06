@@ -285,44 +285,10 @@ def predict_total_r1_np(r1_a, r1_b):
     return B_A * r1_a + B_B * r1_b + B_AB * (r1_a * r1_b)
 
 # ---------------------------
-# CPM/CPRP UI
+# CPM/CPRP
 # ---------------------------
-def money_input(label, key, default=0.0, help=None, decimals=0, min_value=0.0):
-
-    fmt = f"{{:,.{decimals}f}}"
-    # 초기 값
-    if key not in st.session_state:
-        st.session_state[key] = fmt.format(default)
-    s = st.text_input(label, value=st.session_state[key], key=f"{key}_text", help=help)
-
-    try:
-        v = float(s.replace(",", ""))
-        if v < min_value:
-            raise ValueError
-        st.session_state[key] = fmt.format(v)
-    except ValueError:
-        st.warning("숫자만 입력하세요. 예: 1,000,000")
-        v = float(st.session_state[key].replace(",", ""))
-
-    return v
-
-cprp_a_global = money_input(
-    "TV CPRP(원)",
-    key="cprp_input",
-    default=cprp_default_for_target,
-    help="천 단위 콤마(,)로 입력/표시됩니다.",
-    decimals=0,
-    min_value=0.0
-)
-
-cpm_b_global = money_input(
-    "Digital CPM(원)",
-    key="cpm_input",
-    default=cpm_default_for_target,
-    help="천 단위 콤마(,)로 입력/표시됩니다.",
-    decimals=0,
-    min_value=0.0
-)
+cprp_a_global = float(cprp_default_for_target)
+cpm_b_global  = float(cpm_default_for_target)
 
 # ---------------------------
 # Cost to Impression (TV=CPRP, Digital=CPM)
