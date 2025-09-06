@@ -494,12 +494,12 @@ def optimize_total_budget3(a_eok, b_eok, universe_val, unit=UNIT):
     }
 
 def compare_user_vs_opt1(a_eok, b_eok, universe_val, unit=UNIT):
-    user_df, user_parts = analyze_custom_budget1(a_eok, b_eok, cprp_a_global, cpm_b_global, universe_val, unit)
+    user_df, user_parts = analyze_custom_budget1(a_eok, b_eok, universe_val, unit)
     user_a_r1 = float(user_parts['a_r1'][0])
     user_b_r1 = float(user_parts['b_r1'][0])
     user_total_r1 = float(user_parts['total_r1'][0])
 
-    opt = optimize_total_budget1(a_eok, b_eok, cprp_a_global, cpm_b_global, universe_val, unit)
+    opt = optimize_total_budget1(a_eok, b_eok, universe_val, unit)
     total_eok = a_eok + b_eok
     a_eok_opt = round(total_eok * opt['a_share'], 2)
     b_eok_opt = round(total_eok * opt['b_share'], 2)
@@ -529,12 +529,12 @@ def compare_user_vs_opt1(a_eok, b_eok, universe_val, unit=UNIT):
     return summary1
 
 def compare_user_vs_opt3(a_eok, b_eok, universe_val, unit=UNIT):
-    user_df, user_parts = analyze_custom_budget3(a_eok, b_eok, cprp_a_global, cpm_b_global, universe_val, unit)
+    user_df, user_parts = analyze_custom_budget3(a_eok, b_eok, universe_val, unit)
     user_a_r3 = float(user_parts['a_r3'][0])
     user_b_r3 = float(user_parts['b_r3'][0])
     user_total_r3 = float(user_parts['total_r3'][0])
 
-    opt = optimize_total_budget3(a_eok, b_eok, cprp_a_global, cpm_b_global, universe_val, unit)
+    opt = optimize_total_budget3(a_eok, b_eok, universe_val, unit)
     total_eok = a_eok + b_eok
     a_eok_opt = round(total_eok * opt['a3_share'], 2)
     b_eok_opt = round(total_eok * opt['b3_share'], 2)
