@@ -252,7 +252,7 @@ bounds_b2 = ([0,0,0],[np.inf,np.inf,0.5])
 bounds_b3 = ([0,0,0],[np.inf,np.inf,0.3])
 
 popt_a1, _ = curve_fit(hill, x_a,  y_a1, p0=initial_params1, bounds=bounds_a, maxfev=20000)
-popt_b1, _ = curve_fit(hill, x_b,  y_b1, p0=initial_params1, bounds=bounds_a, maxfev=20000)
+popt_b1, _ = curve_fit(hill, x_b,  y_b1, p0=initial_params1, bounds=bounds_b1, maxfev=20000)
 popt_a2, _ = curve_fit(hill, x_a2, y_a2, p0=initial_params1, bounds=bounds_a, maxfev=20000)
 popt_b2, _ = curve_fit(hill, x_b2, y_b2, p0=initial_params2, bounds=bounds_b2, maxfev=20000)
 popt_a3, _ = curve_fit(hill, x_a3, y_a3, p0=initial_params1, bounds=bounds_a, maxfev=20000)
