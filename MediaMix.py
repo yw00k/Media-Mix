@@ -180,40 +180,6 @@ if st.session_state.last_target_for_cprp != selected_target:
     st.session_state.last_target_for_cprp = selected_target
 
 # ---------------------------
-# Load CPRP default for target
-# ---------------------------
-
-CPRP_PATH = "/Media Mix/cprp.csv"
-
-cpm_df = load_csv_from_dropbox(CPRP_PATH)
-default_cpm_value = 10_000
-
-
-if cpm_df is None or 'target' not in cpm_df.columns or 'cpm' not in cpm_df.columns:
-    st.warning("⚠ 데이터를 찾지 못했습니다. 기본값을 사용합니다.")
-    cpm_default_for_target = default_cpm_value
-else:
-
-    row_cpm = cpm_df.loc[cpm_df['target'] == selected_target, 'cpm']
-    if row_cpm.empty:
-        st.warning("⚠ 선택한 타겟의 CPM 값을 찾지 못했습니다. 기본값을 사용합니다.")
-        cpm_default_for_target = default_cpm_value
-    else:
-        try:
-            cpm_default_for_target = float(row_cpm.iloc[0])
-        except Exception:
-            st.warning("⚠ 데이터를 찾지 못했습니다. 기본값을 사용합니다.")
-            cpm_default_for_target = default_cpm_value
-
-if 'last_target_for_cpm' not in st.session_state:
-    st.session_state.last_target_for_cpm = None
-
-if st.session_state.last_target_for_cpm != selected_target:
-
-    st.session_state['cpm_input'] = f"{cpm_default_for_target:,.0f}"
-    st.session_state.last_target_for_cpm = selected_target
-
-# ---------------------------
 # Prepare arrays
 # ---------------------------
 x_total = df_total['imps'].values
@@ -294,31 +260,47 @@ def money_input(label, key, default=0.0, help=None, decimals=0, min_value=0.0):
     if key not in st.session_state:
         st.session_state[key] = fmt.format(default)
 
-cprp_a_global = money_input(
-    "TV CPRP(원)",
-    key="cprp_input",
-    default=cprp_default_for_target,
-    help="천 단위 콤마(,)로 입력/표시됩니다.",
-    decimals=0,
-    min_value=0.0
-)
+    # 입력창
+    s = st.text_input(label, value=st.session_state[key], key=f"{key}_text", help=help)
 
-cpm_b_global = money_input(
-    "Digital CPM(원)",
-    key="cpm_input",
-    default=cpm_default_for_target,
-    help="천 단위 콤마(,)로 입력/표시됩니다.",
-    decimals=0,
-    min_value=0.0
-)
+    try:
+        v = float(s.replace(",", ""))
+        if v < min_value:
+            raise ValueError
+        st.session_state[key] = fmt.format(v)
+    except ValueError:
+        st.warning("숫자만 입력하세요. 예: 1,000,000")
+        v = float(st.session_state[key].replace(",", ""))
+
+    return v
+
+col_cprp, col_cpm = st.columns(2)
+with col_cprp:
+    cprp_a_global = money_input(
+        "TV CPRP(원)",
+        key="cprp_input",
+        default=cprp_default_for_target,
+        help="천 단위 콤마(,)로 입력/표시됩니다.",
+        decimals=0,
+        min_value=0.0
+    )
+with col_cpm:
+    cpm_b_global = money_input(
+        "Digital CPM(원)",
+        key="cpm_input",
+        default=10_300.0,
+        help="천 단위 콤마(,)로 입력/표시됩니다.",
+        decimals=0,
+        min_value=0.0
+    )
 
 # ---------------------------
 # Cost to Impression (TV=CPRP, Digital=CPM)
 # ---------------------------
-def imps_from_tv_budget_by_cprp(budget_won, universe_val):
+def imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val):
 
     budget = np.asarray(budget_won, dtype=float)
-    cprp = float(cprp_a_global)
+    cprp = float(cprp_a)
     uni  = float(universe_val)
 
     with np.errstate(divide='ignore', invalid='ignore'):
@@ -330,10 +312,10 @@ def imps_from_tv_budget_by_cprp(budget_won, universe_val):
         return float(imps)
     return imps
 
-def imps_from_digital_budget_by_cpm(budget_won):
+def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
 
     budget = np.asarray(budget_won, dtype=float)
-    cpm = float(cpm_b_global)
+    cpm = float(cpm_b)
 
     with np.errstate(divide='ignore', invalid='ignore'):
         imps = np.where((cpm > 0) & (budget > 0),
@@ -360,12 +342,12 @@ def plateau_after_exceed(arr, threshold=1.0):
             a[:] = threshold
     return a
 
-def analyze_custom_budget1(a_eok, b_eok, universe_val, unit=UNIT):
+def analyze_custom_budget1(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     a_won = a_eok * unit
     b_won = b_eok * unit
 
-    a_imps = imps_from_tv_budget_by_cprp(a_won, cprp_a_global, universe_val)
-    b_imps = imps_from_digital_budget_by_cpm(b_won, cpm_b_global)
+    a_imps = imps_from_tv_budget_by_cprp(a_won, cprp_a, universe_val)
+    b_imps = imps_from_digital_budget_by_cpm(b_won, cpm_b)
 
     a_r1 = hill(np.array([a_imps]), *popt_a1) if a_imps > 0 else np.array([0.0])
     b_r1 = hill(np.array([b_imps]), *popt_b1) if b_imps > 0 else np.array([0.0])
@@ -393,12 +375,12 @@ def analyze_custom_budget1(a_eok, b_eok, universe_val, unit=UNIT):
     parts = {'a_r1': a_r1, 'b_r1': b_r1, 'total_r1': total_r1}
     return df_out, parts
 
-def analyze_custom_budget3(a_eok, b_eok, universe_val, unit=UNIT):
+def analyze_custom_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     a_won = a_eok * unit
     b_won = b_eok * unit
 
-    a_imps = imps_from_tv_budget_by_cprp(a_won, cprp_a_global, universe_val)
-    b_imps = imps_from_digital_budget_by_cpm(b_won, cpm_b_global)
+    a_imps = imps_from_tv_budget_by_cprp(a_won, cprp_a, universe_val)
+    b_imps = imps_from_digital_budget_by_cpm(b_won, cpm_b)
 
     a_r1 = hill(np.array([a_imps]), *popt_a1) if a_imps > 0 else np.array([0.0])
     a_r2 = hill(np.array([a_imps]), *popt_a2) if a_imps > 0 else np.array([0.0])
@@ -438,13 +420,13 @@ def analyze_custom_budget3(a_eok, b_eok, universe_val, unit=UNIT):
     parts = {'a_r3': a_r3, 'b_r3': b_r3, 'total_r3': total_r3}
     return df_out, parts
 
-def optimize_total_budget1(a_eok, b_eok, universe_val, unit=UNIT):
+def optimize_total_budget1(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     total_won = (a_eok + b_eok) * unit
     a_share = np.arange(0, 101, dtype=np.float64) / 100.0
     b_share = 1.0 - a_share
 
-    a_imps = imps_from_tv_budget_by_cprp(a_share * total_won, cprp_a_global, universe_val)
-    b_imps = imps_from_digital_budget_by_cpm(b_share * total_won, cpm_b_global)
+    a_imps = imps_from_tv_budget_by_cprp(a_share * total_won, cprp_a, universe_val)
+    b_imps = imps_from_digital_budget_by_cpm(b_share * total_won, cpm_b)
 
     a_r1_curve = hill(a_imps, *popt_a1)
     b_r1_curve = hill(b_imps, *popt_b1)
@@ -463,13 +445,13 @@ def optimize_total_budget1(a_eok, b_eok, universe_val, unit=UNIT):
         'total_r1': float(total_r1_value),
     }
 
-def optimize_total_budget3(a_eok, b_eok, universe_val, unit=UNIT):
+def optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
     total_won = (a_eok + b_eok) * unit
     a3_share = np.arange(0, 101, dtype=np.float64) / 100.0
     b3_share = 1.0 - a3_share
 
-    a_imps = imps_from_tv_budget_by_cprp(a3_share * total_won, cprp_a_global, universe_val)
-    b_imps = imps_from_digital_budget_by_cpm(b3_share * total_won, cpm_b_global)
+    a_imps = imps_from_tv_budget_by_cprp(a3_share * total_won, cprp_a, universe_val)
+    b_imps = imps_from_digital_budget_by_cpm(b3_share * total_won, cpm_b)
 
     a_r1_curve = hill(a_imps, *popt_a1); a_r2_curve = hill(a_imps, *popt_a2); a_r3_curve = hill(a_imps, *popt_a3)
     b_r1_curve = hill(b_imps, *popt_b1); b_r2_curve = hill(b_imps, *popt_b2); b_r3_curve = hill(b_imps, *popt_b3)
@@ -493,13 +475,13 @@ def optimize_total_budget3(a_eok, b_eok, universe_val, unit=UNIT):
         'total_r3': float(total_r3_value),
     }
 
-def compare_user_vs_opt1(a_eok, b_eok, universe_val, unit=UNIT):
-    user_df, user_parts = analyze_custom_budget1(a_eok, b_eok, cprp_a_global, cpm_b_global, universe_val, unit)
+def compare_user_vs_opt1(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
+    user_df, user_parts = analyze_custom_budget1(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit)
     user_a_r1 = float(user_parts['a_r1'][0])
     user_b_r1 = float(user_parts['b_r1'][0])
     user_total_r1 = float(user_parts['total_r1'][0])
 
-    opt = optimize_total_budget1(a_eok, b_eok, cprp_a_global, cpm_b_global, universe_val, unit)
+    opt = optimize_total_budget1(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit)
     total_eok = a_eok + b_eok
     a_eok_opt = round(total_eok * opt['a_share'], 2)
     b_eok_opt = round(total_eok * opt['b_share'], 2)
@@ -528,13 +510,13 @@ def compare_user_vs_opt1(a_eok, b_eok, universe_val, unit=UNIT):
     ])
     return summary1
 
-def compare_user_vs_opt3(a_eok, b_eok, universe_val, unit=UNIT):
-    user_df, user_parts = analyze_custom_budget3(a_eok, b_eok, cprp_a_global, cpm_b_global, universe_val, unit)
+def compare_user_vs_opt3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit=UNIT):
+    user_df, user_parts = analyze_custom_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit)
     user_a_r3 = float(user_parts['a_r3'][0])
     user_b_r3 = float(user_parts['b_r3'][0])
     user_total_r3 = float(user_parts['total_r3'][0])
 
-    opt = optimize_total_budget3(a_eok, b_eok, cprp_a_global, cpm_b_global, universe_val, unit)
+    opt = optimize_total_budget3(a_eok, b_eok, cprp_a, cpm_b, universe_val, unit)
     total_eok = a_eok + b_eok
     a_eok_opt = round(total_eok * opt['a3_share'], 2)
     b_eok_opt = round(total_eok * opt['b3_share'], 2)
@@ -563,15 +545,15 @@ def compare_user_vs_opt3(a_eok, b_eok, universe_val, unit=UNIT):
     ])
     return summary3
 
-def optimize_mix_over_budget1(universe_val, max_budget_units=20, unit=UNIT):
+def optimize_mix_over_budget1(cprp_a, cpm_b, universe_val, max_budget_units=20, unit=UNIT):
     a_share = np.arange(0,101,dtype=np.float64)/100.0
     b_share = 1.0 - a_share
 
     budget_eok = np.arange(0, max_budget_units+1)
     budget_won = budget_eok * unit
 
-    a_imps_only = imps_from_tv_budget_by_cprp(budget_won, cprp_a_global, universe_val)
-    b_imps_only = imps_from_digital_budget_by_cpm(budget_won, cpm_b_global)
+    a_imps_only = imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val)
+    b_imps_only = imps_from_digital_budget_by_cpm(budget_won, cpm_b)
     only_a1 = hill(a_imps_only, *popt_a1)
     only_b1 = hill(b_imps_only, *popt_b1)
 
@@ -587,8 +569,8 @@ def optimize_mix_over_budget1(universe_val, max_budget_units=20, unit=UNIT):
         a_budget = a_share * won
         b_budget = b_share * won
 
-        a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a_global, universe_val)
-        b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b_global)
+        a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
+        b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b)
 
         a_r1 = hill(a_imps, *popt_a1)
         b_r1 = hill(b_imps, *popt_b1)
@@ -633,15 +615,15 @@ def optimize_mix_over_budget1(universe_val, max_budget_units=20, unit=UNIT):
     df_opt1  = df_opt1_full[df_opt1_full['예산(억 원)']>0].reset_index(drop=True)
     return df_opt1_full, df_only1_full, df_opt1, df_only1
 
-def optimize_mix_over_budget3(universe_val, max_budget_units=20, unit=UNIT):
+def optimize_mix_over_budget3(cprp_a, cpm_b, universe_val, max_budget_units=20, unit=UNIT):
     a3_share = np.arange(0,101,dtype=np.float64)/100.0
     b3_share = 1.0 - a3_share
 
     budget_eok = np.arange(0, max_budget_units+1)
     budget_won = budget_eok * unit
 
-    a_imps_only = imps_from_tv_budget_by_cprp(budget_won, cprp_a_global, universe_val)
-    b_imps_only = imps_from_digital_budget_by_cpm(budget_won, cpm_b_global)
+    a_imps_only = imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val)
+    b_imps_only = imps_from_digital_budget_by_cpm(budget_won, cpm_b)
     only_a3 = hill(a_imps_only, *popt_a3)
     only_b3 = hill(b_imps_only, *popt_b3)
 
@@ -657,8 +639,8 @@ def optimize_mix_over_budget3(universe_val, max_budget_units=20, unit=UNIT):
         a_budget = a3_share * won
         b_budget = b3_share * won
 
-        a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a_global, universe_val)
-        b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b_global)
+        a_imps = imps_from_tv_budget_by_cprp(a_budget, cprp_a, universe_val)
+        b_imps = imps_from_digital_budget_by_cpm(b_budget, cpm_b)
 
         a_r1 = hill(a_imps, *popt_a1); a_r2 = hill(a_imps, *popt_a2); a_r3 = hill(a_imps, *popt_a3)
         b_r1 = hill(b_imps, *popt_b1); b_r2 = hill(b_imps, *popt_b2); b_r3 = hill(b_imps, *popt_b3)
@@ -738,7 +720,7 @@ with page1:
             b_eok_input = st.number_input("Digital 예산(억 원)", value=3.5, step=0.1, min_value=0.0)
 
         if st.button("실행", type="primary", key="r1_compare_run"):
-            summary_df = compare_user_vs_opt1(a_eok_input, b_eok_input, cprp_a_global, cpm_b_global, universe)
+            summary_df = compare_user_vs_opt1(a_eok_input, b_eok_input, universe)
             st.session_state.r1_compare_result = summary_df
 
         if st.session_state.r1_compare_result is not None:
@@ -780,7 +762,7 @@ with page1:
     with tab1_2:
         max_units = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10, key="r1_max_units")
         if st.button("실행", type="primary", key="r1_sweep_run"):
-            df_opt1_full, df_only1_full, df_opt1, df_only1 = optimize_mix_over_budget1(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units)
+            df_opt1_full, df_only1_full, df_opt1, df_only1 = optimize_mix_over_budget1(universe_val=universe, max_budget_units=max_units)
             st.session_state.r1_sweep_opt_full = df_opt1_full
             st.session_state.r1_sweep_only_full = df_only1_full
             st.session_state.r1_sweep_opt = df_opt1
@@ -837,7 +819,7 @@ with page3:
             b_eok_input3 = st.number_input("Digital 예산(억 원)", value=3.5, step=0.1, min_value=0.0, key="r3_dg_eok")
 
         if st.button("실행", type="primary", key="r3_compare_run"):
-            summary_df3 = compare_user_vs_opt3(a_eok_input3, b_eok_input3, cprp_a_global, cpm_b_global, universe)
+            summary_df3 = compare_user_vs_opt3(a_eok_input3, b_eok_input3, universe)
             st.session_state.r3_compare_result = summary_df3
 
         if st.session_state.r3_compare_result is not None:
@@ -879,7 +861,7 @@ with page3:
     with tab3_2:
         max_units3 = st.slider("예산 범위(억 원)", min_value=1, max_value=20, value=10, key="r3_max_units")
         if st.button("실행", type="primary", key="r3_sweep_run"):
-            df_opt_full3, df_only_full3, df_opt3, df_only3 = optimize_mix_over_budget3(cprp_a_global, cpm_b_global, universe, max_budget_units=max_units3)
+            df_opt_full3, df_only_full3, df_opt3, df_only3 = optimize_mix_over_budget3(universe_val=universe, max_budget_units=max_units3)
             st.session_state.r3_sweep_opt_full = df_opt_full3
             st.session_state.r3_sweep_only_full = df_only_full3
             st.session_state.r3_sweep_opt = df_opt3
