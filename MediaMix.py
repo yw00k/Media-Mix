@@ -467,8 +467,8 @@ def optimize_total_budget3(a_eok, b_eok, universe_val, unit=UNIT):
 
     if total_r3_value < (a_r3_curve + b_r3_curve) :
         total_r3_value = (a_r3_curve + b_r3_curve)
-        else:
-            total_r3_value = total_r3_value
+    else:
+        total_r3_value = total_r3_value
 
     return {
         'a3_share': float(a3_share[idx3]), 'b3_share': float(b3_share[idx3]),
