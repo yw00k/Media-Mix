@@ -293,6 +293,18 @@ def money_input(label, key, default=0.0, help=None, decimals=0, min_value=0.0):
     # 초기 값
     if key not in st.session_state:
         st.session_state[key] = fmt.format(default)
+    s = st.text_input(label, value=st.session_state[key], key=f"{key}_text", help=help)
+
+    try:
+        v = float(s.replace(",", ""))
+        if v < min_value:
+            raise ValueError
+        st.session_state[key] = fmt.format(v)
+    except ValueError:
+        st.warning("숫자만 입력하세요. 예: 1,000,000")
+        v = float(st.session_state[key].replace(",", ""))
+
+    return v
 
 cprp_a_global = money_input(
     "TV CPRP(원)",
@@ -315,10 +327,10 @@ cpm_b_global = money_input(
 # ---------------------------
 # Cost to Impression (TV=CPRP, Digital=CPM)
 # ---------------------------
-def imps_from_tv_budget_by_cprp(budget_won, cprp_a_global, universe_val):
+def imps_from_tv_budget_by_cprp(budget_won, cprp_a, universe_val):
 
     budget = np.asarray(budget_won, dtype=float)
-    cprp = float(cprp_a_global)
+    cprp = float(cprp_a)
     uni  = float(universe_val)
 
     with np.errstate(divide='ignore', invalid='ignore'):
@@ -330,10 +342,10 @@ def imps_from_tv_budget_by_cprp(budget_won, cprp_a_global, universe_val):
         return float(imps)
     return imps
 
-def imps_from_digital_budget_by_cpm(budget_won, cpm_b_global):
+def imps_from_digital_budget_by_cpm(budget_won, cpm_b):
 
     budget = np.asarray(budget_won, dtype=float)
-    cpm = float(cpm_b_global)
+    cpm = float(cpm_b)
 
     with np.errstate(divide='ignore', invalid='ignore'):
         imps = np.where((cpm > 0) & (budget > 0),
