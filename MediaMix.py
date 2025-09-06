@@ -294,21 +294,6 @@ def money_input(label, key, default=0.0, help=None, decimals=0, min_value=0.0):
     if key not in st.session_state:
         st.session_state[key] = fmt.format(default)
 
-    # 입력창
-    s = st.text_input(label, value=st.session_state[key], key=f"{key}_text", help=help)
-
-    try:
-        v = float(s.replace(",", ""))
-        if v < min_value:
-            raise ValueError
-        st.session_state[key] = fmt.format(v)
-    except ValueError:
-        st.warning("숫자만 입력하세요. 예: 1,000,000")
-        v = float(st.session_state[key].replace(",", ""))
-
-    return v
-
-
 cprp_a_global = money_input(
     "TV CPRP(원)",
     key="cprp_input",
