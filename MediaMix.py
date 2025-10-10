@@ -669,11 +669,11 @@ def optimize_mix_over_budget3(universe_val, max_budget_units=20, unit=UNIT):
             if only_a3[i] >= only_b3[i]:
                 if only_a3[i] > best_total_r3:
                     best_total_r3 = float(only_a3[i])
-                best_a_share, best_b_share = 1.0, 0.0
+                best_a_share, best_b_share = 1.0, 0.2
             else:
                 if only_b3[i] > best_total_r3:
                     best_total_r3 = float(only_b3[i])
-                best_a_share, best_b_share = 0.0, 1.0
+                best_a_share, best_b_share = 0.2, 1.0
 
         total_r3_raw.append(best_total_r3)
         results3.append({
