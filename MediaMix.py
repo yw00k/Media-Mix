@@ -422,7 +422,7 @@ def analyze_custom_budget3(a_eok, b_eok, universe_val, unit=UNIT):
 
 def optimize_total_budget1(a_eok, b_eok, universe_val, unit=UNIT):
     total_won = (a_eok + b_eok) * unit
-    a_share = np.arange(20, 81, dtype=np.float64) / 100.0
+    a_share = np.arange(0, 101, dtype=np.float64) / 100.0
     b_share = 1.0 - a_share
 
     a_imps = imps_from_tv_budget_by_cprp(a_share * total_won, cprp_a_global, universe_val)
@@ -447,7 +447,7 @@ def optimize_total_budget1(a_eok, b_eok, universe_val, unit=UNIT):
 
 def optimize_total_budget3(a_eok, b_eok, universe_val, unit=UNIT):
     total_won = (a_eok + b_eok) * unit
-    a3_share = np.arange(20, 81, dtype=np.float64) / 100.0
+    a3_share = np.arange(0, 101, dtype=np.float64) / 100.0
     b3_share = 1.0 - a3_share
 
     a_imps = imps_from_tv_budget_by_cprp(a3_share * total_won, cprp_a_global, universe_val)
@@ -546,7 +546,7 @@ def compare_user_vs_opt3(a_eok, b_eok, universe_val, unit=UNIT):
     return summary3
 
 def optimize_mix_over_budget1(universe_val, max_budget_units=20, unit=UNIT):
-    a_share = np.arange(20,101,dtype=np.float64)/100.0
+    a_share = np.arange(0,101,dtype=np.float64)/100.0
     b_share = 1.0 - a_share
 
     budget_eok = np.arange(0, max_budget_units+1)
@@ -582,10 +582,10 @@ def optimize_mix_over_budget1(universe_val, max_budget_units=20, unit=UNIT):
 
         if a_share[idx1] >= 0.99:
             best_total_r1 = a_r1[idx1]
-            best_a_share, best_b_share = 0.8, 0.2
+            best_a_share, best_b_share = 1.0, 0.0
         elif b_share[idx1] >= 0.99:
             best_total_r1 = b_r1[idx1]
-            best_a_share, best_b_share = 0.2, 0.8
+            best_a_share, best_b_share = 0.0, 1.0
         else:
             best_total_r1 = total_r1_curve[idx1]
             best_a_share, best_b_share = float(a_share[idx1]), float(b_share[idx1])
@@ -594,11 +594,11 @@ def optimize_mix_over_budget1(universe_val, max_budget_units=20, unit=UNIT):
             if only_a1[i] >= only_b1[i]:
                 if only_a1[i] > best_total_r1:
                     best_total_r1 = float(only_a1[i])
-                best_a_share, best_b_share = 0.8, 0.2
+                best_a_share, best_b_share = 1.0, 0.0
             else:
                 if only_b1[i] > best_total_r1:
                     best_total_r1 = float(only_b1[i])
-                best_a_share, best_b_share = 0.2, 0.8
+                best_a_share, best_b_share = 0.0, 1.0
 
         total_r1_raw.append(best_total_r1)
         results1.append({
@@ -657,10 +657,10 @@ def optimize_mix_over_budget3(universe_val, max_budget_units=20, unit=UNIT):
 
         if a3_share[idx3] >= 0.99:
             best_total_r3 = a_r3[idx3]
-            best_a_share, best_b_share = 0.8, 0.2
+            best_a_share, best_b_share = 1.0, 0.0
         elif b3_share[idx3] >= 0.99:
             best_total_r3 = b_r3[idx3]
-            best_a_share, best_b_share = 0.2, 0.8
+            best_a_share, best_b_share = 0.0, 1.0
         else:
             best_total_r3 = total_r3_curve[idx3]
             best_a_share, best_b_share = float(a3_share[idx3]), float(b3_share[idx3])
@@ -669,11 +669,11 @@ def optimize_mix_over_budget3(universe_val, max_budget_units=20, unit=UNIT):
             if only_a3[i] >= only_b3[i]:
                 if only_a3[i] > best_total_r3:
                     best_total_r3 = float(only_a3[i])
-                best_a_share, best_b_share = 0.8, 0.2
+                best_a_share, best_b_share = 1.0, 0.0
             else:
                 if only_b3[i] > best_total_r3:
                     best_total_r3 = float(only_b3[i])
-                best_a_share, best_b_share = 0.2, 0.8
+                best_a_share, best_b_share = 0.0, 1.0
 
         total_r3_raw.append(best_total_r3)
         results3.append({
