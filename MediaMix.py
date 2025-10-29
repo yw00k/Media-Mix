@@ -693,7 +693,7 @@ def optimize_mix_over_budget3(universe_val, max_budget_units=20, unit=UNIT):
 # ---------------------------
 # UI: Pages (Reach1 / Reach3)
 # ---------------------------
-def inject_global_css(base_px: int = 20):
+def inject_global_css(base_px: int = 24):
     st.markdown(f"""
     <style>
     :root {{ --base-font-size: {base_px}px; }}
@@ -748,7 +748,7 @@ def inject_global_css(base_px: int = 20):
     </style>
     """, unsafe_allow_html=True)
 
-inject_global_css(base_px=20)
+inject_global_css(base_px=24)
 
 def bump_plotly_fonts(fig, base_size: int = 18):
     fig.update_layout(
