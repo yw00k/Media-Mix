@@ -897,7 +897,7 @@ with page1:
                 hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
                 hovermode='x', template='plotly_white',
                 width=700, height=500, dragmode=False,
-                legend=dict(orientation="h", yanchor="top", y=1.0, xanchor="center", x=0.5)
+                legend=dict(orientation="h", yanchor="top", y=1.2, xanchor="center", x=0.5)
             )
             bump_plotly_fonts(fig3, base_size=24)
             st.plotly_chart(fig3, use_container_width=True)
@@ -998,7 +998,7 @@ with page3:
                 hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
                 hovermode='x', template='plotly_white',
                 width=700, height=500, dragmode=False,
-                legend=dict(orientation="h", yanchor="top", y=1.0, xanchor="center", x=0.5)
+                legend=dict(orientation="h", yanchor="top", y=1.2, xanchor="center", x=0.5)
             )
             bump_plotly_fonts(fig33, base_size=24)
             st.plotly_chart(fig33, use_container_width=True)
