@@ -750,7 +750,7 @@ def inject_global_css(base_px: int = 24):
 
 inject_global_css(base_px=24)
 
-def bump_plotly_fonts(fig, base_size: int = 24):
+def bump_plotly_fonts(fig, base_size: int = 20):
     fig.update_layout(
         font=dict(size=base_size),  # 전체 기본 폰트
         xaxis=dict(title_font=dict(size=base_size), tickfont=dict(size=base_size-2)),
@@ -823,7 +823,7 @@ with page1:
                 legend=dict(orientation="h", yanchor="top", y=-0.25, xanchor="center", x=0.5),
                 height=400,
             )
-            bump_plotly_fonts(fig1, base_size=24)
+            bump_plotly_fonts(fig1, base_size=20)
             st.plotly_chart(fig1, use_container_width=True)
             st.dataframe(summary_wide, use_container_width=True)
 
@@ -870,7 +870,7 @@ with page1:
                 width=700, height=500, dragmode=False,
                 legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5)
             )
-            bump_plotly_fonts(fig3, base_size=24)
+            bump_plotly_fonts(fig3, base_size=20)
             st.plotly_chart(fig3, use_container_width=True)
             st.dataframe(df_opt, use_container_width=True)
 
@@ -924,7 +924,7 @@ with page3:
                 legend=dict(orientation="h", yanchor="top", y=-0.25, xanchor="center", x=0.5),
                 height=400,
             )
-            bump_plotly_fonts(fig31, base_size=24)
+            bump_plotly_fonts(fig31, base_size=20)
             st.plotly_chart(fig31, use_container_width=True)
             st.dataframe(summary_wide3, use_container_width=True)
 
@@ -971,7 +971,7 @@ with page3:
                 width=700, height=500, dragmode=False,
                 legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5)
             )
-            bump_plotly_fonts(fig33, base_size=24)
+            bump_plotly_fonts(fig33, base_size=20)
             st.plotly_chart(fig33, use_container_width=True)
             st.dataframe(df_opt3, use_container_width=True)
 
