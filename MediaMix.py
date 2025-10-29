@@ -693,6 +693,74 @@ def optimize_mix_over_budget3(universe_val, max_budget_units=20, unit=UNIT):
 # ---------------------------
 # UI: Pages (Reach1 / Reach3)
 # ---------------------------
+def inject_global_css(base_px: int = 20):
+    st.markdown(f"""
+    <style>
+    :root {{ --base-font-size: {base_px}px; }}
+
+    html, body, .stApp {{ font-size: var(--base-font-size); }}
+
+    /* 헤더 크기 */
+    h1 {{ font-size: calc(var(--base-font-size) * 2.0) !important; }}
+    h2 {{ font-size: calc(var(--base-font-size) * 1.6) !important; }}
+    h3 {{ font-size: calc(var(--base-font-size) * 1.3) !important; }}
+
+    /* 일반 텍스트, 라벨 */
+    .stMarkdown p, label {{
+        font-size: calc(var(--base-font-size) * 1.05) !important;
+        line-height: 1.5;
+    }}
+
+    /* 탭 라벨 */
+    .stTabs [data-baseweb="tab"] {{
+        font-size: calc(var(--base-font-size) * 1.1) !important;
+        padding: 0.6rem 1rem !important;
+    }}
+
+    /* 숫자 입력/슬라이더 입력값 */
+    .stNumberInput input {{
+        font-size: calc(var(--base-font-size) * 1.1) !important;
+    }}
+    .stSlider [role="slider"] {{
+        font-size: calc(var(--base-font-size) * 1.0) !important;
+    }}
+    .stNumberInput label, .stSlider label {{
+        font-size: calc(var(--base-font-size) * 1.05) !important;
+    }}
+
+    /* 버튼 */
+    .stButton button {{
+        font-size: calc(var(--base-font-size) * 1.0) !important;
+        padding: 0.6rem 1rem !important;
+        border-radius: 0.75rem;
+    }}
+
+    /* 표/데이터프레임 */
+    .stDataFrame table, .stTable table, .stDataFrame td, .stDataFrame th {{
+        font-size: calc(var(--base-font-size) * 0.95) !important;
+    }}
+
+    /* Plotly 모드바 살짝 키우기 */
+    .stPlotlyChart .modebar {{
+        transform: scale(1.2);
+        transform-origin: top right;
+    }}
+    </style>
+    """, unsafe_allow_html=True)
+
+inject_global_css(base_px=20)
+
+def bump_plotly_fonts(fig, base_size: int = 18):
+    fig.update_layout(
+        font=dict(size=base_size),  # 전체 기본 폰트
+        xaxis=dict(title_font=dict(size=base_size), tickfont=dict(size=base_size-2)),
+        yaxis=dict(title_font=dict(size=base_size), tickfont=dict(size=base_size-2)),
+        legend=dict(font=dict(size=base_size-2))
+    )
+    # 호버 라벨 폰트
+    fig.update_layout(hoverlabel=dict(font_size=base_size-2))
+    return fig
+
 page1, page3 = st.tabs(["Reach 1+ 최적화", "Reach 3+ 최적화"])
 
 # 공통: 세션 키 초기화
@@ -755,6 +823,7 @@ with page1:
                 legend=dict(orientation="h", yanchor="top", y=-0.25, xanchor="center", x=0.5),
                 height=400,
             )
+            bump_plotly_fonts(fig1, base_size=16)
             st.plotly_chart(fig1, use_container_width=True)
             st.dataframe(summary_wide, use_container_width=True)
 
@@ -801,6 +870,7 @@ with page1:
                 width=700, height=500, dragmode=False,
                 legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5)
             )
+            bump_plotly_fonts(fig3, base_size=16)
             st.plotly_chart(fig3, use_container_width=True)
             st.dataframe(df_opt, use_container_width=True)
 
@@ -854,6 +924,7 @@ with page3:
                 legend=dict(orientation="h", yanchor="top", y=-0.25, xanchor="center", x=0.5),
                 height=400,
             )
+            bump_plotly_fonts(fig31, base_size=16)
             st.plotly_chart(fig31, use_container_width=True)
             st.dataframe(summary_wide3, use_container_width=True)
 
@@ -900,6 +971,7 @@ with page3:
                 width=700, height=500, dragmode=False,
                 legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5)
             )
+            bump_plotly_fonts(fig33, base_size=16)
             st.plotly_chart(fig33, use_container_width=True)
             st.dataframe(df_opt3, use_container_width=True)
 
