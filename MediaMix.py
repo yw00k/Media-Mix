@@ -753,7 +753,7 @@ def inject_global_css(base_px: int = 24):
     }
     .stDataFrame [data-testid="column"] div, 
     .stDataFrame [data-testid="table-container"] th div {
-        font-size: 18px !important;   /* 헤더 보정 */
+        font-size: 24px !important;   /* 헤더 보정 */
     }
 
     /* st.table(정적 테이블) */
