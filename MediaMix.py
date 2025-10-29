@@ -693,7 +693,7 @@ def optimize_mix_over_budget3(universe_val, max_budget_units=20, unit=UNIT):
 # ---------------------------
 # UI: Pages (Reach1 / Reach3)
 # ---------------------------
-def inject_global_css(base_px: int = 24):
+def inject_global_css(base_px: int = 32):
     st.markdown(f"""
     <style>
     :root {{ --base-font-size: {base_px}px; }}
@@ -737,7 +737,7 @@ def inject_global_css(base_px: int = 24):
 
     /* 표/데이터프레임 (기본) */
     .stDataFrame table, .stTable table, .stDataFrame td, .stDataFrame th {{
-        font-size: calc(var(--base-font-size) * 0.95) !important;
+        font-size: calc(var(--base-font-size) * 1.0) !important;
     }}
 
     /* Plotly 모드바 살짝 키우기 */
@@ -748,23 +748,23 @@ def inject_global_css(base_px: int = 24):
     
     /* st.dataframe(인터랙티브) — 크게 */
     .stDataFrame [data-testid="stDataFrame"] div {{
-        font-size: 28px !important;   /* 셀, 헤더 전반 */
+        font-size: 32px !important;   /* 셀, 헤더 전반 */
         line-height: 1.5 !important;
     }}
     .stDataFrame [data-testid="column"] div, 
     .stDataFrame [data-testid="table-container"] th div {{
-        font-size: 28px !important;   /* 헤더 보정 */
+        font-size: 32px !important;   /* 헤더 보정 */
     }}
 
     /* st.table(정적 테이블) — 크게 */
     .stTable table, .stTable th, .stTable td {{
-        font-size: 28px !important;
+        font-size: 32px !important;
         line-height: 1.5 !important;
     }}
     </style>
     """, unsafe_allow_html=True)
 
-inject_global_css(base_px=24)
+inject_global_css(base_px=32)
 
 def bump_plotly_fonts(fig, base_size: int = 20):
     fig.update_layout(
