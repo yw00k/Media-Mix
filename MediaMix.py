@@ -748,17 +748,17 @@ def inject_global_css(base_px: int = 24):
     
     /* st.dataframe(인터랙티브) — 크게 */
     .stDataFrame [data-testid="stDataFrame"] div {{
-        font-size: 24px !important;   /* 셀, 헤더 전반 */
+        font-size: 28px !important;   /* 셀, 헤더 전반 */
         line-height: 1.5 !important;
     }}
     .stDataFrame [data-testid="column"] div, 
     .stDataFrame [data-testid="table-container"] th div {{
-        font-size: 24px !important;   /* 헤더 보정 */
+        font-size: 28px !important;   /* 헤더 보정 */
     }}
 
     /* st.table(정적 테이블) — 크게 */
     .stTable table, .stTable th, .stTable td {{
-        font-size: 24px !important;
+        font-size: 28px !important;
         line-height: 1.5 !important;
     }}
     </style>
