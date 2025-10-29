@@ -748,7 +748,7 @@ def inject_global_css(base_px: int = 24):
     
     /* st.dataframe(인터랙티브) */
     .stDataFrame [data-testid="stDataFrame"] div {
-        font-size: 18px !important;   /* 셀, 헤더 전반 */
+        font-size: 24px !important;   /* 셀, 헤더 전반 */
         line-height: 1.5 !important;
     }
     .stDataFrame [data-testid="column"] div, 
@@ -758,7 +758,7 @@ def inject_global_css(base_px: int = 24):
 
     /* st.table(정적 테이블) */
     .stTable table, .stTable th, .stTable td {
-        font-size: 18px !important;
+        font-size: 24px !important;
         line-height: 1.5 !important;
     }
     s
