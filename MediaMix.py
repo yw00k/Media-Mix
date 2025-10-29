@@ -735,7 +735,7 @@ def inject_global_css(base_px: int = 24):
         border-radius: 0.75rem;
     }}
 
-    /* 표/데이터프레임 */
+    /* 표/데이터프레임 (기본) */
     .stDataFrame table, .stTable table, .stDataFrame td, .stDataFrame th {{
         font-size: calc(var(--base-font-size) * 0.95) !important;
     }}
@@ -746,22 +746,21 @@ def inject_global_css(base_px: int = 24):
         transform-origin: top right;
     }}
     
-    /* st.dataframe(인터랙티브) */
-    .stDataFrame [data-testid="stDataFrame"] div {
+    /* st.dataframe(인터랙티브) — 크게 */
+    .stDataFrame [data-testid="stDataFrame"] div {{
         font-size: 24px !important;   /* 셀, 헤더 전반 */
         line-height: 1.5 !important;
-    }
+    }}
     .stDataFrame [data-testid="column"] div, 
-    .stDataFrame [data-testid="table-container"] th div {
+    .stDataFrame [data-testid="table-container"] th div {{
         font-size: 24px !important;   /* 헤더 보정 */
-    }
+    }}
 
-    /* st.table(정적 테이블) */
-    .stTable table, .stTable th, .stTable td {
+    /* st.table(정적 테이블) — 크게 */
+    .stTable table, .stTable th, .stTable td {{
         font-size: 24px !important;
         line-height: 1.5 !important;
-    }
-    s
+    }}
     </style>
     """, unsafe_allow_html=True)
 
