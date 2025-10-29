@@ -745,6 +745,23 @@ def inject_global_css(base_px: int = 24):
         transform: scale(1.2);
         transform-origin: top right;
     }}
+    
+    /* st.dataframe(인터랙티브) */
+    .stDataFrame [data-testid="stDataFrame"] div {
+        font-size: 18px !important;   /* 셀, 헤더 전반 */
+        line-height: 1.5 !important;
+    }
+    .stDataFrame [data-testid="column"] div, 
+    .stDataFrame [data-testid="table-container"] th div {
+        font-size: 18px !important;   /* 헤더 보정 */
+    }
+
+    /* st.table(정적 테이블) */
+    .stTable table, .stTable th, .stTable td {
+        font-size: 18px !important;
+        line-height: 1.5 !important;
+    }
+    s
     </style>
     """, unsafe_allow_html=True)
 
@@ -759,6 +776,19 @@ def bump_plotly_fonts(fig, base_size: int = 20):
     )
     # 호버 라벨 폰트
     fig.update_layout(hoverlabel=dict(font_size=base_size-2))
+    return fig
+
+def bump_bar_textsize(fig, size: int = 24):
+    for tr in fig.data:
+        if getattr(tr, "type", None) == "bar":
+            # trace에 textfont가 없으면 생성
+            tf = dict(size=size, color="black")
+            try:
+                tr.update(textfont=tf)
+            except Exception:
+                pass
+    # 호버 폰트도 함께 키우고 싶으면:
+    fig.update_layout(hoverlabel=dict(font_size=size-2))
     return fig
 
 page1, page3 = st.tabs(["Reach 1+ 최적화", "Reach 3+ 최적화"])
@@ -823,7 +853,7 @@ with page1:
                 legend=dict(orientation="h", yanchor="top", y=-0.25, xanchor="center", x=0.5),
                 height=400,
             )
-            bump_plotly_fonts(fig1, base_size=20)
+            bump_bar_textsize(fig1, size=24)
             st.plotly_chart(fig1, use_container_width=True)
             st.dataframe(summary_wide, use_container_width=True)
 
@@ -924,7 +954,7 @@ with page3:
                 legend=dict(orientation="h", yanchor="top", y=-0.25, xanchor="center", x=0.5),
                 height=400,
             )
-            bump_plotly_fonts(fig31, base_size=20)
+            bump_bar_textsize(fig31, size=24)
             st.plotly_chart(fig31, use_container_width=True)
             st.dataframe(summary_wide3, use_container_width=True)
 
