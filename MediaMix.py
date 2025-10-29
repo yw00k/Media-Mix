@@ -748,17 +748,17 @@ def inject_global_css(base_px: int = 32):
     
     /* st.dataframe(인터랙티브) — 크게 */
     .stDataFrame [data-testid="stDataFrame"] div {{
-        font-size: 32px !important;   /* 셀, 헤더 전반 */
+        font-size: 40px !important;   /* 셀, 헤더 전반 */
         line-height: 1.5 !important;
     }}
     .stDataFrame [data-testid="column"] div, 
     .stDataFrame [data-testid="table-container"] th div {{
-        font-size: 32px !important;   /* 헤더 보정 */
+        font-size: 40px !important;   /* 헤더 보정 */
     }}
 
     /* st.table(정적 테이블) — 크게 */
     .stTable table, .stTable th, .stTable td {{
-        font-size: 32px !important;
+        font-size: 40px !important;
         line-height: 1.5 !important;
     }}
     </style>
@@ -766,7 +766,7 @@ def inject_global_css(base_px: int = 32):
 
 inject_global_css(base_px=32)
 
-def bump_plotly_fonts(fig, base_size: int = 20):
+def bump_plotly_fonts(fig, base_size: int = 24):
     fig.update_layout(
         font=dict(size=base_size),  # 전체 기본 폰트
         xaxis=dict(title_font=dict(size=base_size), tickfont=dict(size=base_size-2)),
@@ -897,9 +897,9 @@ with page1:
                 hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
                 hovermode='x', template='plotly_white',
                 width=700, height=500, dragmode=False,
-                legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5)
+                legend=dict(orientation="h", yanchor="top", y=1.0, xanchor="center", x=0.5)
             )
-            bump_plotly_fonts(fig3, base_size=20)
+            bump_plotly_fonts(fig3, base_size=24)
             st.plotly_chart(fig3, use_container_width=True)
             st.dataframe(df_opt, use_container_width=True)
 
@@ -998,9 +998,9 @@ with page3:
                 hoverlabel=dict(bgcolor='rgba(0,0,0,0.4)', font_color='white'),
                 hovermode='x', template='plotly_white',
                 width=700, height=500, dragmode=False,
-                legend=dict(orientation="h", yanchor="top", y=-0.2, xanchor="center", x=0.5)
+                legend=dict(orientation="h", yanchor="top", y=1.0, xanchor="center", x=0.5)
             )
-            bump_plotly_fonts(fig33, base_size=20)
+            bump_plotly_fonts(fig33, base_size=24)
             st.plotly_chart(fig33, use_container_width=True)
             st.dataframe(df_opt3, use_container_width=True)
 
