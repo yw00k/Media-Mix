@@ -57,7 +57,6 @@ def load_csv_from_dropbox(path: str, usecols=None, parse_dates=None) -> pd.DataF
 # ---------------------------
 # Title with logo
 # ---------------------------
-logo_bytes = load_image_from_dropbox("/Media Mix/logo.png")
 col1, col2 = st.columns([1, 5])
 with col1:
     if logo_bytes is not None:
