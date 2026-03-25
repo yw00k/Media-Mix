@@ -695,9 +695,9 @@ def inject_global_css(base_px: int = 20):
     html, body, .stApp {{ font-size: var(--base-font-size); }}
 
     /* 헤더 크기 */
-    h1 {{ font-size: calc(var(--base-font-size) * 1.0) !important; }}
-    h2 {{ font-size: calc(var(--base-font-size) * 1.0) !important; }}
-    h3 {{ font-size: calc(var(--base-font-size) * 1.0) !important; }}
+    h1 {{ font-size: calc(var(--base-font-size) * 2.0) !important; }}
+    h2 {{ font-size: calc(var(--base-font-size) * 1.6) !important; }}
+    h3 {{ font-size: calc(var(--base-font-size) * 1.3) !important; }}
 
     /* 일반 텍스트, 라벨 */
     .stMarkdown p, label {{
