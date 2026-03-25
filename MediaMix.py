@@ -57,7 +57,7 @@ def load_csv_from_dropbox(path: str, usecols=None, parse_dates=None) -> pd.DataF
 # ---------------------------
 # Title with logo
 # ---------------------------
-col1: st.markdown("<h1> Reach 1/3+ 최적화 시뮬레이션</h1>", unsafe_allow_html=True)
+col1: st.markdown("<h1> Reach 1/3+<br>최적화 시뮬레이션</h1>", unsafe_allow_html=True)
 
 # ---------------------------
 # Load data
