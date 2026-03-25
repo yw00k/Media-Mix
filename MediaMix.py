@@ -687,7 +687,7 @@ def optimize_mix_over_budget3(universe_val, max_budget_units=20, unit=UNIT):
 # ---------------------------
 # UI: Pages (Reach1 / Reach3)
 # ---------------------------
-def inject_global_css(base_px: int = 32):
+def inject_global_css(base_px: int = 20):
     st.markdown(f"""
     <style>
     :root {{ --base-font-size: {base_px}px; }}
@@ -695,31 +695,31 @@ def inject_global_css(base_px: int = 32):
     html, body, .stApp {{ font-size: var(--base-font-size); }}
 
     /* 헤더 크기 */
-    h1 {{ font-size: calc(var(--base-font-size) * 2.0) !important; }}
-    h2 {{ font-size: calc(var(--base-font-size) * 1.6) !important; }}
-    h3 {{ font-size: calc(var(--base-font-size) * 1.3) !important; }}
+    h1 {{ font-size: calc(var(--base-font-size) * 1.0) !important; }}
+    h2 {{ font-size: calc(var(--base-font-size) * 1.0) !important; }}
+    h3 {{ font-size: calc(var(--base-font-size) * 1.0) !important; }}
 
     /* 일반 텍스트, 라벨 */
     .stMarkdown p, label {{
-        font-size: calc(var(--base-font-size) * 1.05) !important;
+        font-size: calc(var(--base-font-size) * 1.0) !important;
         line-height: 1.5;
     }}
 
     /* 탭 라벨 */
     .stTabs [data-baseweb="tab"] {{
-        font-size: calc(var(--base-font-size) * 1.1) !important;
+        font-size: calc(var(--base-font-size) * 1.0) !important;
         padding: 0.6rem 1rem !important;
     }}
 
     /* 숫자 입력/슬라이더 입력값 */
     .stNumberInput input {{
-        font-size: calc(var(--base-font-size) * 1.1) !important;
+        font-size: calc(var(--base-font-size) * 1.0) !important;
     }}
     .stSlider [role="slider"] {{
         font-size: calc(var(--base-font-size) * 1.0) !important;
     }}
     .stNumberInput label, .stSlider label {{
-        font-size: calc(var(--base-font-size) * 1.05) !important;
+        font-size: calc(var(--base-font-size) * 1.0) !important;
     }}
 
     /* 버튼 */
@@ -758,9 +758,9 @@ def inject_global_css(base_px: int = 32):
     </style>
     """, unsafe_allow_html=True)
 
-inject_global_css(base_px=32)
+inject_global_css(base_px=24)
 
-def bump_plotly_fonts(fig, base_size: int = 24):
+def bump_plotly_fonts(fig, base_size: int = 20):
     fig.update_layout(
         font=dict(size=base_size),  # 전체 기본 폰트
         xaxis=dict(title_font=dict(size=base_size), tickfont=dict(size=base_size-2)),
@@ -771,7 +771,7 @@ def bump_plotly_fonts(fig, base_size: int = 24):
     fig.update_layout(hoverlabel=dict(font_size=base_size-2))
     return fig
 
-def bump_bar_textsize(fig, size: int = 24):
+def bump_bar_textsize(fig, size: int = 18):
     for tr in fig.data:
         if getattr(tr, "type", None) == "bar":
             # trace에 textfont가 없으면 생성
