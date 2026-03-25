@@ -57,11 +57,8 @@ def load_csv_from_dropbox(path: str, usecols=None, parse_dates=None) -> pd.DataF
 # ---------------------------
 # Title with logo
 # ---------------------------
-col1, col2 = st.columns([1, 5])
+col1 = st.columns([1, 5])
 with col1:
-    if logo_bytes is not None:
-        st.image(logo_bytes, use_container_width=True)
-with col2:
     st.markdown("<h1> Reach 1/3+ 최적화</h1>", unsafe_allow_html=True)
 
 # ---------------------------
